@@ -280,8 +280,15 @@ export function PositionsPage({
                         <span className="truncate font-medium text-foreground">
                           {asset.name}
                         </span>
-                        <span className="truncate type-legal text-muted-foreground">
-                          {asset.symbol ?? asset.institution ?? asset.category ?? "—"}
+                        <span className="flex items-center gap-1.5 type-legal text-muted-foreground">
+                          <span className="truncate">
+                            {asset.symbol ?? asset.institution ?? asset.category ?? "—"}
+                          </span>
+                          {asset.symbol?.endsWith("ETF") ? (
+                            <span className="rounded-sm bg-secondary px-1 py-0.5 text-[10px] font-medium tracking-[0.3px] text-secondary-foreground">
+                              ETF
+                            </span>
+                          ) : null}
                         </span>
                       </div>
                     </div>

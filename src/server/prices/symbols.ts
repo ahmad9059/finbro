@@ -4,6 +4,8 @@ export type PsxSymbol = {
   symbol: string;
   name: string;
   sector: string;
+  /** Equities and ETFs share the same table; this is only for display. */
+  type: "equity" | "etf";
 };
 
 /**

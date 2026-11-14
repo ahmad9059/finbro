@@ -158,8 +158,13 @@ export function StockPicker({
                     <span className="block truncate type-ui-sm text-foreground">
                       {stock.name}
                     </span>
-                    <span className="block truncate type-legal text-muted-foreground">
-                      {stock.sector}
+                    <span className="flex items-center gap-1.5 type-legal text-muted-foreground">
+                      <span className="truncate">{stock.sector}</span>
+                      {stock.type === "etf" ? (
+                        <span className="rounded-sm bg-secondary px-1 py-0.5 text-[10px] font-medium tracking-[0.3px] text-secondary-foreground">
+                          ETF
+                        </span>
+                      ) : null}
                     </span>
                   </span>
                   {selected ? (

@@ -202,7 +202,7 @@ refreshPrices(userId, kind?)
 ```
 
 - **Stocks** (`prices/psx.ts`): fetch `dps.psx.com.pk/company/{SYMBOL}`, read `.quote__close` with cheerio. If that fails, try the JSON endpoint `/timeseries/int/{SYMBOL}`. Requests run one at a time with a short pause, and a successful quote is cached for five minutes.
-- **Search** (`prices/symbols.ts`): a bundled directory of 468 listed companies (`psx-symbols.json`, refreshed with `pnpm psx:sync`), matched on symbol first and then on company-name tokens. No network.
+- **Search** (`prices/symbols.ts`): a bundled directory of every listed symbol — 617 equities, ETFs and debt instruments taken from the Exchange's own listing page, names from a CC0 dataset and from PSX pages (`psx-symbols.json`, refreshed with `pnpm psx:sync`). Matched on symbol first, then company-name tokens. No network.
 - **Company marks** (`/api/logo/{symbol}`): the PSX page lists each company's website; that host is stored in `psx_company` on every price fetch, and the icon is read from it (Google favicon cache, then DuckDuckGo, then the site's own `favicon.ico`). Cached three ways: an in-memory map per instance, Next's data cache (`revalidate` one week) and a week-long `cache-control`, so one upstream fetch per company per week. A 404 means "no logo" and the UI draws a monogram.
 - **Funds** (`prices/funds.ts`): fund list from `funds.json` (cached for 12 hours); NAV from the last line of `history/{fundId}.ndjson`, falling back to the 2-decimal NAV in `funds.json`.
 - **Manual**: the edit dialog can always set a price by hand. A manual price is overwritten by the next successful automatic refresh.

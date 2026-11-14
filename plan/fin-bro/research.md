@@ -61,13 +61,26 @@ Notes:
 
 ### The stock directory
 
-Searching by company name needs a list of listed companies, which the PSX portal
+Searching by company name needs a list of listed companies, which the data portal
 does not serve from this network (`/market-watch`, `/symbols`, `/companies` all
-404 or 403). The picker therefore uses a **bundled** directory, refreshed with
-`pnpm psx:sync` from the CC0 dataset "Pakistan Stock Symbols & Company
-Metadata" on Hugging Face: 468 listed symbols with name and sector, updated
-weekly by its author. The JSON is committed, so search works offline and cannot
-break when PSX changes its markup.
+404 or 403).
+
+The **Exchange's own listing page**
+(`www.psx.com.pk/psx/resources-and-tools/listings/listed-companies`) carries a
+`<select>` of every tradable symbol — 617 of them, including all 9 ETFs
+(MIIETF, MZNPETF, NBPGETF, UBLPETF, JSGBETF, HBLTETF, NITGETF, ACIETF, JSMFETF)
+and the debt instruments. That is the source of the symbol set.
+
+Names and sectors come from the CC0 dataset "Pakistan Stock Symbols & Company
+Metadata" on Hugging Face (468 equities). Symbols the dataset does not know are
+named from their PSX page: `psx:sync` does this for the 9 ETFs automatically, and
+for the whole tail with `--all` (a few minutes of polite requests). 567 of 617
+are named; the rest are delisted or debt symbols and remain searchable by ticker.
+
+ETFs live under `/etf/{symbol}` on the data portal, and `/company/{symbol}`
+redirects there, so the existing price fetch and logo lookup work unchanged. The
+JSON is committed, so search works offline and cannot break when PSX changes its
+markup.
 
 ### Company logos
 

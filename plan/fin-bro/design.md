@@ -258,7 +258,7 @@ Slides in from the right, 480px wide (full width on mobile), radius 16 on the le
 
 The reference's fused email-capture field is a marketing pattern and is not used.
 
-The PSX company field is a searchable combobox over the bundled directory: type a symbol (`ogdc`) or part of a name (`oil gas`) and pick from a ranked list showing symbol, company and sector. Arrow keys and Enter work. Picking fills the company and price; the price request is cached for five minutes on the server. A found symbol fills the name and price and shows a green confirmation line; an unknown one clears them and explains why. There is no "Look up" button to press.
+The PSX company field is a searchable combobox over the bundled directory: type a symbol (`ogdc`) or part of a name (`oil gas`) and pick from a ranked list showing symbol, company and sector. Arrow keys and Enter work. ETFs are in the same list and carry a small `ETF` tag beside their sector, as do ETF rows in the holdings table. Picking fills the company and price; the price request is cached for five minutes on the server. A found symbol fills the name and price and shows a green confirmation line; an unknown one clears them and explains why. There is no "Look up" button to press.
 
 ### Charts
 
