@@ -17,6 +17,7 @@
     "lint:fix": "eslint . --fix",
     "preview": "next build && next start",
     "start": "next start",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "user:create": "tsx --env-file=.env scripts/create-user.ts"
   },
@@ -28,6 +29,7 @@
     "@trpc/react-query": "^11.28.0",
     "@trpc/server": "^11.28.0",
     "better-auth": "^1.7.22",
+    "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
     "date-fns": "^4.4.0",
@@ -64,7 +66,8 @@
     "tailwindcss": "^4.3.5",
     "tsx": "^4.23.15",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.27.0"
+    "typescript-eslint": "^8.27.0",
+    "vitest": "^5.1.0"
   },
   "ct3aMetadata": {
     "initVersion": "7.40.0"

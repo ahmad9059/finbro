@@ -23,7 +23,8 @@ async function main() {
   const lines = rl[Symbol.asyncIterator]();
   const ask = async (label: string) => {
     stdout.write(label);
-    const { value } = await lines.next();
+    const result = await lines.next();
+    const value: unknown = result.value;
     return typeof value === "string" ? value : "";
   };
   const name = (await ask("Name: ")).trim();
