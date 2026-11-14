@@ -13,10 +13,9 @@ export default async function LoginPage() {
   if (session) redirect("/");
 
   return (
-    // The login page lives in the night world in both themes.
-    <main className="dark flex min-h-svh flex-col items-center justify-center gap-8 bg-background px-4 py-10 text-foreground">
+    <main className="flex min-h-svh flex-col items-center justify-center gap-8 bg-background px-4 py-10 text-foreground">
       <Logo />
-      <div className="w-full max-w-[400px] rounded-lg bg-card p-8">
+      <div className="w-full max-w-[400px] rounded-lg bg-card p-8 shadow-soft">
         <h1 className="type-title">Sign in</h1>
         <p className="mt-2 type-body text-muted-foreground">
           Your portfolio and expenses, in one place.

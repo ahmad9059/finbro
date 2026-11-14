@@ -111,15 +111,15 @@
   --chart-4: #9cb4e8;
   --chart-5: #28253b;
 
-  /* The sidebar and top bar are night-coloured in both themes. */
-  --sidebar: #171721;
-  --sidebar-foreground: #ededf3;
-  --sidebar-muted-foreground: #c3c3cc;
-  --sidebar-accent: #1e1e2a;
-  --sidebar-accent-foreground: #ededf3;
+  /* The shell follows the theme: a white rail in the day, night at night. */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #28253b;
+  --sidebar-muted-foreground: #554e7b;
+  --sidebar-accent: #edecfb; /* lavender hover and active row */
+  --sidebar-accent-foreground: #28253b;
   --sidebar-primary: #5266eb;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-border: rgb(112 112 125 / 0.3);
+  --sidebar-border: rgb(195 195 204 / 0.6);
   --sidebar-ring: #5266eb;
 
   --elevation-soft:
@@ -162,6 +162,16 @@
   --chart-3: #8b7cf0;
   --chart-4: #c3c3cc;
   --chart-5: #ededf3;
+
+  --sidebar: #171721;
+  --sidebar-foreground: #ededf3;
+  --sidebar-muted-foreground: #c3c3cc;
+  --sidebar-accent: #1e1e2a;
+  --sidebar-accent-foreground: #ededf3;
+  --sidebar-primary: #5266eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-border: rgb(112 112 125 / 0.3);
+  --sidebar-ring: #5266eb;
 
   --elevation-soft: 0 0 #0000;
   --elevation-modal: 0 16px 40px rgb(0 0 0 / 0.35);

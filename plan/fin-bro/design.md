@@ -17,9 +17,11 @@ The brand source is [design-reference.md](../../design-reference.md) (Mercury). 
 | Secondary text | Ink Secondary `#554e7b` | Fog `#c3c3cc` |
 | Data panels (tables, charts) | Surface `#ffffff` + soft shadow | Night Raised `#1e1e2a`, no shadow |
 | Summary cards (KPIs) | Lavender `#edecfb` | Night Raised `#1e1e2a` |
-| **Sidebar and top bar** | **Night `#171721`** | **Night `#171721`** |
+| Sidebar and top bar | Surface `#ffffff` + 1px rule, ink text | Night `#171721`, on-dark text |
 
-The sidebar and top bar are night-coloured in **both** modes. This is the Mercury signature: every light page is bracketed in dark. In dark mode a 1px rule separates them from the page.
+The shell follows the theme. Mercury brackets its marketing pages in dark, but inside a working dashboard a permanently dark rail next to a white page reads as a bug, so the rail is white in the day and night at night. The Mercury signature survives in the fill-not-border surfaces, the single indigo action and the light type.
+
+Active navigation is the same in both worlds: a lavender (light) or night-raised (dark) row with a 3px indigo bar on the left edge.
 
 The theme follows the system setting by default, with a toggle in the top bar (`next-themes`, class strategy).
 
@@ -210,8 +212,8 @@ Never two primary buttons in one view. Inside a dialog, "Save" is primary and th
 ```
 
 - **Top bar**: 64px (the reference's nav is 72px; trimmed for an app). Left cell holds the wordmark and is the same width as the sidebar. Right side: page title in On Dark, then theme toggle, user menu.
-- **Sidebar row**: 40px tall, 8px radius, icon 18px + `type-ui` label. Default text Fog. Hover: Night Raised fill. **Active: Night Raised fill, On Dark text, and a 3px indigo bar on the left edge.**
-- **Group labels**: `type-eyebrow` in Fog.
+- **Sidebar row**: 40px tall, 8px radius, icon 18px + `type-ui` label. Default text secondary. Hover: lavender fill (light) or Night Raised (dark). **Active: the same fill, primary text, and a 3px indigo bar on the left edge.**
+- **Group labels**: `type-eyebrow` in secondary text.
 - **Below 1024px**: the sidebar becomes an off-canvas sheet opened from a menu button in the top bar.
 
 ### Page header
@@ -275,7 +277,7 @@ The reference's fused email-capture field is a marketing pattern and is not used
 
 ### Login page (`ex-auth-form-card`)
 
-A full Night page in both modes (this is the "homepage" world). Centred card in Night Raised, radius 12, padding 32, 400px wide: wordmark, "Sign in" in `type-title`, email and password fields, one full-width primary button. No sign-up link, no social buttons.
+A centred card on the canvas, radius 12, padding 32, 400px wide, soft shadow: wordmark, "Sign in" in `type-title`, email and password fields, one full-width primary button. No sign-up link, no social buttons. Follows the theme like every other screen.
 
 ## Page layouts
 
@@ -313,7 +315,7 @@ Overview also shows two short lists under the charts: upcoming payments and top 
 | Translucent capsule for every other action | Outlined or square buttons |
 | Separate surfaces by fill | Borders around cards, heavy shadows |
 | Weights 360–500 | Bold or semibold text |
-| Night sidebar and top bar in both modes | A white sidebar in light mode |
+| A shell that matches the mode | A night rail on a light page |
 | Green/red on numbers only, with sign and arrow | Green/red buttons, backgrounds or borders |
 | Skeletons and designed empty states | Blank panels, bare spinners |
 

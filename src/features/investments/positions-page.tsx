@@ -10,7 +10,7 @@ import {
   Plus,
   RefreshCw,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { errorMessage } from "~/lib/errors";
@@ -63,6 +63,8 @@ export function PositionsPage({
   const [showClosed, setShowClosed] = useState(false);
   const [sort, setSort] = useState<SortKey>("value");
   const refresh = api.price.refresh.useMutation();
+  const autoRefresh = api.price.refresh.useMutation();
+  const autoRan = useRef(false);
 
   const rows = useMemo(() => {
     const items = data?.items ?? [];
@@ -74,6 +76,39 @@ export function PositionsPage({
           : b.position.unrealized - a.position.unrealized,
       );
   }, [data, showClosed, sort]);
+
+  /**
+   * Prices come from an evening job, but a page opened hours later should not
+   * show yesterday's numbers. On first load, refresh anything older than ten
+   * minutes; the server skips the rest, so a quick back-and-forth is free.
+   */
+  useEffect(() => {
+    if (autoRan.current || !data || data.items.length === 0) return;
+    const stale = data.items.some(({ asset }) => {
+      if (asset.lastPrice === null) return true;
+      const checked = asset.priceCheckedAt
+        ? new Date(asset.priceCheckedAt).getTime()
+        : 0;
+      return Date.now() - checked > 10 * 60 * 1000;
+    });
+    if (!stale) return;
+    autoRan.current = true;
+    autoRefresh.mutate(
+      { kind },
+      {
+        onSuccess: (result) => {
+          if (result.updated === 0) return;
+          void Promise.all([
+            utils.asset.list.invalidate(),
+            utils.overview.get.invalidate(),
+          ]);
+        },
+        // Silent: the button in the header still explains any failure.
+        onError: () => undefined,
+      },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once per visit
+  }, [data, kind]);
 
   async function onRefresh() {
     try {

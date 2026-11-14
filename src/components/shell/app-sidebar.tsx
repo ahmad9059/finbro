@@ -48,7 +48,7 @@ function NavLink({ item }: { item: NavItem }) {
 export function AppSidebar() {
   return (
     <Sidebar collapsible="offcanvas">
-      <SidebarHeader className="h-16 shrink-0 flex-row items-center border-b border-sidebar-border px-5 py-0">
+      <SidebarHeader className="h-16 shrink-0 flex-row items-center border-b border-sidebar-border bg-sidebar px-5 py-0">
         <Link
           href="/"
           className="rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
@@ -61,7 +61,7 @@ export function AppSidebar() {
         {navGroups.map((group, index) => (
           <SidebarGroup key={group.label ?? index} className="px-2 py-1">
             {group.label ? (
-              <SidebarGroupLabel className="h-8 px-3 type-eyebrow text-sidebar-muted-foreground/80">
+              <SidebarGroupLabel className="h-8 px-3 type-eyebrow text-sidebar-muted-foreground">
                 {group.label}
               </SidebarGroupLabel>
             ) : null}
