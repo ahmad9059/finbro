@@ -125,12 +125,12 @@ const holdings: Holding[] = [
   {
     kind: "mutual_fund",
     name: "Meezan Islamic Fund",
-    fundId: "12125",
+    fundId: "12817",
     institution: "Al Meezan Investment Management Limited",
     category: "Shariah Compliant Equity",
-    price: 92.4317,
+    price: 162.63,
     txns: [
-      { kind: "buy", date: "2026-01-15", units: 1_800.5, unitPrice: 78.2, amount: 140_800, fees: 0 },
+      { kind: "buy", date: "2026-01-15", units: 1_800.5, unitPrice: 141.2, amount: 254_200, fees: 0 },
       { kind: "bonus", date: "2026-06-28", units: 54.2, amount: 0 },
       { kind: "dividend", date: "2026-09-10", amount: 4_200 },
     ],
@@ -138,10 +138,10 @@ const holdings: Holding[] = [
   {
     kind: "mutual_fund",
     name: "NBP Stock Fund",
-    fundId: "12449",
+    fundId: "13054",
     institution: "NBP Fund Management Limited",
     category: "Equity",
-    price: 44.8842,
+    price: 42.65,
     txns: [
       { kind: "buy", date: "2026-05-11", units: 3_200, unitPrice: 39.9, amount: 127_680, fees: 0 },
     ],
@@ -161,12 +161,12 @@ const holdings: Holding[] = [
   {
     kind: "money_market",
     name: "Meezan Cash Fund",
-    fundId: "12141",
+    fundId: "12820",
     institution: "Al Meezan Investment Management Limited",
     category: "Shariah Compliant Money Market",
-    price: 105.3321,
+    price: 53.56,
     txns: [
-      { kind: "buy", date: "2026-09-01", units: 950, unitPrice: 102.9, amount: 97_755, fees: 0 },
+      { kind: "buy", date: "2026-09-01", units: 950, unitPrice: 51.4, amount: 48_830, fees: 0 },
     ],
   },
   {

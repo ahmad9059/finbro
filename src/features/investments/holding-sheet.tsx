@@ -19,7 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { formatDate, formatUnits } from "~/lib/format";
+import { formatDate, formatPercent, formatUnits } from "~/lib/format";
 import type { TxnKind } from "~/lib/portfolio";
 import type { AssetTxn } from "~/server/db/schema";
 import { api } from "~/trpc/react";
@@ -141,11 +141,11 @@ export function HoldingSheet({
                     <dt className="type-eyebrow text-muted-foreground">
                       Unrealized
                     </dt>
-                    <dd className="mt-1.5 type-title">
-                      <Delta
-                        value={position.unrealized}
-                        ratio={position.unrealizedPct}
-                      />
+                    <dd className="mt-1.5">
+                      <Delta value={position.unrealized} className="type-title" />
+                      <span className="block type-legal text-muted-foreground">
+                        {formatPercent(position.unrealizedPct)} on what you paid
+                      </span>
                     </dd>
                   </div>
                   <div>
