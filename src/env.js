@@ -11,6 +11,7 @@ export const env = createEnv({
       process.env.NODE_ENV === "production" ? z.string() : z.string().optional(),
     BETTER_AUTH_URL: z.string().url().optional(),
     AUTH_ALLOW_SIGNUP: z.enum(["true", "false"]).optional(),
+    CRON_SECRET: z.string().min(16).optional(),
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -34,6 +35,7 @@ export const env = createEnv({
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     AUTH_ALLOW_SIGNUP: process.env.AUTH_ALLOW_SIGNUP,
+    CRON_SECRET: process.env.CRON_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
   },

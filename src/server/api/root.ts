@@ -1,4 +1,11 @@
+import { assetRouter } from "~/server/api/routers/asset";
+import { assetTxnRouter } from "~/server/api/routers/asset-txn";
+import { categoryRouter } from "~/server/api/routers/category";
+import { expenseRouter } from "~/server/api/routers/expense";
 import { healthRouter } from "~/server/api/routers/health";
+import { overviewRouter } from "~/server/api/routers/overview";
+import { priceRouter } from "~/server/api/routers/price";
+import { subscriptionRouter } from "~/server/api/routers/subscription";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 
 /**
@@ -8,6 +15,13 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   health: healthRouter,
+  asset: assetRouter,
+  assetTxn: assetTxnRouter,
+  price: priceRouter,
+  expense: expenseRouter,
+  category: categoryRouter,
+  subscription: subscriptionRouter,
+  overview: overviewRouter,
 });
 
 // export type definition of API
