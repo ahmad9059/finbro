@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="finbro">
+  <rect width="64" height="64" rx="16" fill="#5266eb"/>
+  <path d="M13 44C19.5 31 28.5 16 43.5 11.5C38.5 23.5 39.5 35.5 51 44Z" fill="#fff" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M14 52.5H50" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>
+</svg>

@@ -1,6 +1,249 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
+@custom-variant dark (&:is(.dark *));
+
+/* Mercury never goes above weight 500. Remapping the scale makes that true
+   for every `font-*` utility, including the ones inside shadcn components. */
 @theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-weight-light: 360;
+  --font-weight-normal: 400;
+  --font-weight-medium: 420;
+  --font-weight-semibold: 480;
+  --font-weight-bold: 500;
+  --font-weight-extrabold: 500;
+  --font-weight-black: 500;
+}
+
+@theme inline {
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-heading: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-tint: var(--tint);
+  --color-tint-foreground: var(--tint-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-link: var(--link);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted-foreground: var(--sidebar-muted-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Mercury radius scale: 4 / 8 / 12 / 16 / 32 */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+
+  --shadow-soft: var(--elevation-soft);
+  --shadow-modal: var(--elevation-modal);
+}
+
+:root {
+  --radius: 0.75rem;
+
+  --background: #fbfcfd; /* canvas */
+  --foreground: #28253b; /* ink */
+  --card: #ffffff; /* surface */
+  --card-foreground: #28253b;
+  --tint: #edecfb; /* lavender: KPI cards */
+  --tint-foreground: #28253b;
+  --popover: #ffffff;
+  --popover-foreground: #28253b;
+
+  --primary: #5266eb; /* Mercury Indigo */
+  --primary-foreground: #ffffff;
+  --secondary: rgb(82 102 235 / 0.1); /* button-tint-light */
+  --secondary-foreground: #28253b;
+  --muted: #f4f4fb;
+  --muted-foreground: #554e7b; /* ink-secondary */
+  --accent: rgb(82 102 235 / 0.08);
+  --accent-foreground: #28253b;
+  --link: #5266eb;
+
+  --border: rgb(195 195 204 / 0.6); /* fog rule */
+  --input: rgb(85 78 123 / 0.22);
+  --ring: #5266eb;
+  --overlay: rgb(23 23 33 / 0.6); /* night at 60% */
+
+  --gain: #17794e; /* data only */
+  --loss: #c0364a; /* data only */
+  --destructive: #c0364a;
+
+  --chart-1: #5266eb;
+  --chart-2: #8b7cf0;
+  --chart-3: #554e7b;
+  --chart-4: #9cb4e8;
+  --chart-5: #28253b;
+
+  /* The sidebar and top bar are night-coloured in both themes. */
+  --sidebar: #171721;
+  --sidebar-foreground: #ededf3;
+  --sidebar-muted-foreground: #c3c3cc;
+  --sidebar-accent: #1e1e2a;
+  --sidebar-accent-foreground: #ededf3;
+  --sidebar-primary: #5266eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-border: rgb(112 112 125 / 0.3);
+  --sidebar-ring: #5266eb;
+
+  --elevation-soft:
+    0 1px 2px rgb(40 37 59 / 0.04), 0 6px 16px rgb(40 37 59 / 0.05);
+  --elevation-modal:
+    0 2px 4px rgb(40 37 59 / 0.05), 0 16px 40px rgb(40 37 59 / 0.09);
+}
+
+.dark {
+  --background: #171721; /* night */
+  --foreground: #ededf3; /* on-dark */
+  --card: #1e1e2a; /* night-raised */
+  --card-foreground: #ededf3;
+  --tint: #1e1e2a;
+  --tint-foreground: #ededf3;
+  --popover: #262635;
+  --popover-foreground: #ededf3;
+
+  --primary: #5266eb;
+  --primary-foreground: #ffffff;
+  --secondary: rgb(156 180 232 / 0.2); /* button-tint-dark */
+  --secondary-foreground: #ededf3;
+  --muted: #1e1e2a;
+  --muted-foreground: #c3c3cc; /* fog */
+  --accent: rgb(195 195 204 / 0.12);
+  --accent-foreground: #ededf3;
+  --link: #9cb4e8; /* periwinkle: indigo is too dim for text on night */
+
+  --border: rgb(112 112 125 / 0.4); /* slate rule */
+  --input: rgb(112 112 125 / 0.6);
+  --ring: #5266eb;
+  --overlay: rgb(10 10 16 / 0.6);
+
+  --gain: #5fcf9f;
+  --loss: #f08a97;
+  --destructive: #f08a97;
+
+  --chart-1: #5266eb;
+  --chart-2: #9cb4e8;
+  --chart-3: #8b7cf0;
+  --chart-4: #c3c3cc;
+  --chart-5: #ededf3;
+
+  --elevation-soft: 0 0 #0000;
+  --elevation-modal: 0 16px 40px rgb(0 0 0 / 0.35);
+}
+
+/* Type scale from plan/fin-bro/design.md */
+@utility type-hero {
+  font-size: clamp(2rem, 1.4rem + 2vw, 2.625rem);
+  line-height: 1.15;
+  font-weight: 480;
+  letter-spacing: 0.42px;
+}
+@utility type-title {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  font-weight: 480;
+  letter-spacing: 0.42px;
+}
+@utility type-lead {
+  font-size: 1.5rem;
+  line-height: 1.2;
+  font-weight: 480;
+  letter-spacing: 0.48px;
+}
+@utility type-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.35;
+  font-weight: 360;
+}
+@utility type-body {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 400;
+}
+@utility type-ui {
+  font-size: 1rem;
+  line-height: 1;
+  font-weight: 420;
+}
+@utility type-ui-sm {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 420;
+  letter-spacing: 0.07px;
+}
+@utility type-eyebrow {
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.28px;
+  text-transform: uppercase;
+}
+@utility type-legal {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 400;
+  letter-spacing: 0.24px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+  }
+  body {
+    @apply bg-background text-foreground type-body antialiased;
+    font-optical-sizing: auto;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }

@@ -44,7 +44,7 @@ Paste-ready for `globals.css`. Names follow shadcn so every component picks them
   --primary-foreground: #ffffff;
   --secondary: rgb(82 102 235 / 0.10);        /* button-tint-light */
   --secondary-foreground: #28253b;
-  --muted: #fbfbff;                           /* surface-tint */
+  --muted: #f4f4fb;                           /* hover and skeleton fill, derived */
   --muted-foreground: #554e7b;                /* ink-secondary */
   --accent: rgb(82 102 235 / 0.08);           /* hover fill, derived */
   --accent-foreground: #28253b;
@@ -146,17 +146,17 @@ Expose the extra tokens to Tailwind under `@theme inline`: `--color-tint`, `--co
 
 | Style | Size / line | Weight | Tracking | Use |
 | --- | --- | --- | --- | --- |
-| `text-hero` | 42 / 1.15 | 480 | 0.42px | Net worth on Overview only |
-| `text-title` | 28 / 1.2 | 480 | 0.42px | Page title, KPI numbers |
-| `text-lead` | 24 / 1.2 | 480 | 0.48px | Dialog titles, the amount field |
-| `text-body-lg` | 18 / 1.35 | 360 | 0 | Empty-state copy, intro lines |
-| `text-body` | 16 / 1.4 | 400 | 0 | Default text |
-| `text-ui` | 16 / 1 | 420 | 0 | Buttons, inputs, sidebar items |
-| `text-ui-sm` | 14 / 1.4 | 420 | 0.07px | Table cells, small pills, field labels |
-| `text-eyebrow` | 12 / 1 | 500 | 0.28px, uppercase | KPI labels, table headers, sidebar group labels |
-| `text-legal` | 12 / 1.4 | 400 | 0.24px | "As of" stamps, hints |
+| `type-hero` | 42 / 1.15 | 480 | 0.42px | Net worth on Overview only |
+| `type-title` | 28 / 1.2 | 480 | 0.42px | Page title, KPI numbers |
+| `type-lead` | 24 / 1.2 | 480 | 0.48px | Dialog titles, the amount field |
+| `type-body-lg` | 18 / 1.35 | 360 | 0 | Empty-state copy, intro lines |
+| `type-body` | 16 / 1.4 | 400 | 0 | Default text |
+| `type-ui` | 16 / 1 | 420 | 0 | Buttons, inputs, sidebar items |
+| `type-ui-sm` | 14 / 1.4 | 420 | 0.07px | Table cells, small pills, field labels |
+| `type-eyebrow` | 12 / 1 | 500 | 0.28px, uppercase | KPI labels, table headers, sidebar group labels |
+| `type-legal` | 12 / 1.4 | 400 | 0.24px | "As of" stamps, hints |
 
-Define each as a Tailwind `@utility` in `globals.css` so they are used by name.
+Define each as a Tailwind `@utility` in `globals.css` so they are used by name. They are prefixed `type-`, not `text-`: the class merger treats any unknown `text-*` class as a colour and drops it when a text colour is also present.
 
 Rules:
 
@@ -181,7 +181,7 @@ Rules:
 | Primary | Indigo fill, white label, capsule, 40px tall, 20px side padding | The one main action on a view: "Add expense", "Add transaction", "Sign in", "Save" |
 | Tint (`secondary`) | 10% indigo (light) or 20% periwinkle (dark), text-coloured label | Every other action: "Refresh prices", "Cancel", "Mark paid", "Edit" |
 | Ghost | No fill until hover (`--accent`) | Icon buttons, row menus |
-| Small | 32px tall, 16px padding, `text-ui-sm` | Buttons inside table rows and cards |
+| Small | 32px tall, 16px padding, `type-ui-sm` | Buttons inside table rows and cards |
 | Icon | Round, 40px (32px small) | Theme toggle, close, row menu |
 
 Never two primary buttons in one view. Inside a dialog, "Save" is primary and the page's own primary button is behind the overlay, which is fine. No outlined buttons, no square corners. Destructive actions are a tint button with a `--loss` label, behind a confirm dialog.
@@ -210,8 +210,8 @@ Never two primary buttons in one view. Inside a dialog, "Save" is primary and th
 ```
 
 - **Top bar**: 64px (the reference's nav is 72px; trimmed for an app). Left cell holds the wordmark and is the same width as the sidebar. Right side: page title in On Dark, then theme toggle, user menu.
-- **Sidebar row**: 40px tall, 8px radius, icon 18px + `text-ui` label. Default text Fog. Hover: Night Raised fill. **Active: Night Raised fill, On Dark text, and a 3px indigo bar on the left edge.**
-- **Group labels**: `text-eyebrow` in Fog.
+- **Sidebar row**: 40px tall, 8px radius, icon 18px + `type-ui` label. Default text Fog. Hover: Night Raised fill. **Active: Night Raised fill, On Dark text, and a 3px indigo bar on the left edge.**
+- **Group labels**: `type-eyebrow` in Fog.
 - **Below 1024px**: the sidebar becomes an off-canvas sheet opened from a menu button in the top bar.
 
 ### Page header
@@ -223,9 +223,9 @@ Sits on the canvas, under the top bar: a one-line description in secondary text 
 Lavender fill (light) or Night Raised (dark). Radius 12, padding 24, no border, no shadow.
 
 ```
-MARKET VALUE                 ← text-eyebrow, secondary colour
-Rs 1,284,500                 ← text-title, tabular
-▲ +Rs 84,500 (+7.0%)         ← text-ui-sm, gain or loss colour, with arrow and sign
+MARKET VALUE                 ← type-eyebrow, secondary colour
+Rs 1,284,500                 ← type-title, tabular
+▲ +Rs 84,500 (+7.0%)         ← type-ui-sm, gain or loss colour, with arrow and sign
 ```
 
 Four in a row on desktop, two on tablet, one on mobile.
@@ -233,8 +233,8 @@ Four in a row on desktop, two on tablet, one on mobile.
 ### Data table (`ex-data-table-cell`)
 
 - Lives in a panel: Surface + soft shadow (light), Night Raised (dark), radius 12.
-- Header: `text-eyebrow`, secondary colour, no fill, 44px tall.
-- Rows: 52px tall, `text-ui-sm`, 1px rule between rows, no zebra stripes, no vertical lines.
+- Header: `type-eyebrow`, secondary colour, no fill, 44px tall.
+- Rows: 52px tall, `type-ui-sm`, 1px rule between rows, no zebra stripes, no vertical lines.
 - Numbers right-aligned with `tabular-nums`. First column: name in primary text with a small secondary line under it (symbol, AMC or bank).
 - Row hover: `--accent` fill. A clickable row opens the detail sheet.
 - Narrow screens: the panel scrolls sideways and the first column stays pinned.
@@ -246,13 +246,13 @@ Slides in from the right, 480px wide (full width on mobile), radius 16 on the le
 ### Dialog (`ex-modal-card`) — the add/edit popup
 
 - Popover-coloured surface, radius 16, padding 32, max width 480, `--shadow-modal`. Backdrop: Night at 60%.
-- Title in `text-lead`. Fields stacked with 16px gaps.
+- Title in `type-lead`. Fields stacked with 16px gaps.
 - Footer right-aligned: tint "Cancel", then primary "Save".
-- **Add expense** is the showcase: the amount field comes first, set large in `text-lead` with a fixed `Rs` prefix, focused on open. Then date (defaults to today), category, title, notes. Enter submits. After saving, a toast confirms and the dialog closes.
+- **Add expense** is the showcase: the amount field comes first, set large in `type-lead` with a fixed `Rs` prefix, focused on open. Then date (defaults to today), category, title, notes. Enter submits. After saving, a toast confirms and the dialog closes.
 
 ### Form fields
 
-40px tall, radius 8, 1px `--input` outline, Surface fill (light) or Night (dark). Label above in `text-ui-sm`, secondary colour. Focus: 2px indigo ring. Error: the message below in `--loss` with an icon; the outline changes too, so the error is not colour-only.
+40px tall, radius 8, 1px `--input` outline, Surface fill (light) or Night (dark). Label above in `type-ui-sm`, secondary colour. Focus: 2px indigo ring. Error: the message below in `--loss` with an icon; the outline changes too, so the error is not colour-only.
 
 The reference's fused email-capture field is a marketing pattern and is not used.
 
@@ -263,19 +263,19 @@ The reference's fused email-capture field is a marketing pattern and is not used
 - **Net-worth line**: one indigo line, soft indigo area fill fading to transparent, no dots except on hover.
 - **Spending by category**: horizontal bars in a single colour (indigo), sorted largest first, each labelled with name and amount. Not a nine-colour pie.
 - **Six-month spending trend**: vertical bars, the current month in indigo and earlier months in the tint colour.
-- Axis labels in `text-legal`, secondary colour. Grid lines use `--border`, horizontal only. Tooltips use the popover surface.
+- Axis labels in `type-legal`, secondary colour. Grid lines use `--border`, horizontal only. Tooltips use the popover surface.
 
 ### Small pieces
 
-- **Tag**: 4px radius, `text-legal`, tint fill. For category, cycle ("Monthly"), price age. "Overdue" uses the `--loss` text colour with an icon.
-- **Empty state** (`ex-empty-state-card`): a tint panel, a 40px line icon, one `text-body-lg` sentence, and the page's primary action.
+- **Tag**: 4px radius, `type-legal`, tint fill. For category, cycle ("Monthly"), price age. "Overdue" uses the `--loss` text colour with an icon.
+- **Empty state** (`ex-empty-state-card`): a tint panel, a 40px line icon, one `type-body-lg` sentence, and the page's primary action.
 - **Loading**: skeleton blocks in the shape of the real content. No spinners on page load.
 - **Toast** (`ex-toast`): Sonner, bottom right, popover surface, radius 12.
 - **Icons**: lucide, 1.5px stroke, 18px in navigation and buttons.
 
 ### Login page (`ex-auth-form-card`)
 
-A full Night page in both modes (this is the "homepage" world). Centred card in Night Raised, radius 12, padding 32, 400px wide: wordmark, "Sign in" in `text-title`, email and password fields, one full-width primary button. No sign-up link, no social buttons.
+A full Night page in both modes (this is the "homepage" world). Centred card in Night Raised, radius 12, padding 32, 400px wide: wordmark, "Sign in" in `type-title`, email and password fields, one full-width primary button. No sign-up link, no social buttons.
 
 ## Page layouts
 

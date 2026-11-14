@@ -5,7 +5,14 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: [".next", "next-env.d.ts", "drizzle"],
+    // components/ui and use-mobile are vendored shadcn code.
+    ignores: [
+      ".next",
+      "next-env.d.ts",
+      "drizzle",
+      "src/components/ui",
+      "src/hooks/use-mobile.ts",
+    ],
   },
   ...nextVitals,
   {
