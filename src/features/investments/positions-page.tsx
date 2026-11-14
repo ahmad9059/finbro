@@ -3,13 +3,17 @@
 import {
   ArrowDown,
   ArrowUp,
+  CandlestickChart,
   CircleAlert,
+  Landmark,
+  PieChart,
   Plus,
   RefreshCw,
-  type LucideIcon,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+
+import { errorMessage } from "~/lib/errors";
 
 import { EmptyState } from "~/components/shared/empty-state";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
@@ -26,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { formatUnits } from "~/lib/format";
+import { formatPercent, formatUnits } from "~/lib/format";
 import { api } from "~/trpc/react";
 
 import { AssetDialog } from "./asset-dialog";
@@ -36,17 +40,22 @@ import { PriceTag } from "./price-tag";
 
 type SortKey = "value" | "pnl";
 
+const ICONS = {
+  stock: CandlestickChart,
+  mutual_fund: PieChart,
+  money_market: Landmark,
+} as const;
+
 export function PositionsPage({
   kind,
   copy,
-  icon,
   title,
 }: {
   kind: PositionsKind;
   copy: PositionsCopy;
-  icon: LucideIcon;
   title: string;
 }) {
+  const Icon = ICONS[kind];
   const utils = api.useUtils();
   const { data, isLoading, isError, refetch } = api.asset.list.useQuery({ kind });
   const [addOpen, setAddOpen] = useState(false);
@@ -84,7 +93,7 @@ export function PositionsPage({
         toast.success(`${result.updated} price${result.updated === 1 ? "" : "s"} updated.`);
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not refresh.");
+      toast.error(errorMessage(error, "Could not refresh."));
     }
   }
 
@@ -123,17 +132,12 @@ export function PositionsPage({
           />
           <KpiCard
             label="Unrealized"
-            value={
-              <Delta
-                value={totals?.unrealized ?? 0}
-                ratio={
-                  totals && totals.cost > 0
-                    ? totals.unrealized / totals.cost
-                    : undefined
-                }
-              />
+            value={<Delta value={totals?.unrealized ?? 0} />}
+            footer={
+              totals && totals.cost > 0
+                ? `${formatPercent(totals.unrealized / totals.cost)} on what you paid`
+                : "Value minus what you paid"
             }
-            footer="Value minus what you paid"
           />
           <KpiCard
             label="Realized + income"
@@ -148,14 +152,14 @@ export function PositionsPage({
       ) : isError ? (
         <div className="flex flex-col items-center gap-4 rounded-lg bg-card p-10 text-center shadow-soft">
           <CircleAlert className="size-8 text-loss" aria-hidden="true" />
-          <p className="text-body-lg">Could not load your holdings.</p>
+          <p className="type-body-lg">Could not load your holdings.</p>
           <Button variant="secondary" onClick={() => void refetch()}>
             Try again
           </Button>
         </div>
       ) : data?.items.length === 0 ? (
         <EmptyState
-          icon={icon}
+          icon={Icon}
           title={`Nothing here yet. Add your first ${kind === "stock" ? "holding" : "fund"} and it will show up with its value and gain.`}
         >
           <Button onClick={() => setAddOpen(true)}>
@@ -166,8 +170,8 @@ export function PositionsPage({
       ) : (
         <div className="overflow-hidden rounded-lg bg-card shadow-soft">
           <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
-            <h2 className="text-eyebrow text-muted-foreground">{title}</h2>
-            <label className="flex items-center gap-2 text-ui-sm text-muted-foreground">
+            <h2 className="type-eyebrow text-muted-foreground">{title}</h2>
+            <label className="flex items-center gap-2 type-ui-sm text-muted-foreground">
               <Switch
                 checked={showClosed}
                 onCheckedChange={setShowClosed}
@@ -227,7 +231,7 @@ export function PositionsPage({
                       <span className="font-medium text-foreground">
                         {asset.name}
                       </span>
-                      <span className="text-legal text-muted-foreground">
+                      <span className="type-legal text-muted-foreground">
                         {asset.symbol ?? asset.institution ?? asset.category ?? "—"}
                       </span>
                     </div>
@@ -236,14 +240,20 @@ export function PositionsPage({
                     {formatUnits(position.units)}
                   </TableCell>
                   <TableCell className="hidden text-right tabular-nums sm:table-cell">
-                    {formatUnits(Number(position.avgCost.toFixed(4)), 4)}
+                    {position.avgCost.toLocaleString("en-US", {
+                      minimumFractionDigits: copy.priceDecimals,
+                      maximumFractionDigits: copy.priceDecimals,
+                    })}
                   </TableCell>
                   <TableCell className="hidden text-right sm:table-cell">
                     <div className="flex flex-col items-end gap-0.5">
                       <span className="tabular-nums">
                         {asset.lastPrice === null
                           ? "—"
-                          : formatUnits(asset.lastPrice, 4)}
+                          : asset.lastPrice.toLocaleString("en-US", {
+                              minimumFractionDigits: copy.priceDecimals,
+                              maximumFractionDigits: copy.priceDecimals,
+                            })}
                       </span>
                       <PriceTag asOf={asset.priceAsOf} source={asset.priceSource} />
                     </div>

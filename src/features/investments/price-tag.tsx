@@ -31,14 +31,15 @@ export function PriceTag({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 text-legal text-muted-foreground",
+        "inline-flex items-center gap-1 type-legal text-muted-foreground",
         stale && "text-loss",
         className,
       )}
       title={`${source === "manual" ? "Entered by hand" : "Fetched automatically"} · ${formatDate(asOf)}`}
     >
       <Clock className="size-3" aria-hidden="true" />
-      {stale ? "Stale" : "As of"} {formatDate(asOf)}
+      {stale ? "Stale · " : ""}
+      {formatDate(asOf).replace(/ \d{4}$/, "")}
     </span>
   );
 }

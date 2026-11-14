@@ -4,6 +4,8 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { errorMessage } from "~/lib/errors";
+
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { Delta, Money } from "~/components/shared/money";
 import { Badge } from "~/components/ui/badge";
@@ -78,7 +80,7 @@ export function HoldingSheet({
       toast.success("Transaction deleted.");
       await afterTxnChange();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete.");
+      toast.error(errorMessage(error, "Could not delete."));
     } finally {
       setConfirmTxn(null);
     }
@@ -95,7 +97,7 @@ export function HoldingSheet({
       ]);
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete.");
+      toast.error(errorMessage(error, "Could not delete."));
     } finally {
       setConfirmAsset(false);
     }
@@ -128,18 +130,18 @@ export function HoldingSheet({
               <div className="flex flex-col gap-6 px-6 py-6">
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       {copy.value}
                     </dt>
-                    <dd className="mt-1.5 text-title tabular-nums">
+                    <dd className="mt-1.5 type-title tabular-nums">
                       <Money value={position.marketValue} />
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       Unrealized
                     </dt>
-                    <dd className="mt-1.5 text-title">
+                    <dd className="mt-1.5 type-title">
                       <Delta
                         value={position.unrealized}
                         ratio={position.unrealizedPct}
@@ -147,7 +149,7 @@ export function HoldingSheet({
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       {copy.units}
                     </dt>
                     <dd className="mt-1.5 tabular-nums">
@@ -155,15 +157,18 @@ export function HoldingSheet({
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       {copy.avgCost}
                     </dt>
                     <dd className="mt-1.5 tabular-nums">
-                      {formatUnits(Number(position.avgCost.toFixed(4)), 4)}
+                      {position.avgCost.toLocaleString("en-US", {
+                        minimumFractionDigits: copy.priceDecimals,
+                        maximumFractionDigits: copy.priceDecimals,
+                      })}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       Cost basis
                     </dt>
                     <dd className="mt-1.5 tabular-nums">
@@ -171,7 +176,7 @@ export function HoldingSheet({
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       Realized + income
                     </dt>
                     <dd className="mt-1.5 tabular-nums">
@@ -184,7 +189,7 @@ export function HoldingSheet({
 
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-eyebrow text-muted-foreground">
+                    <h3 className="type-eyebrow text-muted-foreground">
                       Transactions
                     </h3>
                     <Button
@@ -201,7 +206,7 @@ export function HoldingSheet({
                   </div>
 
                   {data.txns.length === 0 ? (
-                    <p className="rounded-md bg-muted/60 px-4 py-6 text-center text-ui-sm text-muted-foreground">
+                    <p className="rounded-md bg-muted/60 px-4 py-6 text-center type-ui-sm text-muted-foreground">
                       No transactions yet.
                     </p>
                   ) : (
@@ -212,7 +217,7 @@ export function HoldingSheet({
                           className="flex items-center justify-between gap-3 py-3"
                         >
                           <div className="min-w-0">
-                            <p className="flex items-center gap-2 text-ui-sm">
+                            <p className="flex items-center gap-2 type-ui-sm">
                               <Badge variant="secondary">
                                 {KIND_LABELS[txn.kind]}
                               </Badge>
@@ -220,7 +225,7 @@ export function HoldingSheet({
                                 {formatDate(txn.date)}
                               </span>
                             </p>
-                            <p className="mt-1 truncate text-legal text-muted-foreground">
+                            <p className="mt-1 truncate type-legal text-muted-foreground">
                               {txn.units !== null
                                 ? `${formatUnits(txn.units)} × ${formatUnits(Number(txn.unitPrice ?? 0), 4)}`
                                 : "Cash movement"}
@@ -228,7 +233,7 @@ export function HoldingSheet({
                             </p>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
-                            <span className="tabular-nums text-ui-sm">
+                            <span className="tabular-nums type-ui-sm">
                               <Money value={txn.amount} />
                             </span>
                             <Button
@@ -258,7 +263,7 @@ export function HoldingSheet({
                 </div>
 
                 {asset.notes ? (
-                  <p className="rounded-md bg-muted/60 p-4 text-ui-sm text-muted-foreground">
+                  <p className="rounded-md bg-muted/60 p-4 type-ui-sm text-muted-foreground">
                     {asset.notes}
                   </p>
                 ) : null}
@@ -278,11 +283,11 @@ export function HoldingSheet({
                 </div>
 
                 {position.units === 0 ? (
-                  <p className="text-legal text-muted-foreground">
+                  <p className="type-legal text-muted-foreground">
                     Nothing is held here any more.
                   </p>
                 ) : !position.hasPrice ? (
-                  <p className="text-legal text-loss">
+                  <p className="type-legal text-loss">
                     No price yet, so the value shown is what you paid.
                   </p>
                 ) : null}

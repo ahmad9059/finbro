@@ -13,6 +13,8 @@ export type PositionsCopy = {
   namePlaceholder: string;
   institutionLabel: string;
   lookup: "stock" | "fund";
+  /** Decimals for unit prices and average cost. */
+  priceDecimals: number;
   moneyMarket: boolean;
   hint: string;
   txns: { kind: TxnKind; label: string; description: string }[];
@@ -45,6 +47,7 @@ export const positionsCopy: Record<PositionsKind, PositionsCopy> = {
     namePlaceholder: "Search the symbol to fill this in",
     institutionLabel: "Broker",
     lookup: "stock",
+    priceDecimals: 2,
     moneyMarket: false,
     hint: "Prices come from the PSX data portal. Refresh after the market closes.",
     txns: UNIT_TXNS,
@@ -60,6 +63,7 @@ export const positionsCopy: Record<PositionsKind, PositionsCopy> = {
     namePlaceholder: "Search by fund or asset manager",
     institutionLabel: "Asset manager",
     lookup: "fund",
+    priceDecimals: 4,
     moneyMarket: false,
     hint: "NAVs come from MUFAP's daily fund directory, updated each business evening.",
     txns: UNIT_TXNS,
@@ -75,6 +79,7 @@ export const positionsCopy: Record<PositionsKind, PositionsCopy> = {
     namePlaceholder: "Search money market funds",
     institutionLabel: "Asset manager",
     lookup: "fund",
+    priceDecimals: 4,
     moneyMarket: true,
     hint: "NAVs come from MUFAP's daily fund directory, updated each business evening.",
     txns: UNIT_TXNS,
@@ -93,6 +98,7 @@ export const savingsCopy: PositionsCopy = {
   namePlaceholder: "e.g. Meezan Savings",
   institutionLabel: "Bank",
   lookup: "stock",
+  priceDecimals: 2,
   moneyMarket: false,
   hint: "Balances are what you deposited plus profit, minus withdrawals.",
   txns: [

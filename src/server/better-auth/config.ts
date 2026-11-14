@@ -23,7 +23,8 @@ export const auth = betterAuth({
     window: 60,
     max: 100,
     customRules: {
-      "/sign-in/email": { window: 60, max: 5 },
+      // Room for a few retries, still enough to stop guessing.
+      "/sign-in/email": { window: 60, max: 20 },
     },
   },
   // nextCookies must stay last.

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { CandlestickChart } from "lucide-react";
 
 import {
   positionsCopy,
@@ -16,7 +15,6 @@ export default function Page() {
     <PositionsPage
       kind={kind}
       copy={positionsCopy[kind]}
-      icon={CandlestickChart}
       title="Holdings"
     />
   );

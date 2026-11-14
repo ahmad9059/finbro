@@ -4,6 +4,8 @@ import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { errorMessage } from "~/lib/errors";
+
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { Money } from "~/components/shared/money";
 import { Badge } from "~/components/ui/badge";
@@ -48,7 +50,7 @@ export function SavingsTransactions({
         utils.overview.get.invalidate(),
       ]);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete.");
+      toast.error(errorMessage(error, "Could not delete."));
     } finally {
       setConfirm(null);
     }
@@ -57,7 +59,7 @@ export function SavingsTransactions({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-eyebrow text-muted-foreground">Transactions</h3>
+        <h3 className="type-eyebrow text-muted-foreground">Transactions</h3>
         <Button
           size="sm"
           variant="secondary"
@@ -72,7 +74,7 @@ export function SavingsTransactions({
       </div>
 
       {data?.txns.length === 0 ? (
-        <p className="rounded-md bg-muted/60 px-4 py-6 text-center text-ui-sm text-muted-foreground">
+        <p className="rounded-md bg-muted/60 px-4 py-6 text-center type-ui-sm text-muted-foreground">
           No movements yet.
         </p>
       ) : (
@@ -80,14 +82,14 @@ export function SavingsTransactions({
           {data?.txns.map((txn) => (
             <li key={txn.id} className="flex items-center justify-between gap-3 py-3">
               <div className="min-w-0">
-                <p className="flex items-center gap-2 text-ui-sm">
+                <p className="flex items-center gap-2 type-ui-sm">
                   <Badge variant="secondary">
                     {KIND_LABELS[txn.kind] ?? txn.kind}
                   </Badge>
                   <span className="text-muted-foreground">{formatDate(txn.date)}</span>
                 </p>
                 {txn.notes ? (
-                  <p className="mt-1 truncate text-legal text-muted-foreground">
+                  <p className="mt-1 truncate type-legal text-muted-foreground">
                     {txn.notes}
                   </p>
                 ) : null}
@@ -96,8 +98,8 @@ export function SavingsTransactions({
                 <span
                   className={
                     txn.kind === "withdrawal"
-                      ? "tabular-nums text-ui-sm text-loss"
-                      : "tabular-nums text-ui-sm"
+                      ? "tabular-nums type-ui-sm text-loss"
+                      : "tabular-nums type-ui-sm"
                   }
                 >
                   <Money value={txn.kind === "withdrawal" ? -txn.amount : txn.amount} />
@@ -194,7 +196,7 @@ export function UpdateBalanceForm({
         utils.overview.get.invalidate(),
       ]);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     } finally {
       setPending(false);
     }
@@ -202,8 +204,8 @@ export function UpdateBalanceForm({
 
   return (
     <form onSubmit={(event) => void onSubmit(event)} className="flex flex-col gap-3">
-      <h3 className="text-eyebrow text-muted-foreground">Update balance</h3>
-      <p className="text-ui-sm text-muted-foreground">
+      <h3 className="type-eyebrow text-muted-foreground">Update balance</h3>
+      <p className="type-ui-sm text-muted-foreground">
         Type the balance your bank shows. The difference is recorded as{" "}
         {difference >= 0 ? "profit" : "a withdrawal"}.
       </p>

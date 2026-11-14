@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import { errorMessage } from "~/lib/errors";
 import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -127,7 +129,7 @@ export function TxnDialog({
       ]);
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     }
   }
 
@@ -171,7 +173,7 @@ export function TxnDialog({
               })}
             </div>
             {hint ? (
-              <p className="text-legal text-muted-foreground">{hint}</p>
+              <p className="type-legal text-muted-foreground">{hint}</p>
             ) : null}
           </fieldset>
 
@@ -232,7 +234,7 @@ export function TxnDialog({
               className={unitKind ? "bg-muted/60" : undefined}
               {...register("amount", asNumber)}
             />
-            <p className="text-legal text-muted-foreground">
+            <p className="type-legal text-muted-foreground">
               {amount ? formatPKR(amount, { decimals: 2 }) : " "}
             </p>
             <FieldError errors={[errors.amount]} />

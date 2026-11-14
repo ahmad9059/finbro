@@ -63,12 +63,12 @@ export function FundPicker({
         </div>
         <div className="max-h-72 overflow-y-auto p-1">
           {isFetching && !data ? (
-            <p className="flex items-center gap-2 px-3 py-6 text-ui-sm text-muted-foreground">
+            <p className="flex items-center gap-2 px-3 py-6 type-ui-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" /> Loading funds
             </p>
           ) : null}
           {data?.length === 0 ? (
-            <p className="px-3 py-6 text-ui-sm text-muted-foreground">
+            <p className="px-3 py-6 type-ui-sm text-muted-foreground">
               No fund matches. You can add it by hand instead.
             </p>
           ) : null}
@@ -85,14 +85,14 @@ export function FundPicker({
                 className="flex w-full items-start gap-2 rounded-md px-3 py-2 text-left hover:bg-accent"
               >
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-ui-sm text-foreground">
+                  <span className="block truncate type-ui-sm text-foreground">
                     {fund.name}
                   </span>
-                  <span className="block truncate text-legal text-muted-foreground">
+                  <span className="block truncate type-legal text-muted-foreground">
                     {fund.amc} · {fund.category}
                   </span>
                 </span>
-                <span className="shrink-0 tabular-nums text-legal text-muted-foreground">
+                <span className="shrink-0 tabular-nums type-legal text-muted-foreground">
                   {fund.nav.toFixed(2)}
                 </span>
                 {selected ? (

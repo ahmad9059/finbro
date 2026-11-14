@@ -2,8 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import { errorMessage } from "~/lib/errors";
 import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -97,6 +100,16 @@ export function SubscriptionDialog({
   const cycle = watch("cycle");
   const categoryId = watch("categoryId");
 
+  // The category list arrives after the dialog mounts, so fill the default then.
+  useEffect(() => {
+    if (subscription || categoryId) return;
+    const fallback =
+      defaultCategoryId ??
+      categories?.find((category) => category.name === "Subscriptions")?.id ??
+      categories?.[0]?.id;
+    if (fallback) setValue("categoryId", String(fallback));
+  }, [categories, categoryId, defaultCategoryId, setValue, subscription]);
+
   async function onSubmit(values: Values) {
     const payload = {
       name: values.name,
@@ -121,7 +134,7 @@ export function SubscriptionDialog({
       ]);
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     }
   }
 

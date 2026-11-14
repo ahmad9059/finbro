@@ -14,7 +14,7 @@ export type CategoryTotal = {
 export function CategoryBars({ data }: { data: CategoryTotal[] }) {
   if (data.length === 0) {
     return (
-      <p className="py-8 text-center text-ui-sm text-muted-foreground">
+      <p className="py-8 text-center type-ui-sm text-muted-foreground">
         Nothing spent in this month.
       </p>
     );
@@ -25,8 +25,8 @@ export function CategoryBars({ data }: { data: CategoryTotal[] }) {
       {data.map((row) => (
         <li key={row.categoryId} className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3">
-            <span className="truncate text-ui-sm">{row.name}</span>
-            <span className="shrink-0 tabular-nums text-legal text-muted-foreground">
+            <span className="truncate type-ui-sm">{row.name}</span>
+            <span className="shrink-0 tabular-nums type-legal text-muted-foreground">
               <Money value={row.total} /> · {formatPercent(row.share, { signed: false })}
             </span>
           </div>

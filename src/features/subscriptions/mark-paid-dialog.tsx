@@ -4,6 +4,8 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { errorMessage } from "~/lib/errors";
+
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -87,7 +89,7 @@ export function MarkPaidDialog({
         },
       );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     } finally {
       setPending(false);
     }

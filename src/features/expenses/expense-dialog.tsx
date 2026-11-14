@@ -2,9 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import { errorMessage } from "~/lib/errors";
 import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -74,6 +76,8 @@ export function ExpenseDialog({
     staleTime: 60_000,
   });
   const create = api.expense.create.useMutation();
+  // Remember the category you used last, so most entries are one keystroke.
+  const [lastCategory, setLastCategory] = useState<string>("");
   const update = api.expense.update.useMutation();
 
   const {
@@ -97,10 +101,24 @@ export function ExpenseDialog({
 
   // Focus the amount the moment the dialog opens: type, Tab, Enter.
   useEffect(() => {
-    if (open) setTimeout(() => setFocus("amount"), 50);
-  }, [open, setFocus]);
+    if (!open) return;
+    if (!expense) {
+      const remembered = window.localStorage.getItem("finbro:lastCategory");
+      if (remembered) setValue("categoryId", remembered);
+    }
+    setTimeout(() => setFocus("amount"), 50);
+  }, [open, expense, setFocus, setValue]);
 
-  const categoryId = watch("categoryId");
+  const typedCategory = watch("categoryId");
+  const categoryId =
+    typedCategory || lastCategory || (categories?.[0] ? String(categories[0].id) : "");
+
+  // The category list loads after the dialog mounts; fill the default then.
+  useEffect(() => {
+    if (open && !typedCategory && categoryId) {
+      setValue("categoryId", categoryId);
+    }
+  }, [open, typedCategory, categoryId, setValue]);
 
   async function onSubmit(values: Values) {
     const payload = {
@@ -139,7 +157,7 @@ export function ExpenseDialog({
       reset();
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     }
   }
 
@@ -161,7 +179,7 @@ export function ExpenseDialog({
           <Field data-invalid={!!errors.amount}>
             <FieldLabel htmlFor="amount">Amount</FieldLabel>
             <div className="relative">
-              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ui text-muted-foreground">
+              <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center type-ui text-muted-foreground">
                 Rs
               </span>
               <Input
@@ -170,7 +188,7 @@ export function ExpenseDialog({
                 placeholder="0.00"
                 autoComplete="off"
                 aria-invalid={!!errors.amount}
-                className="h-14 pl-11 text-lead tabular-nums"
+                className="h-14 pl-11 type-lead tabular-nums"
                 {...register("amount", asNumber)}
               />
             </div>

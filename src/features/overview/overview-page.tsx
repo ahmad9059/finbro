@@ -1,14 +1,11 @@
 "use client";
 
-import {
-  ArrowRight,
-  Check,
-  CircleAlert,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Check, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+
+import { errorMessage } from "~/lib/errors";
 
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Delta, Money } from "~/components/shared/money";
@@ -58,7 +55,7 @@ export function OverviewPage() {
         `${name} recorded. Next due ${formatDate(result.nextDueDate)}.`,
       );
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     } finally {
       setPaying(null);
     }
@@ -85,8 +82,8 @@ export function OverviewPage() {
             aria-hidden="true"
           />
           <div className="flex flex-col gap-2">
-            <p className="text-lead">Start with one number.</p>
-            <p className="max-w-md text-body-lg text-muted-foreground">
+            <p className="type-lead">Start with one number.</p>
+            <p className="max-w-md type-body-lg text-muted-foreground">
               Add a holding or an expense and this page fills in: net worth,
               allocation, and what is due next.
             </p>
@@ -116,13 +113,14 @@ export function OverviewPage() {
         <KpiCard
           label="Net worth"
           hero
+          className="sm:col-span-2"
           value={<Money value={data.netWorth} />}
           footer="Everything you hold, added up"
         />
         <KpiCard
           label="Unrealized"
-          value={<Delta value={data.unrealized} ratio={data.unrealizedPct} />}
-          footer="Investments only"
+          value={<Delta value={data.unrealized} />}
+          footer={`${formatPercent(data.unrealizedPct)} on what you paid`}
         />
         <KpiCard
           label="Spent this month"
@@ -131,20 +129,6 @@ export function OverviewPage() {
             <Link href="/expenses" className="text-link hover:underline">
               See the month
             </Link>
-          }
-        />
-        <KpiCard
-          label="Due in 30 days"
-          value={data.dueIn30Days}
-          footer={
-            data.overdueCount > 0 ? (
-              <span className="flex items-center gap-1 text-loss">
-                <CircleAlert className="size-3.5" aria-hidden="true" />
-                {data.overdueCount} overdue
-              </span>
-            ) : (
-              "Subscriptions and bills"
-            )
           }
         />
       </KpiGrid>
@@ -159,9 +143,16 @@ export function OverviewPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Section title="Due soon" description="Next 30 days, overdue first">
+        <Section
+          title="Due soon"
+          description={
+            data.overdueCount > 0
+              ? `${data.dueIn30Days} due in 30 days · ${data.overdueCount} overdue`
+              : `${data.dueIn30Days} due in 30 days`
+          }
+        >
           {data.upcoming.length === 0 ? (
-            <p className="text-ui-sm text-muted-foreground">
+            <p className="type-ui-sm text-muted-foreground">
               Nothing due in the next month.
             </p>
           ) : (
@@ -172,14 +163,14 @@ export function OverviewPage() {
                   className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-ui-sm">{row.name}</p>
-                    <p className="text-legal text-muted-foreground">
+                    <p className="truncate type-ui-sm">{row.name}</p>
+                    <p className="type-legal text-muted-foreground">
                       {formatDate(row.nextDueDate)}
                       {row.overdue ? " · overdue" : ""}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="tabular-nums text-ui-sm">
+                    <span className="tabular-nums type-ui-sm">
                       <Money value={row.amount} />
                     </span>
                     <Button
@@ -200,7 +191,7 @@ export function OverviewPage() {
 
         <Section title="Top holdings" description="By market value">
           {data.topHoldings.length === 0 ? (
-            <p className="text-ui-sm text-muted-foreground">
+            <p className="type-ui-sm text-muted-foreground">
               No investments yet.
             </p>
           ) : (
@@ -212,13 +203,13 @@ export function OverviewPage() {
                     className="flex items-center justify-between gap-3 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="min-w-0">
-                      <span className="block truncate text-ui-sm">{row.name}</span>
-                      <span className="text-legal text-muted-foreground">
+                      <span className="block truncate type-ui-sm">{row.name}</span>
+                      <span className="type-legal text-muted-foreground">
                         {row.symbol ?? formatPercent(row.unrealizedPct)}
                       </span>
                     </span>
                     <span className="flex shrink-0 items-center gap-3">
-                      <span className="tabular-nums text-ui-sm">
+                      <span className="tabular-nums type-ui-sm">
                         <Money value={row.marketValue} />
                       </span>
                       <ArrowRight
@@ -234,7 +225,7 @@ export function OverviewPage() {
         </Section>
       </div>
 
-      <p className="flex flex-wrap items-center gap-2 text-legal text-muted-foreground">
+      <p className="flex flex-wrap items-center gap-2 type-legal text-muted-foreground">
         <Badge variant="secondary">Next</Badge>
         Prices refresh each evening after the market closes. You can also refresh
         them by hand on any investments page.

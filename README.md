@@ -1,29 +1,119 @@
-# Create T3 App
+# finbro
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Personal investment and expense tracker for `fin.devshub.xyz`. PSX stocks, mutual
+funds, money market funds, savings accounts, monthly expenses and subscriptions —
+in one dashboard, light and dark.
 
-## What's next? How do I make an app with this?
+The plan this was built from lives in [`plan/fin-bro/`](plan/fin-bro/README.md).
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+## Stack
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+Next.js 16 (App Router) · TypeScript · tRPC · Drizzle ORM · PostgreSQL (Neon) ·
+Better Auth · Tailwind CSS v4 · shadcn/ui · Recharts.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## Running it
 
-## Learn More
+```bash
+pnpm install
+cp .env.example .env      # then fill in the values
+pnpm db:migrate
+pnpm dev
+```
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+Open http://localhost:3000 and sign in. There is no sign-up page: accounts are
+created from the command line.
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+| Command | What it does |
+| --- | --- |
+| `pnpm dev` | Development server |
+| `pnpm build` | Production build |
+| `pnpm typecheck` | TypeScript, no emit |
+| `pnpm lint` | ESLint |
+| `pnpm test` | Unit tests for the money maths and date helpers |
+| `pnpm check` | Lint + typecheck |
+| `pnpm db:generate` | Write a migration from `src/server/db/schema.ts` |
+| `pnpm db:migrate` | Apply migrations |
+| `pnpm db:studio` | Browse the database |
+| `pnpm user:create` | Create the owner account |
+| `pnpm seed:demo <email>` | Fill an account with demo data (wipes its data first) |
+| `pnpm rate-limit:clear` | Reset Better Auth's sign-in counters |
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## Environment
 
-## How do I deploy this?
+| Name | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Neon pooled connection string |
+| `BETTER_AUTH_SECRET` | Session signing secret (`openssl rand -base64 32`) |
+| `BETTER_AUTH_URL` | `http://localhost:3000` or `https://fin.devshub.xyz` |
+| `CRON_SECRET` | Guards `/api/cron/daily`; Vercel sends it automatically |
+| `AUTH_ALLOW_SIGNUP` | `true` only while `pnpm user:create` runs |
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Creating the account
+
+```bash
+pnpm user:create
+```
+
+Sign-up is disabled for every other path, so this is the only way in. Running it
+again with an existing email changes nothing.
+
+## Prices
+
+- **Stocks** come from the PSX data portal (`dps.psx.com.pk`). It has no official
+  API; the app reads the company page and falls back to the JSON tick endpoint.
+  If PSX cannot be reached the stored price stays and is marked stale.
+- **Fund and money market NAVs** come from the open MUFAP dataset on GitHub
+  (`saadsalmankhan/pakistan-mutual-funds-data`), updated each business evening.
+- Any price can be entered by hand from the holding's sheet. Manual prices show
+  their date and are replaced by the next successful automatic refresh.
+
+Neither source is a licensed feed; both are used for private, low-volume
+personal tracking and can change without notice.
+
+## The daily job
+
+`GET /api/cron/daily` refreshes prices, writes one net-worth snapshot per asset
+kind, and returns a summary. It requires `Authorization: Bearer $CRON_SECRET`.
+
+`vercel.json` schedules it at `0 18 * * *` UTC — late evening in Pakistan, after
+the PSX close and the fund dataset update. On Vercel's Hobby plan it fires
+somewhere within that hour. Running it twice is safe.
+
+To run it by hand:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" https://fin.devshub.xyz/api/cron/daily
+```
+
+## Deploying
+
+1. Push the repository to GitHub.
+2. In Vercel, import it and add the environment variables above
+   (`BETTER_AUTH_URL=https://fin.devshub.xyz`).
+3. Add `fin.devshub.xyz` as a domain and create the DNS record Vercel shows.
+4. Run the migrations once against the production database:
+   `pnpm db:migrate` with the production `DATABASE_URL`.
+5. Create your account: `pnpm user:create`.
+6. Check that the sign-up endpoint is refused (it should answer
+   `EMAIL_PASSWORD_SIGN_UP_DISABLED`) and that `/api/cron/daily` returns 401
+   without the secret.
+
+## Backups
+
+```bash
+pg_dump "$DATABASE_URL" > finbro-$(date +%F).sql
+```
+
+Neon keeps point-in-time history for a limited window; take a dump now and then
+as well.
+
+## Layout
+
+```
+src/app/            routes: (app) shell pages, (auth) login, api/auth, api/cron
+src/components/     ui (shadcn, themed), shell (sidebar, top bar), shared
+src/features/       investments, savings, expenses, subscriptions, overview, settings
+src/lib/            portfolio maths, dates, formatting, schemas, categories
+src/server/         db, better-auth, tRPC routers, price sources, daily job
+scripts/            create-user, seed-demo, clear-rate-limit
+```

@@ -13,6 +13,8 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { errorMessage } from "~/lib/errors";
+
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { EmptyState } from "~/components/shared/empty-state";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
@@ -73,7 +75,7 @@ export function SubscriptionsPage() {
       toast.success(row.status === "active" ? "Paused." : "Resumed.");
       await utils.subscription.list.invalidate();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     }
   }
 
@@ -87,7 +89,7 @@ export function SubscriptionsPage() {
         utils.overview.get.invalidate(),
       ]);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete.");
+      toast.error(errorMessage(error, "Could not delete."));
     } finally {
       setDeleting(null);
     }
@@ -105,7 +107,7 @@ export function SubscriptionsPage() {
       {isLoading ? (
         <KpiSkeleton count={3} />
       ) : (
-        <KpiGrid>
+        <KpiGrid className="xl:grid-cols-3">
           <KpiCard
             label="Monthly cost"
             value={<Money value={data?.monthlyCost ?? 0} />}
@@ -143,9 +145,9 @@ export function SubscriptionsPage() {
       ) : (
         <div className="overflow-hidden rounded-lg bg-card shadow-soft">
           <div className="flex items-center justify-between px-6 pt-6">
-            <h2 className="text-eyebrow text-muted-foreground">Subscriptions</h2>
+            <h2 className="type-eyebrow text-muted-foreground">Subscriptions</h2>
             {data && data.paidThisMonth > 0 ? (
-              <span className="text-legal text-muted-foreground">
+              <span className="type-legal text-muted-foreground">
                 <Money value={data.paidThisMonth} /> paid this month
               </span>
             ) : null}
@@ -169,7 +171,7 @@ export function SubscriptionsPage() {
                   <TableCell>
                     <div className="flex flex-col gap-0.5">
                       <span className="font-medium text-foreground">{row.name}</span>
-                      <span className="text-legal text-muted-foreground">
+                      <span className="type-legal text-muted-foreground">
                         {row.categoryName}
                         {row.status === "paused" ? " · paused" : ""}
                       </span>

@@ -4,6 +4,8 @@ import { Loader2, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { errorMessage } from "~/lib/errors";
+
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -39,7 +41,7 @@ export function CategoriesSection() {
       toast.success("Category added.");
       await invalidate();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not add.");
+      toast.error(errorMessage(error, "Could not add."));
     }
   }
 
@@ -51,7 +53,7 @@ export function CategoriesSection() {
       toast.success("Category renamed.");
       await invalidate();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not rename.");
+      toast.error(errorMessage(error, "Could not rename."));
     }
   }
 
@@ -62,7 +64,7 @@ export function CategoriesSection() {
       toast.success("Category deleted.");
       await invalidate();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete.");
+      toast.error(errorMessage(error, "Could not delete."));
     } finally {
       setDeleting(null);
     }
@@ -85,7 +87,7 @@ export function CategoriesSection() {
       </form>
 
       {isLoading ? (
-        <p className="flex items-center gap-2 text-ui-sm text-muted-foreground">
+        <p className="flex items-center gap-2 type-ui-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" /> Loading
         </p>
       ) : (
@@ -110,9 +112,9 @@ export function CategoriesSection() {
                   }}
                 />
               ) : (
-                <span className="text-ui-sm">
+                <span className="type-ui-sm">
                   {category.name}
-                  <span className="ml-2 text-legal text-muted-foreground">
+                  <span className="ml-2 type-legal text-muted-foreground">
                     {category.usage} {category.usage === 1 ? "entry" : "entries"}
                   </span>
                 </span>

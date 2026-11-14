@@ -12,6 +12,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { errorMessage } from "~/lib/errors";
+
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { EmptyState } from "~/components/shared/empty-state";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
@@ -71,7 +73,7 @@ export function ExpensesPage() {
         utils.overview.get.invalidate(),
       ]);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete.");
+      toast.error(errorMessage(error, "Could not delete."));
     } finally {
       setDeleting(null);
     }
@@ -89,7 +91,7 @@ export function ExpensesPage() {
           >
             <ChevronLeft />
           </Button>
-          <span className="min-w-36 text-center text-ui-sm">
+          <span className="min-w-36 text-center type-ui-sm">
             {formatMonth(month)}
           </span>
           <Button
@@ -111,7 +113,7 @@ export function ExpensesPage() {
       {summary.isLoading ? (
         <KpiSkeleton count={3} />
       ) : (
-        <KpiGrid>
+        <KpiGrid className="xl:grid-cols-3">
           <KpiCard
             label="Spent this month"
             value={<Money value={summary.data?.total ?? 0} />}
@@ -123,7 +125,7 @@ export function ExpensesPage() {
               <Delta
                 value={summary.data?.difference ?? 0}
                 invert
-                className="text-title"
+                className="type-title"
               />
             }
             footer={<Money value={summary.data?.previousTotal ?? 0} />}
@@ -187,7 +189,7 @@ export function ExpensesPage() {
                     <TableCell>
                       <span className="font-medium text-foreground">{row.title}</span>
                       {row.notes ? (
-                        <span className="block truncate text-legal text-muted-foreground">
+                        <span className="block truncate type-legal text-muted-foreground">
                           {row.notes}
                         </span>
                       ) : null}

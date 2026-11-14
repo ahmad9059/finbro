@@ -42,7 +42,7 @@ export function SavingsPage() {
       {isLoading ? (
         <KpiSkeleton count={3} />
       ) : (
-        <KpiGrid>
+        <KpiGrid className="xl:grid-cols-3">
           <KpiCard
             label="Total balance"
             value={<Money value={totals?.marketValue ?? 0} />}
@@ -76,7 +76,7 @@ export function SavingsPage() {
       ) : (
         <div className="overflow-hidden rounded-lg bg-card shadow-soft">
           <div className="px-6 pt-6">
-            <h2 className="text-eyebrow text-muted-foreground">Accounts</h2>
+            <h2 className="type-eyebrow text-muted-foreground">Accounts</h2>
           </div>
           <Table>
             <TableHeader>
@@ -100,7 +100,7 @@ export function SavingsPage() {
                   <TableCell>
                     <div className="flex flex-col gap-0.5">
                       <span className="font-medium text-foreground">{asset.name}</span>
-                      <span className="text-legal text-muted-foreground">
+                      <span className="type-legal text-muted-foreground">
                         {asset.institution ?? "—"}
                       </span>
                     </div>

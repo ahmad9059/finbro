@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+
+import { errorMessage } from "~/lib/errors";
 import { z } from "zod";
 
 import { Button } from "~/components/ui/button";
@@ -73,6 +75,7 @@ export function AssetDialog({
   const editing = !!asset;
   const isSavings = kind === "savings";
   const isStock = kind === "stock";
+  const unitWord = isStock ? "share" : "unit";
   const utils = api.useUtils();
   const [fund, setFund] = useState<PickedFund | null>(null);
   const [lookingUp, setLookingUp] = useState(false);
@@ -153,7 +156,7 @@ export function AssetDialog({
           id: asset.id,
           ...payload,
           price: values.price ?? null,
-          priceAsOf: values.priceAsOf ?? null,
+          priceAsOf: values.priceAsOf?.trim() ? values.priceAsOf : null,
           priceSource: "manual",
         });
         toast.success("Saved.");
@@ -186,7 +189,7 @@ export function AssetDialog({
           kind,
           ...payload,
           price: values.price ?? null,
-          priceAsOf: values.priceAsOf ?? null,
+          priceAsOf: values.priceAsOf?.trim() ? values.priceAsOf : null,
           priceSource: "manual",
           opening,
         });
@@ -200,7 +203,7 @@ export function AssetDialog({
       ]);
       onOpenChange(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save.");
+      toast.error(errorMessage(error, "Could not save."));
     }
   }
 
@@ -304,12 +307,12 @@ export function AssetDialog({
 
           {!editing && !isSavings ? (
             <fieldset className="flex flex-col gap-4 rounded-md bg-muted/60 p-4">
-              <legend className="px-1 text-eyebrow text-muted-foreground">
+              <legend className="px-1 type-eyebrow text-muted-foreground">
                 First purchase (optional)
               </legend>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
-                  <FieldLabel htmlFor="openingUnits">Number of shares</FieldLabel>
+                  <FieldLabel htmlFor="openingUnits">Number of {unitWord}s</FieldLabel>
                   <Input
                     id="openingUnits"
                     inputMode="decimal"
@@ -317,7 +320,7 @@ export function AssetDialog({
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="openingPrice">Price per share</FieldLabel>
+                  <FieldLabel htmlFor="openingPrice">Price per {unitWord}</FieldLabel>
                   <Input
                     id="openingPrice"
                     inputMode="decimal"

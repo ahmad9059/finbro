@@ -76,8 +76,8 @@ export function AllocationDonut({
           </PieChart>
         </ChartContainer>
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-eyebrow text-muted-foreground">Total</span>
-          <span className="mt-1 text-ui-sm tabular-nums">
+          <span className="type-eyebrow text-muted-foreground">Total</span>
+          <span className="mt-1 type-ui-sm tabular-nums">
             <Money value={total} />
           </span>
         </div>
@@ -85,7 +85,7 @@ export function AllocationDonut({
 
       <ul className="flex w-full flex-col gap-3">
         {data.length === 0 ? (
-          <li className="text-ui-sm text-muted-foreground">Nothing to show yet.</li>
+          <li className="type-ui-sm text-muted-foreground">Nothing to show yet.</li>
         ) : null}
         {data.map((slice) => (
           <li key={slice.kind} className="flex items-center justify-between gap-3">
@@ -95,9 +95,9 @@ export function AllocationDonut({
                 style={{ background: COLORS[slice.kind] }}
                 aria-hidden="true"
               />
-              <span className="truncate text-ui-sm">{LABELS[slice.kind]}</span>
+              <span className="truncate type-ui-sm">{LABELS[slice.kind]}</span>
             </span>
-            <span className="shrink-0 tabular-nums text-legal text-muted-foreground">
+            <span className="shrink-0 tabular-nums type-legal text-muted-foreground">
               <Money value={slice.marketValue} /> ·{" "}
               {formatPercent(slice.share, { signed: false })}
             </span>

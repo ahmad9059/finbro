@@ -4,6 +4,8 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { errorMessage } from "~/lib/errors";
+
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { Money } from "~/components/shared/money";
 import { Button } from "~/components/ui/button";
@@ -52,7 +54,7 @@ export function BalanceSheet({
       ]);
       onClose();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not delete.");
+      toast.error(errorMessage(error, "Could not delete."));
     } finally {
       setConfirm(false);
     }
@@ -81,21 +83,21 @@ export function BalanceSheet({
               <div className="flex flex-col gap-6 px-6 py-6">
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">Balance</dt>
-                    <dd className="mt-1.5 text-title tabular-nums">
+                    <dt className="type-eyebrow text-muted-foreground">Balance</dt>
+                    <dd className="mt-1.5 type-title tabular-nums">
                       <Money value={position.marketValue} />
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       Net deposited
                     </dt>
-                    <dd className="mt-1.5 text-title tabular-nums">
+                    <dd className="mt-1.5 type-title tabular-nums">
                       <Money value={position.cost} />
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-eyebrow text-muted-foreground">
+                    <dt className="type-eyebrow text-muted-foreground">
                       Profit earned
                     </dt>
                     <dd className="mt-1.5 tabular-nums text-gain">

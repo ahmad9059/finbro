@@ -47,6 +47,19 @@ EXPENSES
 Settings
 ```
 
+## Status
+
+Built and working as of 2026-11-14: phases 1–10. `pnpm typecheck`, `pnpm lint`,
+`pnpm test` (31 tests) and `pnpm build` all pass. What differs from the plan as
+written:
+
+| Plan | What was built | Why |
+| --- | --- | --- |
+| T3 scaffold on Next 15 | Next 16, React 19, Zod 4, Drizzle 0.45, Better Auth 1.7 | Upgraded in Phase 1 while the app was empty |
+| Auth from the T3 CLI (Better Auth in the app) | Same: Better Auth runs inside the app, sign-up disabled, owner created by `pnpm user:create` | Neon Auth was offered but you chose the built-in option |
+| `/dev/ui` kitchen-sink page | Not built as a separate route | Every real page was reviewed in both themes instead |
+| Phase 9 "Subscriptions & To Give" | Subscriptions only; money given to someone is a normal expense under "Payments to people" | Your decision on 2026-11-14 |
+
 ## Phases
 
 | # | Phase | Size | Result |
