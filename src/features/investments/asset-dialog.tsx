@@ -27,6 +27,7 @@ import { api } from "~/trpc/react";
 
 import type { PositionsCopy, PositionsKind } from "./config";
 import { FundPicker, type PickedFund } from "./fund-picker";
+import { StockPicker } from "./stock-picker";
 
 const optionalNumber = (min: number, message?: string) =>
   z
@@ -257,15 +258,19 @@ export function AssetDialog({
         >
           {isStock ? (
             <Field data-invalid={!!errors.symbol}>
-              <FieldLabel htmlFor="symbol">PSX symbol</FieldLabel>
-              <Input
-                id="symbol"
-                placeholder="OGDC"
-                className="uppercase"
-                autoComplete="off"
-                autoCapitalize="characters"
-                spellCheck={false}
-                {...register("symbol")}
+              <FieldLabel htmlFor="symbol">Company</FieldLabel>
+              <input type="hidden" {...register("symbol")} />
+              <StockPicker
+                value={
+                  watch("symbol")
+                    ? { symbol: watch("symbol") ?? "", name: watch("name") ?? "" }
+                    : null
+                }
+                onPick={(stock) => {
+                  setValue("symbol", stock.symbol, { shouldValidate: true });
+                  setValue("name", stock.name);
+                  setDebouncedSymbol(stock.symbol);
+                }}
               />
               {lookupStatus ? (
                 <p
@@ -303,16 +308,22 @@ export function AssetDialog({
             </Field>
           ) : null}
 
-          <Field data-invalid={!!errors.name}>
-            <FieldLabel htmlFor="name">{copy.nameLabel}</FieldLabel>
-            <Input
-              id="name"
-              placeholder={copy.namePlaceholder}
-              aria-invalid={!!errors.name}
-              {...register("name")}
-            />
-            <FieldError errors={[errors.name]} />
-          </Field>
+          {isStock ? (
+            // The picker already shows the company; only the fields the server
+            // needs are kept.
+            <input type="hidden" {...register("name")} />
+          ) : (
+            <Field data-invalid={!!errors.name}>
+              <FieldLabel htmlFor="name">{copy.nameLabel}</FieldLabel>
+              <Input
+                id="name"
+                placeholder={copy.namePlaceholder}
+                aria-invalid={!!errors.name}
+                {...register("name")}
+              />
+              <FieldError errors={[errors.name]} />
+            </Field>
+          )}
 
           <div className="grid gap-5 sm:grid-cols-2">
             <Field>

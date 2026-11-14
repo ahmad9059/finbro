@@ -16,6 +16,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "next build && next start",
+    "psx:sync": "tsx scripts/sync-psx-symbols.ts",
     "rate-limit:clear": "tsx --env-file=.env scripts/clear-rate-limit.ts",
     "seed:demo": "tsx --env-file=.env scripts/seed-demo.ts",
     "start": "next start",

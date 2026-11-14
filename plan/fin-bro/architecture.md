@@ -201,7 +201,8 @@ refreshPrices(userId, kind?)
   return { updated, failed: [{asset, reason}] }
 ```
 
-- **Stocks** (`prices/psx.ts`): fetch `dps.psx.com.pk/company/{SYMBOL}`, read `.quote__close` with cheerio. If that fails, try the JSON endpoint `/timeseries/int/{SYMBOL}`. Requests run one at a time with a short pause.
+- **Stocks** (`prices/psx.ts`): fetch `dps.psx.com.pk/company/{SYMBOL}`, read `.quote__close` with cheerio. If that fails, try the JSON endpoint `/timeseries/int/{SYMBOL}`. Requests run one at a time with a short pause, and a successful quote is cached for five minutes.
+- **Search** (`prices/symbols.ts`): a bundled directory of 468 listed companies (`psx-symbols.json`, refreshed with `pnpm psx:sync`), matched on symbol first and then on company-name tokens. No network.
 - **Funds** (`prices/funds.ts`): fund list from `funds.json` (cached for 12 hours); NAV from the last line of `history/{fundId}.ndjson`, falling back to the 2-decimal NAV in `funds.json`.
 - **Manual**: the edit dialog can always set a price by hand. A manual price is overwritten by the next successful automatic refresh.
 - **Refresh button**: calls the same function. The server skips any asset refreshed in the last 10 minutes, so repeated clicks do not hammer the sources.

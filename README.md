@@ -36,6 +36,7 @@ created from the command line.
 | `pnpm db:studio` | Browse the database |
 | `pnpm user:create` | Create the owner account |
 | `pnpm seed:demo <email>` | Fill an account with demo data (wipes its data first) |
+| `pnpm psx:sync` | Refresh the bundled PSX company directory |
 | `pnpm user:delete <email>` | Delete an account and everything it owns |
 | `pnpm rate-limit:clear` | Reset Better Auth's sign-in counters |
 
@@ -63,6 +64,10 @@ again with an existing email changes nothing.
 - **Stocks** come from the PSX data portal (`dps.psx.com.pk`). It has no official
   API; the app reads the company page and falls back to the JSON tick endpoint.
   If PSX cannot be reached the stored price stays and is marked stale.
+- **Stock search** uses a bundled directory of listed companies (symbol, name,
+  sector), refreshed with `pnpm psx:sync` from a CC0 dataset. Searching never
+  touches the network, so the picker opens instantly; typing a symbol or part of
+  a name ranks matches and returns them in a list.
 - **Fund and money market NAVs** come from the open MUFAP dataset on GitHub
   (`saadsalmankhan/pakistan-mutual-funds-data`), updated each business evening.
 - Any price can be entered by hand from the holding's sheet. Manual prices show

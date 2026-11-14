@@ -59,6 +59,26 @@ Notes:
 
 **Decision:** company page first (the one that works), JSON endpoint as fallback, manual price entry always available. If a fetch fails, the old price stays and the UI shows how old it is.
 
+### The stock directory
+
+Searching by company name needs a list of listed companies, which the PSX portal
+does not serve from this network (`/market-watch`, `/symbols`, `/companies` all
+404 or 403). The picker therefore uses a **bundled** directory, refreshed with
+`pnpm psx:sync` from the CC0 dataset "Pakistan Stock Symbols & Company
+Metadata" on Hugging Face: 468 listed symbols with name and sector, updated
+weekly by its author. The JSON is committed, so search works offline and cannot
+break when PSX changes its markup.
+
+### Capital Stake
+
+`https://www.capitalstake.com` offers a REST API (`csapis.com/3.0/market/...`).
+Checked 2026-11-14: every market route answers **403 `unauthorized_request`**
+without a bearer token, and their site redirects `/api/...` to the marketing
+page. It is usable only with an API key issued to an account, it is unofficial,
+and it has no mutual-fund NAVs (MUFAP remains the source for those). Not adopted;
+the price layer is isolated in `src/server/prices/`, so a `capitalstake.ts`
+provider could be added later without touching the rest of the app.
+
 ## 4. Mutual fund and money market NAVs
 
 MUFAP (the funds association) publishes NAVs daily as HTML and has no working public API. Its site is behind Cloudflare.
