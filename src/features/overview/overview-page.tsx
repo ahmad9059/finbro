@@ -11,7 +11,6 @@ import {
   Sparkles,
   Trophy,
   TrendingUp,
-  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -22,12 +21,11 @@ import { errorMessage } from "~/lib/errors";
 import { CompanyLogo } from "~/components/shared/company-logo";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Delta, Money } from "~/components/shared/money";
-import { PageHeader } from "~/components/shared/page-header";
 import { Section } from "~/components/shared/section";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
-import { formatMonth, todayPK } from "~/lib/dates";
+import { currentMonthPK, formatMonth, todayPK } from "~/lib/dates";
 import { formatDate, formatPercent } from "~/lib/format";
 import type { AssetKind } from "~/lib/portfolio";
 import { api } from "~/trpc/react";
@@ -36,6 +34,7 @@ import { useExpenseDialog } from "~/features/expenses/expense-dialog-provider";
 
 import { AllocationDonut } from "./allocation-donut";
 import { NetWorthChart } from "./net-worth-chart";
+import { OverviewBanner } from "./overview-banner";
 import { ValueByKindChart } from "./value-by-kind-chart";
 
 const KIND_PATHS: Record<AssetKind, string> = {
@@ -75,11 +74,20 @@ export function OverviewPage() {
     }
   }
 
+  const bannerShell = "-mx-4 -mt-6 lg:-mx-8 lg:-mt-8";
+
   if (isLoading || !data) {
     return (
       <div className="flex flex-col gap-8">
-        <PageHeader description="Your portfolio and this month, in one place." />
-        <KpiSkeleton />
+        <div className={bannerShell}>
+          <OverviewBanner
+            loading
+            month={formatMonth(currentMonthPK())}
+            netWorth={0}
+            updated={todayPK()}
+          />
+        </div>
+        <KpiSkeleton count={3} />
         <Skeleton className="h-72 w-full" />
       </div>
     );
@@ -88,7 +96,14 @@ export function OverviewPage() {
   if (!data.hasAnything) {
     return (
       <div className="flex flex-col gap-8">
-        <PageHeader description="Your portfolio and this month, in one place." />
+        <div className={bannerShell}>
+          <OverviewBanner
+            month={formatMonth(data.month)}
+            netWorth={0}
+            updated={data.today}
+            onAddExpense={() => open()}
+          />
+        </div>
         <div className="flex flex-col items-center gap-6 rounded-lg bg-tint px-6 py-16 text-center">
           <Sparkles
             className="size-10 text-muted-foreground"
@@ -117,21 +132,16 @@ export function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader description={`${formatMonth(data.month)} · updated ${formatDate(data.today)}`}>
-        <Button variant="secondary" onClick={() => open()}>
-          Add expense
-        </Button>
-      </PageHeader>
-
-      <KpiGrid>
-        <KpiCard
-          label="Net worth"
-          icon={Wallet}
-          hero
-          className="sm:col-span-2"
-          value={<Money value={data.netWorth} />}
-          footer="Everything you hold, added up"
+      <div className={bannerShell}>
+        <OverviewBanner
+          month={formatMonth(data.month)}
+          netWorth={data.netWorth}
+          updated={data.today}
+          onAddExpense={() => open()}
         />
+      </div>
+
+      <KpiGrid className="xl:grid-cols-3">
         <KpiCard
           label="Unrealized"
           icon={TrendingUp}
@@ -146,6 +156,16 @@ export function OverviewPage() {
             <Link href="/expenses" className="text-link hover:underline">
               See the month
             </Link>
+          }
+        />
+        <KpiCard
+          label="Due in 30 days"
+          icon={CalendarClock}
+          value={data.dueIn30Days}
+          footer={
+            data.overdueCount > 0
+              ? `${data.overdueCount} overdue`
+              : "Subscriptions and bills"
           }
         />
       </KpiGrid>
