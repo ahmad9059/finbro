@@ -21,7 +21,8 @@
     "start": "next start",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "user:create": "tsx --env-file=.env scripts/create-user.ts"
+    "user:create": "tsx --env-file=.env scripts/create-user.ts",
+    "user:delete": "tsx --env-file=.env scripts/delete-user.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^7.0.6",

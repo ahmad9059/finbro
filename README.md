@@ -36,6 +36,7 @@ created from the command line.
 | `pnpm db:studio` | Browse the database |
 | `pnpm user:create` | Create the owner account |
 | `pnpm seed:demo <email>` | Fill an account with demo data (wipes its data first) |
+| `pnpm user:delete <email>` | Delete an account and everything it owns |
 | `pnpm rate-limit:clear` | Reset Better Auth's sign-in counters |
 
 ## Environment
@@ -97,6 +98,15 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://fin.devshub.xyz/api/cron/da
 6. Check that the sign-up endpoint is refused (it should answer
    `EMAIL_PASSWORD_SIGN_UP_DISABLED`) and that `/api/cron/daily` returns 401
    without the secret.
+
+## Before you deploy
+
+The local database has a demo account, `dev-tester@finbro.local`, with seeded
+data. It uses a known password, so remove it before the app is public:
+
+```bash
+pnpm user:delete dev-tester@finbro.local
+```
 
 ## Backups
 
