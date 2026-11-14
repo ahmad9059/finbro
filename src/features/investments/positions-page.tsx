@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   ArrowDown,
   ArrowUp,
@@ -11,6 +12,7 @@ import {
   PiggyBank,
   PieChart,
   Plus,
+  Check,
   RefreshCw,
   TrendingUp,
   Wallet,
@@ -71,6 +73,8 @@ export function PositionsPage({
   const [showClosed, setShowClosed] = useState(false);
   const [sort, setSort] = useState<SortKey>("value");
   const refresh = api.price.refresh.useMutation();
+  const [justRefreshed, setJustRefreshed] = useState(false);
+  const reduceMotion = useReducedMotion();
   const autoRefresh = api.price.refresh.useMutation();
   const autoRan = useRef(false);
 
@@ -135,6 +139,10 @@ export function PositionsPage({
       } else {
         toast.success(`${result.updated} price${result.updated === 1 ? "" : "s"} updated.`);
       }
+      if (result.updated > 0) {
+        setJustRefreshed(true);
+        setTimeout(() => setJustRefreshed(false), 1600);
+      }
     } catch (error) {
       toast.error(errorMessage(error, "Could not refresh."));
     }
@@ -150,7 +158,25 @@ export function PositionsPage({
           onClick={() => void onRefresh()}
           disabled={refresh.isPending}
         >
-          <RefreshCw className={refresh.isPending ? "animate-spin" : undefined} />
+          {/* One object changes state: spin, then tick — never a jump cut. */}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={refresh.isPending ? "loading" : justRefreshed ? "done" : "idle"}
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.6 }}
+              transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+              className="inline-flex"
+            >
+              {refresh.isPending ? (
+                <RefreshCw className="animate-spin" />
+              ) : justRefreshed ? (
+                <Check className="text-gain" />
+              ) : (
+                <RefreshCw />
+              )}
+            </motion.span>
+          </AnimatePresence>
           Refresh prices
         </Button>
         <Button onClick={() => setAddOpen(true)}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -27,6 +27,7 @@ function isActive(pathname: string, href: string) {
 
 function NavLink({ item }: { item: NavItem }) {
   const pathname = usePathname();
+  const reduceMotion = useReducedMotion();
   const { setOpenMobile } = useSidebar();
   const active = isActive(pathname, item.href);
 
@@ -44,7 +45,11 @@ function NavLink({ item }: { item: NavItem }) {
               layout="position"
               aria-hidden="true"
               className="absolute inset-y-2.5 left-0 w-[3px] rounded-r-full bg-sidebar-primary"
-              transition={{ type: "spring", stiffness: 520, damping: 42 }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { type: "spring", stiffness: 520, damping: 42 }
+              }
             />
           ) : null}
           <item.icon

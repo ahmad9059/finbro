@@ -286,13 +286,17 @@ lucide, 1.5px stroke. Every navigation item, page title, KPI card label, section
 
 ### Micro-interactions
 
-- Buttons: colour transition 150ms and a 1.5% press scale. No bounce.
-- KPI cards and section titles: a 200ms lift on hover (translate 2px, soft shadow; in dark, a 3% surface lift instead of a shadow), and the card's icon scales 10%.
-- Table rows: 150ms background fill on hover; rows that open a sheet use the pointer cursor.
-- Charts: hover highlights the item and fades the rest, with a tooltip; no entrance animation on page load.
-- Dialogs and sheets: shadcn's 150ms fade and zoom; Escape closes; focus is trapped.
-- Toasts: bottom right, popover surface, 4s, with an Undo action where a write can be reversed.
-- Everything above is disabled under `prefers-reduced-motion`.
+Motion is feedback, never decoration. Only things you can act on move; a card that cannot be clicked has no hover state.
+
+- **Timing tokens** in `globals.css`: `--motion-fast` 120ms, `--motion-base` 180ms, `--motion-slow` 240ms, with `--ease-out` (`cubic-bezier(0.16, 1, 0.3, 1)`) for things arriving and `--ease-press` for the press itself. Nothing on a click response runs longer than 240ms.
+- **Buttons**: the solid action darkens slightly, lifts 1px and gains a soft indigo shadow (light mode only); secondary pills deepen their tint and lift 1px; icon buttons only fill. Every button presses to 97% and settles at 180ms. No bounce.
+- **Navigation**: the active bar is a single element that springs from item to item (Motion `layoutId`, 520/42), and the row icon nudges 2px on hover. Rows themselves use a 200ms fill.
+- **Tables and lists**: 150ms row fill, and row actions fade in on hover or keyboard focus, staying visible on touch screens where hover does not exist.
+- **Inputs and switches**: borders and rings ease in over 200ms; the switch knob travels over 200ms rather than snapping.
+- **Charts**: hover highlights the item and fades its siblings, with a tooltip; no entrance animation on page load.
+- **Dialogs and sheets**: shadcn's fade and zoom, Escape closes, focus is trapped.
+- **Toasts**: bottom right, popover surface, 4s, with an Undo action where a write can be reversed.
+- Everything above is disabled under `prefers-reduced-motion`, including the spring on the navigation bar, which becomes an instant swap.
 
 ### Small pieces
 
