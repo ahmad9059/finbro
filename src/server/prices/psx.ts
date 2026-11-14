@@ -86,10 +86,24 @@ async function get(path: string, extra: Record<string, string> = {}) {
 }
 
 /**
- * Latest price for a PSX symbol. Tries the company page first, then the JSON
- * endpoint. Never throws.
+ * A PSX company page takes about five seconds, so a successful quote is kept
+ * for a few minutes. Typing a symbol letter by letter then costs one fetch,
+ * and the refresh job does not re-fetch a symbol it just read.
  */
+const CACHE_TTL_MS = 5 * 60 * 1000;
+const cache = new Map<string, { at: number; result: PriceResult }>();
+
+/** Latest price for a PSX symbol, from cache when it is fresh. */
 export async function fetchStockPrice(rawSymbol: string): Promise<PriceResult> {
+  const symbol = normalizeSymbol(rawSymbol);
+  const hit = cache.get(symbol);
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.result;
+  const result = await fetchFromPsx(symbol);
+  if (result.ok) cache.set(symbol, { at: Date.now(), result });
+  return result;
+}
+
+async function fetchFromPsx(rawSymbol: string): Promise<PriceResult> {
   const symbol = normalizeSymbol(rawSymbol);
   if (!isValidSymbol(symbol)) return fail("That is not a valid PSX symbol.");
 

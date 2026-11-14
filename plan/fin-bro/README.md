@@ -26,7 +26,7 @@ Small project, T3 Stack, Mercury-style design in light and dark mode.
 | Database | PostgreSQL + Drizzle ORM |
 | Auth | Better Auth, email + password, one user, sign-up disabled |
 | UI | Tailwind CSS v4 + shadcn/ui, themed with Mercury tokens |
-| Charts | Recharts (through the shadcn Chart component) |
+| Charts | MUI X Charts, themed from the Mercury tokens |
 | Forms | react-hook-form + Zod |
 | Other | next-themes, lucide-react, sonner, date-fns, cheerio |
 | Hosting | Vercel + Neon Postgres, one daily cron |
@@ -58,6 +58,7 @@ written:
 | T3 scaffold on Next 15 | Next 16, React 19, Zod 4, Drizzle 0.45, Better Auth 1.7 | Upgraded in Phase 1 while the app was empty |
 | Auth from the T3 CLI (Better Auth in the app) | Same: Better Auth runs inside the app, sign-up disabled, owner created by `pnpm user:create` | Neon Auth was offered but you chose the built-in option |
 | `/dev/ui` kitchen-sink page | Not built as a separate route | Every real page was reviewed in both themes instead |
+| Recharts | MUI X Charts | You asked for the MUI charts library; MUI's reset is not used |
 | Phase 9 "Subscriptions & To Give" | Subscriptions only; money given to someone is a normal expense under "Payments to people" | Your decision on 2026-11-14 |
 
 ## Phases

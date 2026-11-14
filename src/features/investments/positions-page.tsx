@@ -3,22 +3,29 @@
 import {
   ArrowDown,
   ArrowUp,
+  Banknote,
+  BarChart3,
   CandlestickChart,
   CircleAlert,
   Landmark,
+  PiggyBank,
   PieChart,
   Plus,
   RefreshCw,
+  TrendingUp,
+  Wallet,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { errorMessage } from "~/lib/errors";
 
+import { HoldingsChart } from "~/components/charts/holdings-chart";
 import { EmptyState } from "~/components/shared/empty-state";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Delta, Money } from "~/components/shared/money";
 import { PageHeader } from "~/components/shared/page-header";
+import { Section } from "~/components/shared/section";
 import { TableSkeleton } from "~/components/shared/table-skeleton";
 import { Button } from "~/components/ui/button";
 import { Switch } from "~/components/ui/switch";
@@ -157,16 +164,19 @@ export function PositionsPage({
         <KpiGrid>
           <KpiCard
             label="Market value"
+            icon={Wallet}
             value={<Money value={totals?.marketValue ?? 0} />}
             footer={`${totals?.count ?? 0} ${totals?.count === 1 ? "holding" : "holdings"}`}
           />
           <KpiCard
             label="Invested"
+            icon={PiggyBank}
             value={<Money value={totals?.cost ?? 0} />}
             footer="Cost of what you still hold"
           />
           <KpiCard
             label="Unrealized"
+            icon={TrendingUp}
             value={<Delta value={totals?.unrealized ?? 0} />}
             footer={
               totals && totals.cost > 0
@@ -176,6 +186,7 @@ export function PositionsPage({
           />
           <KpiCard
             label="Realized + income"
+            icon={Banknote}
             value={<Money value={(totals?.realized ?? 0) + (totals?.income ?? 0)} />}
             footer="Locked-in gains and dividends"
           />
@@ -312,6 +323,21 @@ export function PositionsPage({
           </Table>
         </div>
       )}
+
+      {rows.length > 1 ? (
+        <Section
+          title="By holding"
+          description="Value of each position, largest first"
+          icon={BarChart3}
+        >
+          <HoldingsChart
+            data={rows.map(({ asset, position }) => ({
+              name: asset.symbol ?? asset.name,
+              value: position.marketValue,
+            }))}
+          />
+        </Section>
+      ) : null}
 
       <AssetDialog
         kind={kind}

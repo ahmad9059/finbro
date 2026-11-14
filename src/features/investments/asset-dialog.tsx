@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { CircleAlert, CircleCheck, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ import { Field, FieldError, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import type { Asset } from "~/server/db/schema";
+import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
 import type { PositionsCopy, PositionsKind } from "./config";
@@ -78,7 +79,9 @@ export function AssetDialog({
   const unitWord = isStock ? "share" : "unit";
   const utils = api.useUtils();
   const [fund, setFund] = useState<PickedFund | null>(null);
-  const [lookingUp, setLookingUp] = useState(false);
+  const [debouncedSymbol, setDebouncedSymbol] = useState("");
+  // Which symbol last filled the name and price, so a miss can clear them.
+  const filledSymbol = useRef<string | null>(null);
 
   const defaults: Values = {
     name: asset?.name ?? "",
@@ -106,31 +109,57 @@ export function AssetDialog({
 
   const create = api.asset.create.useMutation();
   const update = api.asset.update.useMutation();
+
+  // Look the symbol up as it is typed, so there is no button to press.
+  const symbolInput = watch("symbol") ?? "";
+  useEffect(() => {
+    if (!isStock || !open) return;
+    const next = symbolInput.trim().toUpperCase();
+    const timer = setTimeout(() => setDebouncedSymbol(next), 450);
+    return () => clearTimeout(timer);
+  }, [symbolInput, isStock, open]);
+
+  const symbolReady = /^[A-Z0-9]{2,12}$/.test(debouncedSymbol);
   const lookup = api.price.lookupStock.useQuery(
-    { symbol: watch("symbol") ?? "" },
-    { enabled: false, retry: false },
+    { symbol: debouncedSymbol },
+    {
+      enabled: isStock && symbolReady && !editing,
+      retry: false,
+      staleTime: 5 * 60_000,
+    },
   );
 
-  async function onLookup() {
-    const symbol = (watch("symbol") ?? "").trim().toUpperCase();
-    if (!symbol) return;
-    setLookingUp(true);
-    try {
-      const result = await lookup.refetch();
-      const data = result.data;
-      if (!data) return;
-      if (!data.ok) {
-        toast.error(data.reason);
-        return;
-      }
-      setValue("name", data.name ?? symbol);
-      setValue("price", data.price);
-      setValue("priceAsOf", data.asOf);
-      toast.success(`${symbol}: Rs ${data.price}`);
-    } finally {
-      setLookingUp(false);
+  // Fill the name and price the moment a match comes back; clear them again
+  // when the symbol changes to one PSX does not know.
+  useEffect(() => {
+    const result = lookup.data;
+    if (!result) return;
+    if (result.ok) {
+      if (result.name) setValue("name", result.name);
+      setValue("price", result.price);
+      setValue("priceAsOf", result.asOf);
+      filledSymbol.current = debouncedSymbol;
+      return;
     }
-  }
+    if (filledSymbol.current) {
+      setValue("name", "");
+      setValue("price", undefined);
+      setValue("priceAsOf", "");
+      filledSymbol.current = null;
+    }
+  }, [lookup.data, debouncedSymbol, setValue]);
+
+  const lookupStatus = !isStock
+    ? null
+    : !symbolReady
+      ? "Type a symbol; the company and price fill in automatically."
+      : lookup.isFetching
+        ? `Checking ${debouncedSymbol} on PSX…`
+        : lookup.data?.ok
+          ? `${lookup.data.name ?? debouncedSymbol} · Rs ${lookup.data.price.toLocaleString("en-US", { maximumFractionDigits: 2 })}`
+          : lookup.data
+            ? lookup.data.reason
+            : null;
 
   function onPickFund(picked: PickedFund) {
     setFund(picked);
@@ -229,24 +258,36 @@ export function AssetDialog({
           {isStock ? (
             <Field data-invalid={!!errors.symbol}>
               <FieldLabel htmlFor="symbol">PSX symbol</FieldLabel>
-              <div className="flex gap-2">
-                <Input
-                  id="symbol"
-                  placeholder="OGDC"
-                  className="uppercase"
-                  autoComplete="off"
-                  {...register("symbol")}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => void onLookup()}
-                  disabled={lookingUp}
+              <Input
+                id="symbol"
+                placeholder="OGDC"
+                className="uppercase"
+                autoComplete="off"
+                autoCapitalize="characters"
+                spellCheck={false}
+                {...register("symbol")}
+              />
+              {lookupStatus ? (
+                <p
+                  className={cn(
+                    "flex items-center gap-1.5 type-legal",
+                    lookup.data && !lookup.data.ok
+                      ? "text-loss"
+                      : lookup.data?.ok
+                        ? "text-gain"
+                        : "text-muted-foreground",
+                  )}
                 >
-                  {lookingUp ? <Loader2 className="animate-spin" /> : null}
-                  Look up
-                </Button>
-              </div>
+                  {lookup.isFetching ? (
+                    <Loader2 className="size-3 animate-spin" aria-hidden="true" />
+                  ) : lookup.data?.ok ? (
+                    <CircleCheck className="size-3" aria-hidden="true" />
+                  ) : lookup.data ? (
+                    <CircleAlert className="size-3" aria-hidden="true" />
+                  ) : null}
+                  {lookupStatus}
+                </p>
+              ) : null}
               <FieldError errors={[errors.symbol]} />
             </Field>
           ) : null}

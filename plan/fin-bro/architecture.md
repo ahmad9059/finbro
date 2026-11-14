@@ -21,7 +21,7 @@ Browser ──► Next.js (App Router, Vercel)
 | DB | PostgreSQL (Neon) + Drizzle | T3 default; exact `numeric` type for money |
 | Auth | Better Auth, email + password | Offered by the T3 CLI; supports disabling sign-up |
 | Styling | Tailwind v4 + shadcn/ui | CSS-variable theming fits the Mercury light/dark tokens |
-| Charts | Recharts via shadcn Chart | Themed from the same CSS variables |
+| Charts | MUI X Charts | Themed from the same tokens through a small MUI theme bridge |
 | Forms | react-hook-form + Zod | The same Zod schema validates the form and the tRPC input |
 | Tests | Vitest, for the calculation library only | Money math must be right; the rest is checked by hand |
 

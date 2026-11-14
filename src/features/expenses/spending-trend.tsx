@@ -1,19 +1,14 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { BarChart } from "@mui/x-charts/BarChart";
 
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "~/components/ui/chart";
+  ChartTheme,
+  useChartAxis,
+  useChartColors,
+} from "~/components/charts/chart-theme";
 import { formatMonthShort } from "~/lib/dates";
 import { formatPKR } from "~/lib/format";
-
-const config = {
-  total: { label: "Spent", color: "var(--chart-1)" },
-} satisfies ChartConfig;
 
 export type TrendPoint = { month: string; total: number; isCurrent: boolean };
 
@@ -25,47 +20,58 @@ export function SpendingTrend({
   onSelect?: (month: string) => void;
 }) {
   return (
-    <ChartContainer config={config} className="aspect-auto h-[220px] w-full">
-      <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-        <CartesianGrid vertical={false} strokeDasharray="3 3" />
-        <XAxis
-          dataKey="month"
-          tickLine={false}
-          axisLine={false}
-          tickMargin={8}
-          tickFormatter={(value: string) => formatMonthShort(value)}
-        />
-        <YAxis
-          tickLine={false}
-          axisLine={false}
-          width={56}
-          tickFormatter={(value: number) =>
-            value >= 1000 ? `${Math.round(value / 1000)}k` : String(value)
-          }
-        />
-        <ChartTooltip
-          content={
-            <ChartTooltipContent
-              labelFormatter={(_, payload) => {
-                const month = payload?.[0]?.payload as TrendPoint | undefined;
-                return month?.month ?? "";
-              }}
-              formatter={(value) => formatPKR(Number(value))}
-            />
-          }
-        />
-        <Bar
-          dataKey="total"
-          radius={[6, 6, 0, 0]}
-          maxBarSize={44}
-          isAnimationActive={false}
-          onClick={(point) => {
-            const month = (point as unknown as TrendPoint)?.month;
-            if (month && onSelect) onSelect(month);
-          }}
-          className="cursor-pointer"
-        />
-      </BarChart>
-    </ChartContainer>
+    <ChartTheme>
+      <Inner data={data} onSelect={onSelect} />
+    </ChartTheme>
+  );
+}
+
+function Inner({
+  data,
+  onSelect,
+}: {
+  data: TrendPoint[];
+  onSelect?: (month: string) => void;
+}) {
+  const colors = useChartColors();
+  const axis = useChartAxis();
+
+  return (
+    <BarChart
+      height={220}
+      margin={{ top: 8, right: 4, bottom: 4, left: 4 }}
+      hideLegend
+      grid={{ horizontal: true }}
+      borderRadius={6}
+      onItemClick={(_event, item) => {
+        const point = data[item.dataIndex ?? 0];
+        if (point && onSelect) onSelect(point.month);
+      }}
+      series={[
+        {
+          label: "Spent",
+          data: data.map((point) => point.total),
+          color: colors[0],
+          valueFormatter: (value: number | null) => formatPKR(value ?? 0),
+        },
+      ]}
+      xAxis={[
+        {
+          scaleType: "band",
+          data: data.map((point) => point.month),
+          valueFormatter: (month: string) => formatMonthShort(month),
+          ...axis,
+        },
+      ]}
+      yAxis={[
+        {
+          width: 44,
+          valueFormatter: (value: number) =>
+            value >= 1000 ? `${Math.round(value / 1000)}k` : String(value),
+          ...axis,
+        },
+      ]}
+      sx={{ cursor: "pointer", "& .MuiChartsGrid-line": { strokeDasharray: "3 3" } }}
+    />
   );
 }

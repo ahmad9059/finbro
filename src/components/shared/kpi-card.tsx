@@ -1,3 +1,5 @@
+import type { LucideIcon } from "lucide-react";
+
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 
@@ -6,6 +8,7 @@ export function KpiCard({
   label,
   value,
   footer,
+  icon: Icon,
   hero = false,
   className,
 }: {
@@ -13,6 +16,8 @@ export function KpiCard({
   value: React.ReactNode;
   /** Usually a <Delta /> or a short hint. */
   footer?: React.ReactNode;
+  /** A small mark beside the label, so the row reads at a glance. */
+  icon?: LucideIcon;
   /** Use the largest numeral size. One per page at most. */
   hero?: boolean;
   className?: string;
@@ -20,14 +25,24 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "flex min-w-0 flex-col gap-3 rounded-lg bg-tint p-6 text-tint-foreground",
+        "group/kpi flex min-w-0 flex-col gap-3 rounded-lg bg-tint p-6 text-tint-foreground",
+        "transition-[transform,box-shadow,background-color] duration-200 ease-out",
+        "hover:-translate-y-0.5 hover:shadow-soft dark:hover:bg-[color-mix(in_srgb,var(--tint),white_3%)]",
         className,
       )}
     >
-      <p className="type-eyebrow text-muted-foreground">{label}</p>
+      <p className="flex items-center gap-2 type-eyebrow text-muted-foreground">
+        {Icon ? (
+          <Icon
+            className="size-3.5 transition-transform duration-200 group-hover/kpi:scale-110"
+            aria-hidden="true"
+          />
+        ) : null}
+        {label}
+      </p>
       <p
         className={cn(
-          "truncate tabular-nums",
+          "tabular-nums",
           hero ? "type-hero" : "type-title",
         )}
       >

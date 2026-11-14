@@ -1,12 +1,17 @@
 "use client";
 
 import {
+  BarChart3,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
+  PieChart,
   Pencil,
   Plus,
   ReceiptText,
+  Tags,
   Trash2,
+  TrendingUp,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -116,11 +121,13 @@ export function ExpensesPage() {
         <KpiGrid className="xl:grid-cols-3">
           <KpiCard
             label="Spent this month"
+            icon={ReceiptText}
             value={<Money value={summary.data?.total ?? 0} />}
             footer={`${list.data?.length ?? 0} ${list.data?.length === 1 ? "expense" : "expenses"}`}
           />
           <KpiCard
             label="vs last month"
+            icon={TrendingUp}
             value={
               <Delta
                 value={summary.data?.difference ?? 0}
@@ -132,6 +139,7 @@ export function ExpensesPage() {
           />
           <KpiCard
             label="Biggest category"
+            icon={Tags}
             value={biggest ? biggest.name : "—"}
             footer={
               biggest ? (
@@ -151,6 +159,7 @@ export function ExpensesPage() {
         <Section
           title="This month"
           description={formatMonth(month)}
+          icon={CalendarDays}
           flush
         >
           {list.isLoading ? (
@@ -231,10 +240,10 @@ export function ExpensesPage() {
         </Section>
 
         <div className="flex flex-col gap-6">
-          <Section title="Where it went">
+          <Section title="Where it went" icon={PieChart}>
             <CategoryBars data={summary.data?.categories ?? []} />
           </Section>
-          <Section title="Six months">
+          <Section title="Six months" icon={BarChart3}>
             <SpendingTrend
               data={trend.data ?? []}
               onSelect={(next) => goTo(next)}

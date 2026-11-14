@@ -9,7 +9,7 @@ The plan this was built from lives in [`plan/fin-bro/`](plan/fin-bro/README.md).
 ## Stack
 
 Next.js 16 (App Router) · TypeScript · tRPC · Drizzle ORM · PostgreSQL (Neon) ·
-Better Auth · Tailwind CSS v4 · shadcn/ui · Recharts.
+Better Auth · Tailwind CSS v4 · shadcn/ui · MUI X Charts.
 
 ## Running it
 

@@ -258,14 +258,37 @@ Slides in from the right, 480px wide (full width on mobile), radius 16 on the le
 
 The reference's fused email-capture field is a marketing pattern and is not used.
 
+The PSX symbol field looks the company up as you type (450ms debounce, results cached for five minutes on the server). A found symbol fills the name and price and shows a green confirmation line; an unknown one clears them and explains why. There is no "Look up" button to press.
+
 ### Charts
 
-- Recharts through the shadcn Chart wrapper, coloured from `--chart-1…5`.
-- **Allocation donut** (four asset kinds): 2px gaps between segments, total in the centre, and a legend listing name, value and percent beside it. The legend is the accessible version of the chart.
-- **Net-worth line**: one indigo line, soft indigo area fill fading to transparent, no dots except on hover.
-- **Spending by category**: horizontal bars in a single colour (indigo), sorted largest first, each labelled with name and amount. Not a nine-colour pie.
+MUI X Charts (`@mui/x-charts`), wrapped in a small `ChartTheme` bridge that maps the Mercury tokens onto a minimal MUI theme, so axis labels, grid and tooltips inherit the same colours as the rest of the app. MUI's reset is not used.
+
+- One colour per asset kind, held constant across both themes: PSX Stocks indigo, Mutual Funds periwinkle, Money Market violet, Savings neutral. The same four colours drive the donut, the stacked area and the legends.
+- Axis labels `type-legal` in secondary text, horizontal grid only (`3 3` dash), no vertical axis line, no chart border.
+- Tooltips: popover surface, 8px radius, modal shadow; amounts in PKR.
+- Legends are built in HTML beside the chart rather than in the chart, so they can show name, value and share.
+- **Allocation donut**: MUI pie, inner radius 62, 2px gaps, hover fades the other arcs, total in the centre, and a legend listing name, value and percent beside it. The legend is the accessible version of the chart.
+- **Net-worth line**: one indigo line, soft area fill, no dots until hover, five x-axis labels regardless of range.
+- **Spending by category**: CSS bars in a single colour (indigo), sorted largest first, each labelled with name and amount. Not a nine-colour pie.
+- **Value by kind**: stacked area of the daily snapshots, one band per asset kind, with a value legend underneath.
+- **By holding**: horizontal bars of the largest eight positions, symbol or name on the axis.
 - **Six-month spending trend**: vertical bars, the current month in indigo and earlier months in the tint colour.
 - Axis labels in `type-legal`, secondary colour. Grid lines use `--border`, horizontal only. Tooltips use the popover surface.
+
+### Icons
+
+lucide, 1.5px stroke. Every navigation item, page title, KPI card label, section title and empty state carries one; buttons carry one when the action has an obvious mark (plus, pencil, trash, refresh, check). Icons are decorative and `aria-hidden` unless they are the only label, in which case the control gets an `aria-label`.
+
+### Micro-interactions
+
+- Buttons: colour transition 150ms and a 1.5% press scale. No bounce.
+- KPI cards and section titles: a 200ms lift on hover (translate 2px, soft shadow; in dark, a 3% surface lift instead of a shadow), and the card's icon scales 10%.
+- Table rows: 150ms background fill on hover; rows that open a sheet use the pointer cursor.
+- Charts: hover highlights the item and fades the rest, with a tooltip; no entrance animation on page load.
+- Dialogs and sheets: shadcn's 150ms fade and zoom; Escape closes; focus is trapped.
+- Toasts: bottom right, popover surface, 4s, with an Undo action where a write can be reversed.
+- Everything above is disabled under `prefers-reduced-motion`.
 
 ### Small pieces
 

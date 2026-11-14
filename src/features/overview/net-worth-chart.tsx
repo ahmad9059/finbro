@@ -1,28 +1,17 @@
 "use client";
 
+import { LineChart } from "@mui/x-charts/LineChart";
+import { LineChart as LineIcon } from "lucide-react";
 import { useMemo, useState } from "react";
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts";
 
-import { EmptyState } from "~/components/shared/empty-state";
 import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from "~/components/ui/chart";
+  ChartTheme,
+  useChartAxis,
+  useChartColors,
+} from "~/components/charts/chart-theme";
+import { EmptyState } from "~/components/shared/empty-state";
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { formatDate, formatPKR } from "~/lib/format";
-import { LineChart } from "lucide-react";
-
-const config = {
-  value: { label: "Net worth", color: "var(--chart-1)" },
-} satisfies ChartConfig;
 
 const RANGES = ["1M", "3M", "1Y", "All"] as const;
 type Range = (typeof RANGES)[number];
@@ -54,7 +43,7 @@ export function NetWorthChart({
   if (data.length < 2) {
     return (
       <EmptyState
-        icon={LineChart}
+        icon={LineIcon}
         title="Your net-worth history builds up from today. One point is added each evening."
       />
     );
@@ -73,51 +62,57 @@ export function NetWorthChart({
           </TabsList>
         </Tabs>
       </div>
-
-      <ChartContainer config={config} className="aspect-auto h-[240px] w-full">
-        <AreaChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-          <defs>
-            <linearGradient id="networth" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.22} />
-              <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid vertical={false} strokeDasharray="3 3" />
-          <XAxis
-            dataKey="date"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            minTickGap={32}
-            tickFormatter={(value: string) => formatDate(value).slice(0, 6)}
-          />
-          <YAxis
-            tickLine={false}
-            axisLine={false}
-            width={56}
-            tickFormatter={(value: number) =>
-              value >= 1000 ? `${Math.round(value / 1000)}k` : String(value)
-            }
-          />
-          <ChartTooltip
-            content={
-              <ChartTooltipContent
-                formatter={(value) => formatPKR(Number(value))}
-              />
-            }
-          />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke="var(--chart-1)"
-            strokeWidth={2}
-            fill="url(#networth)"
-            dot={false}
-            activeDot={{ r: 4 }}
-            isAnimationActive={false}
-          />
-        </AreaChart>
-      </ChartContainer>
+      <ChartTheme>
+        <Inner points={points} />
+      </ChartTheme>
     </div>
+  );
+}
+
+function Inner({ points }: { points: { date: string; value: number }[] }) {
+  const colors = useChartColors();
+  const axis = useChartAxis();
+
+  return (
+    <LineChart
+      height={240}
+      margin={{ top: 8, right: 8, bottom: 4, left: 4 }}
+      hideLegend
+      grid={{ horizontal: true }}
+      series={[
+        {
+          data: points.map((point) => point.value),
+          label: "Net worth",
+          color: colors[0],
+          area: true,
+          curve: "monotoneX",
+          showMark: false,
+          valueFormatter: (value: number | null) => formatPKR(value ?? 0),
+        },
+      ]}
+      xAxis={[
+        {
+          scaleType: "point",
+          data: points.map((point) => point.date),
+          tickInterval: (_value: string, index: number) =>
+            index % Math.max(1, Math.ceil(points.length / 5)) === 0,
+          valueFormatter: (date: string) => formatDate(date).replace(/ \d{4}$/, ""),
+          ...axis,
+        },
+      ]}
+      yAxis={[
+        {
+          width: 46,
+          valueFormatter: (value: number) =>
+            value >= 1000 ? `${Math.round(value / 1000)}k` : String(value),
+          ...axis,
+        },
+      ]}
+      sx={{
+        "& .MuiLineChart-area": { opacity: 0.18 },
+        "& .MuiChartsGrid-line": { strokeDasharray: "3 3" },
+        "& .MuiLineChart-line": { strokeWidth: 2 },
+      }}
+    />
   );
 }

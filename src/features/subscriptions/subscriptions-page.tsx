@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  CalendarClock,
   Check,
+  CircleDollarSign,
   MoreHorizontal,
   Pause,
   Pencil,
@@ -110,16 +112,19 @@ export function SubscriptionsPage() {
         <KpiGrid className="xl:grid-cols-3">
           <KpiCard
             label="Monthly cost"
+            icon={Repeat}
             value={<Money value={data?.monthlyCost ?? 0} />}
             footer="Yearly plans divided by 12"
           />
           <KpiCard
             label="Yearly cost"
+            icon={CircleDollarSign}
             value={<Money value={data?.yearlyCost ?? 0} />}
             footer="What these add up to in a year"
           />
           <KpiCard
             label="Due this month"
+            icon={CalendarClock}
             value={data?.dueThisMonth ?? 0}
             footer={
               data && data.dueIn30Days > data.dueThisMonth
@@ -145,7 +150,10 @@ export function SubscriptionsPage() {
       ) : (
         <div className="overflow-hidden rounded-lg bg-card shadow-soft">
           <div className="flex items-center justify-between px-6 pt-6">
-            <h2 className="type-eyebrow text-muted-foreground">Subscriptions</h2>
+            <h2 className="flex items-center gap-2 type-eyebrow text-muted-foreground">
+              <Repeat className="size-3.5" aria-hidden="true" />
+              Subscriptions
+            </h2>
             {data && data.paidThisMonth > 0 ? (
               <span className="type-legal text-muted-foreground">
                 <Money value={data.paidThisMonth} /> paid this month

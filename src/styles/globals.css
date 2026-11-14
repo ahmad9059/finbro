@@ -177,58 +177,63 @@
   --elevation-modal: 0 16px 40px rgb(0 0 0 / 0.35);
 }
 
-/* Type scale from plan/fin-bro/design.md */
-@utility type-hero {
-  font-size: clamp(2rem, 1.4rem + 2vw, 2.625rem);
-  line-height: 1.15;
-  font-weight: 480;
-  letter-spacing: 0.42px;
-}
-@utility type-title {
-  font-size: 1.75rem;
-  line-height: 1.2;
-  font-weight: 480;
-  letter-spacing: 0.42px;
-}
-@utility type-lead {
-  font-size: 1.5rem;
-  line-height: 1.2;
-  font-weight: 480;
-  letter-spacing: 0.48px;
-}
-@utility type-body-lg {
-  font-size: 1.125rem;
-  line-height: 1.35;
-  font-weight: 360;
-}
-@utility type-body {
-  font-size: 1rem;
-  line-height: 1.4;
-  font-weight: 400;
-}
-@utility type-ui {
-  font-size: 1rem;
-  line-height: 1;
-  font-weight: 420;
-}
-@utility type-ui-sm {
-  font-size: 0.875rem;
-  line-height: 1.4;
-  font-weight: 420;
-  letter-spacing: 0.07px;
-}
-@utility type-eyebrow {
-  font-size: 0.75rem;
-  line-height: 1;
-  font-weight: 500;
-  letter-spacing: 0.28px;
-  text-transform: uppercase;
-}
-@utility type-legal {
-  font-size: 0.75rem;
-  line-height: 1.4;
-  font-weight: 400;
-  letter-spacing: 0.24px;
+/* Type scale from plan/fin-bro/design.md.
+   These are plain component classes, not `@utility`: static CSS cannot be
+   dropped by a stale build or a content-scan miss, which would take every
+   heading, label and table header with it. */
+@layer components {
+  .type-hero {
+    font-size: clamp(2rem, 1.4rem + 2vw, 2.625rem);
+    line-height: 1.15;
+    font-weight: 480;
+    letter-spacing: 0.42px;
+  }
+  .type-title {
+    font-size: 1.75rem;
+    line-height: 1.2;
+    font-weight: 480;
+    letter-spacing: 0.42px;
+  }
+  .type-lead {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 480;
+    letter-spacing: 0.48px;
+  }
+  .type-body-lg {
+    font-size: 1.125rem;
+    line-height: 1.35;
+    font-weight: 360;
+  }
+  .type-body {
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 400;
+  }
+  .type-ui {
+    font-size: 1rem;
+    line-height: 1;
+    font-weight: 420;
+  }
+  .type-ui-sm {
+    font-size: 0.875rem;
+    line-height: 1.4;
+    font-weight: 420;
+    letter-spacing: 0.07px;
+  }
+  .type-eyebrow {
+    font-size: 0.75rem;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: 0.28px;
+    text-transform: uppercase;
+  }
+  .type-legal {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-weight: 400;
+    letter-spacing: 0.24px;
+  }
 }
 
 @layer base {
@@ -239,7 +244,10 @@
     @apply font-sans;
   }
   body {
-    @apply bg-background text-foreground type-body antialiased;
+    @apply bg-background text-foreground antialiased;
+    font-size: 1rem;
+    line-height: 1.4;
+    font-weight: 400;
     font-optical-sizing: auto;
   }
   button:not(:disabled),

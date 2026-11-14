@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Wallet } from "lucide-react";
+import { Banknote, Landmark, PiggyBank, Plus, Wallet } from "lucide-react";
 import { useState } from "react";
 
 import { EmptyState } from "~/components/shared/empty-state";
@@ -45,16 +45,19 @@ export function SavingsPage() {
         <KpiGrid className="xl:grid-cols-3">
           <KpiCard
             label="Total balance"
+            icon={Wallet}
             value={<Money value={totals?.marketValue ?? 0} />}
             footer={`${totals?.count ?? 0} ${totals?.count === 1 ? "account" : "accounts"}`}
           />
           <KpiCard
             label="Net deposited"
+            icon={PiggyBank}
             value={<Money value={totals?.cost ?? 0} />}
             footer="Deposits minus withdrawals"
           />
           <KpiCard
             label="Profit earned"
+            icon={Banknote}
             value={<Money value={totals?.income ?? 0} />}
             footer="Credited by the banks"
           />
@@ -76,7 +79,10 @@ export function SavingsPage() {
       ) : (
         <div className="overflow-hidden rounded-lg bg-card shadow-soft">
           <div className="px-6 pt-6">
-            <h2 className="type-eyebrow text-muted-foreground">Accounts</h2>
+            <h2 className="flex items-center gap-2 type-eyebrow text-muted-foreground">
+              <Landmark className="size-3.5" aria-hidden="true" />
+              Accounts
+            </h2>
           </div>
           <Table>
             <TableHeader>

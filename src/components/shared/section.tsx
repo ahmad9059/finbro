@@ -1,3 +1,5 @@
+import type { LucideIcon } from "lucide-react";
+
 import { cn } from "~/lib/utils";
 
 /** A titled panel: surface + soft shadow in light, night-raised in dark. */
@@ -5,6 +7,7 @@ export function Section({
   title,
   description,
   action,
+  icon: Icon,
   children,
   className,
   flush = false,
@@ -12,6 +15,8 @@ export function Section({
   title?: string;
   description?: string;
   action?: React.ReactNode;
+  /** A small mark beside the title, to match the KPI row. */
+  icon?: LucideIcon;
   children: React.ReactNode;
   className?: string;
   /** Remove body padding (for tables that run edge to edge). */
@@ -20,14 +25,23 @@ export function Section({
   return (
     <section
       className={cn(
-        "overflow-hidden rounded-lg bg-card text-card-foreground shadow-soft",
+        "group/section overflow-hidden rounded-lg bg-card text-card-foreground shadow-soft",
+        "transition-shadow duration-200",
         className,
       )}
     >
       {title ? (
         <header className="flex items-start justify-between gap-4 px-6 pt-6">
           <div className="flex flex-col gap-1.5">
-            <h2 className="type-eyebrow text-muted-foreground">{title}</h2>
+            <h2 className="flex items-center gap-2 type-eyebrow text-muted-foreground">
+              {Icon ? (
+                <Icon
+                  className="size-3.5 transition-transform duration-200 group-hover/section:scale-110"
+                  aria-hidden="true"
+                />
+              ) : null}
+              {title}
+            </h2>
             {description ? (
               <p className="type-ui-sm font-normal text-muted-foreground">
                 {description}

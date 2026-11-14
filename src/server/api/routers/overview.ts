@@ -46,11 +46,11 @@ export const overviewRouter = createTRPCRouter({
       ctx.db
         .select({
           date: portfolioSnapshot.date,
-          marketValue: sql<string>`sum(${portfolioSnapshot.marketValue})`,
+          kind: portfolioSnapshot.kind,
+          marketValue: portfolioSnapshot.marketValue,
         })
         .from(portfolioSnapshot)
         .where(eq(portfolioSnapshot.userId, userId))
-        .groupBy(portfolioSnapshot.date)
         .orderBy(asc(portfolioSnapshot.date)),
       ctx.db
         .select({
@@ -104,10 +104,13 @@ export const overviewRouter = createTRPCRouter({
         share: summary.byKind[kind].share,
         count: summary.byKind[kind].count,
       })).filter((row) => row.marketValue > 0),
-      snapshots: snapshots.map((row) => ({
-        date: row.date,
-        value: round(Number(row.marketValue)),
-      })),
+      snapshots: totalsByDate(snapshots),
+      byKind: ASSET_KINDS.map((kind) => ({
+        kind,
+        points: snapshots
+          .filter((row) => row.kind === kind)
+          .map((row) => ({ date: row.date, value: round(Number(row.marketValue)) })),
+      })).filter((series) => series.points.some((point) => point.value > 0)),
       upcoming: due.filter((row) => row.nextDueDate <= in30).slice(0, 5),
       topHoldings,
       hasAnything: views.length > 0,
@@ -119,6 +122,19 @@ export const overviewRouter = createTRPCRouter({
     return writeSnapshot(ctx.db, ctx.session.user.id);
   }),
 });
+
+/** Adds the per-kind rows up to one total per day. */
+function totalsByDate(
+  rows: { date: string; kind: string; marketValue: number }[],
+) {
+  const totals = new Map<string, number>();
+  for (const row of rows) {
+    totals.set(row.date, (totals.get(row.date) ?? 0) + Number(row.marketValue));
+  }
+  return [...totals.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, value]) => ({ date, value: round(value) }));
+}
 
 export async function writeSnapshot(
   database: Db,

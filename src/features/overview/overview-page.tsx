@@ -1,6 +1,18 @@
 "use client";
 
-import { ArrowRight, Check, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarClock,
+  Check,
+  Layers,
+  LineChart,
+  PieChart,
+  ReceiptText,
+  Sparkles,
+  Trophy,
+  TrendingUp,
+  Wallet,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -23,6 +35,7 @@ import { useExpenseDialog } from "~/features/expenses/expense-dialog-provider";
 
 import { AllocationDonut } from "./allocation-donut";
 import { NetWorthChart } from "./net-worth-chart";
+import { ValueByKindChart } from "./value-by-kind-chart";
 
 const KIND_PATHS: Record<AssetKind, string> = {
   stock: "/stocks",
@@ -112,6 +125,7 @@ export function OverviewPage() {
       <KpiGrid>
         <KpiCard
           label="Net worth"
+          icon={Wallet}
           hero
           className="sm:col-span-2"
           value={<Money value={data.netWorth} />}
@@ -119,11 +133,13 @@ export function OverviewPage() {
         />
         <KpiCard
           label="Unrealized"
+          icon={TrendingUp}
           value={<Delta value={data.unrealized} />}
           footer={`${formatPercent(data.unrealizedPct)} on what you paid`}
         />
         <KpiCard
           label="Spent this month"
+          icon={ReceiptText}
           value={<Money value={data.spentThisMonth} />}
           footer={
             <Link href="/expenses" className="text-link hover:underline">
@@ -134,16 +150,35 @@ export function OverviewPage() {
       </KpiGrid>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Section title="Allocation" description="Share of your net worth">
+        <Section
+          title="Allocation"
+          description="Share of your net worth"
+          icon={PieChart}
+        >
           <AllocationDonut data={data.allocation} total={data.netWorth} />
         </Section>
-        <Section title="Net worth" description="One point is added each evening">
+        <Section
+          title="Net worth"
+          description="One point is added each evening"
+          icon={LineChart}
+        >
           <NetWorthChart data={data.snapshots} />
         </Section>
       </div>
 
+      {data.byKind.length > 0 ? (
+        <Section
+          title="Value by kind"
+          description="How each part of the portfolio moved"
+          icon={Layers}
+        >
+          <ValueByKindChart series={data.byKind} />
+        </Section>
+      ) : null}
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Section
+          icon={CalendarClock}
           title="Due soon"
           description={
             data.overdueCount > 0
@@ -189,7 +224,11 @@ export function OverviewPage() {
           )}
         </Section>
 
-        <Section title="Top holdings" description="By market value">
+        <Section
+          title="Top holdings"
+          description="By market value"
+          icon={Trophy}
+        >
           {data.topHoldings.length === 0 ? (
             <p className="type-ui-sm text-muted-foreground">
               No investments yet.
