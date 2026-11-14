@@ -1,137 +1,194 @@
-# finbro
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark.svg">
+    <img src="public/logo.svg" alt="finbro" width="280">
+  </picture>
+</p>
 
-Personal investment and expense tracker for `fin.devshub.xyz`. PSX stocks, mutual
-funds, money market funds, savings accounts, monthly expenses and subscriptions —
-in one dashboard, dark by default with a light theme one click away.
+<p align="center">
+  <strong>Your portfolio and your month, in one quiet dashboard.</strong><br>
+  PSX stocks · mutual funds · money market · savings accounts · monthly spending · subscriptions
+</p>
 
-The plan this was built from lives in [`plan/fin-bro/`](plan/fin-bro/README.md).
+<p align="center">
+  <a href="#running-it">Running it</a> ·
+  <a href="#how-prices-work">How prices work</a> ·
+  <a href="#deploying">Deploying</a> ·
+  <a href="plan/fin-bro/README.md">The plan</a>
+</p>
+
+<p align="center">
+  <img alt="Next.js 16" src="https://img.shields.io/badge/Next.js-16-171721?style=flat-square&logo=nextdotjs&logoColor=white">
+  <img alt="React 19" src="https://img.shields.io/badge/React-19-171721?style=flat-square&logo=react&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-171721?style=flat-square&logo=typescript&logoColor=white">
+  <img alt="tRPC" src="https://img.shields.io/badge/tRPC-11-171721?style=flat-square&logo=trpc&logoColor=white">
+  <img alt="Drizzle" src="https://img.shields.io/badge/Drizzle-ORM-171721?style=flat-square">
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-Neon-171721?style=flat-square&logo=postgresql&logoColor=white">
+  <img alt="Better Auth" src="https://img.shields.io/badge/Better_Auth-1.7-171721?style=flat-square">
+  <img alt="Tailwind CSS 4" src="https://img.shields.io/badge/Tailwind-4-171721?style=flat-square&logo=tailwindcss&logoColor=white">
+  <img alt="MUI X Charts" src="https://img.shields.io/badge/MUI_X-Charts-171721?style=flat-square&logo=mui&logoColor=white">
+</p>
+
+---
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/overview-dark.webp">
+    <img src="docs/screenshots/overview-light.webp" alt="Overview in light mode" width="100%">
+  </picture>
+</p>
+
+## Why this exists
+
+Most portfolio trackers are built for US brokerages. This one is built around how
+investing actually looks in Pakistan: PSX settlements, MUFAP fund NAVs that move
+once a day, and a savings account that pays profit instead of interest. It tracks
+what you own and what you spend, and stops there — no advice, no predictions, no
+feed of other people's returns.
+
+The look follows [Mercury's design language](design-reference.md): two surface
+worlds, one indigo action per view, light type, and numbers that line up.
+
+## What it does
+
+| Area | What you get |
+| --- | --- |
+| **Overview** | Net worth, unrealized gain, allocation donut, net-worth history, a stacked "value by kind" chart, what is due in the next 30 days, top holdings |
+| **PSX stocks** | Search the directory by company name or symbol, add holdings, buy/sell/bonus/dividend transactions, average-cost P&L (realized and unrealized), company logos, per-holding value chart |
+| **Mutual funds & money market** | Fund search over 573 MUFAP funds, 4-decimal NAVs, invest by amount or by units, reinvested dividends as bonus units |
+| **Savings accounts** | Balance, net deposited and profit earned, deposits and withdrawals, one-tap reconciliation against your bank app |
+| **Monthly expenses** | `E` opens the add-expense popup anywhere, month switcher in the URL, category breakdown, six-month trend |
+| **Subscriptions** | Monthly or yearly, monthly cost, overdue flags, "Mark paid" records the expense and advances the due date, with Undo |
+| **Settings** | Light/dark/system theme, category management with usage counts, password change |
+
+<details>
+<summary><strong>More screens</strong></summary>
+
+<p align="center">
+  <img src="docs/screenshots/stocks-dark.webp" alt="PSX holdings with company logos" width="49%">
+  <img src="docs/screenshots/expenses-light.webp" alt="Monthly expenses with charts" width="49%">
+</p>
+
+</details>
 
 ## Stack
 
-Next.js 16 (App Router) · TypeScript · tRPC · Drizzle ORM · PostgreSQL (Neon) ·
-Better Auth · Tailwind CSS v4 · shadcn/ui · MUI X Charts.
+| Layer | Choice | Why |
+| --- | --- | --- |
+| Framework | Next.js 16 (App Router), React 19, TypeScript | Server components for the shell, client components for tables and dialogs |
+| API | tRPC v11 + TanStack Query | End-to-end types, no hand-written fetch layer |
+| Database | PostgreSQL (Neon) + Drizzle ORM | Exact `numeric` money columns, SQL-first schema |
+| Auth | Better Auth, email + password | Runs inside the app; sign-up disabled; one owner account |
+| UI | Tailwind CSS v4 + shadcn/ui, Mercury tokens | Two themes from one set of CSS variables |
+| Charts | MUI X Charts | Themed through a small MUI bridge; no MUI reset |
+| Forms | react-hook-form + Zod | One schema validates the form and the API input |
+| Prices | PSX data portal, MUFAP dataset | See below |
 
 ## Running it
 
 ```bash
 pnpm install
-cp .env.example .env      # then fill in the values
-pnpm db:migrate
-pnpm dev
+cp .env.example .env        # fill in the values below
+pnpm db:migrate             # create the tables
+pnpm user:create            # create your account (no sign-up page exists)
+pnpm dev                    # http://localhost:3000
 ```
 
-Open http://localhost:3000 and sign in. There is no sign-up page: accounts are
-created from the command line.
+Node 22+ and pnpm 10+ are expected; the repo was built on Node 26 and pnpm 12.
+
+### Environment
+
+| Name | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Postgres connection string (Neon's pooled URL in production) |
+| `BETTER_AUTH_SECRET` | Session signing secret — `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | `http://localhost:3000` locally, `https://fin.devshub.xyz` in production |
+| `CRON_SECRET` | Guards `/api/cron/daily`; Vercel sends it automatically |
+| `AUTH_ALLOW_SIGNUP` | Set to `true` only while `pnpm user:create` runs |
+
+### Commands
 
 | Command | What it does |
 | --- | --- |
 | `pnpm dev` | Development server |
 | `pnpm build` | Production build |
-| `pnpm typecheck` | TypeScript, no emit |
-| `pnpm lint` | ESLint |
-| `pnpm test` | Unit tests for the money maths and date helpers |
 | `pnpm check` | Lint + typecheck |
+| `pnpm test` | Unit tests for the money maths and date helpers |
 | `pnpm db:generate` | Write a migration from `src/server/db/schema.ts` |
 | `pnpm db:migrate` | Apply migrations |
 | `pnpm db:studio` | Browse the database |
 | `pnpm user:create` | Create the owner account |
+| `pnpm user:delete <email>` | Delete an account and everything it owns |
 | `pnpm seed:demo <email>` | Fill an account with demo data (wipes its data first) |
 | `pnpm psx:sync` | Refresh the bundled PSX company directory |
-| `pnpm user:delete <email>` | Delete an account and everything it owns |
-| `pnpm rate-limit:clear` | Reset Better Auth's sign-in counters |
+| `pnpm rate-limit:clear` | Reset sign-in rate-limit counters |
 
-## Environment
+## How prices work
 
-| Name | Purpose |
-| --- | --- |
-| `DATABASE_URL` | Neon pooled connection string |
-| `BETTER_AUTH_SECRET` | Session signing secret (`openssl rand -base64 32`) |
-| `BETTER_AUTH_URL` | `http://localhost:3000` or `https://fin.devshub.xyz` |
-| `CRON_SECRET` | Guards `/api/cron/daily`; Vercel sends it automatically |
-| `AUTH_ALLOW_SIGNUP` | `true` only while `pnpm user:create` runs |
+There is no official PSX API. Everything is read from the public data portal and
+one open dataset, with the stored price kept when a source fails.
 
-## Creating the account
+| Data | Source | Cadence |
+| --- | --- | --- |
+| Stock quotes | `dps.psx.com.pk/company/{SYMBOL}` (HTML), falling back to `/timeseries/int/{SYMBOL}` | Daily job + first visit to an investments page + the Refresh button; cached 5 minutes |
+| Company directory | Bundled JSON of 468 listed companies (CC0 dataset) | `pnpm psx:sync` |
+| Company logos | The company's own website, read from its PSX page → Google favicon cache → DuckDuckGo → the site's `favicon.ico` | Cached a week (memory, framework data cache, HTTP) |
+| Fund NAVs | [Pakistan mutual funds dataset](https://github.com/saadsalmankhan/pakistan-mutual-funds-data) (MUFAP scrape, 4 decimals) | Daily job, cached 12 hours |
 
-```bash
-pnpm user:create
+The daily job (`/api/cron/daily`, Vercel cron `0 18 * * *` UTC — late evening in
+Pakistan, after the close and after the NAV publish) refreshes prices, records
+one net-worth snapshot per asset kind, and is safe to run twice.
+
+Neither PSX nor the fund dataset is a licensed feed. Both are used here for
+private, low-volume personal tracking and can change without notice; a manual
+price can always be entered from a holding's sheet.
+
+## Data model in one paragraph
+
+An `asset` is a holding or an account (`stock`, `mutual_fund`, `money_market`,
+`savings`). An `asset_txn` is any movement in it — buy, sell, bonus, dividend,
+deposit, withdrawal, profit — and positions are derived, never stored: units,
+average cost, realized and unrealized gain come from a pure function that is
+unit-tested. Expenses reference a category and optionally the subscription that
+created them. `portfolio_snapshot` holds one row per day per asset kind for the
+history charts. Everything is scoped to the signed-in user.
+
+## Project layout
+
 ```
-
-Sign-up is disabled for every other path, so this is the only way in. Running it
-again with an existing email changes nothing.
-
-## Prices
-
-- **Stocks** come from the PSX data portal (`dps.psx.com.pk`). It has no official
-  API; the app reads the company page and falls back to the JSON tick endpoint.
-  If PSX cannot be reached the stored price stays and is marked stale.
-- **Company logos** are read from each company's own website (the host is taken
-  from its PSX page, the image from a favicon service) and cached for a week;
-  companies without one fall back to a monogram.
-- **Stock search** uses a bundled directory of listed companies (symbol, name,
-  sector), refreshed with `pnpm psx:sync` from a CC0 dataset. Searching never
-  touches the network, so the picker opens instantly; typing a symbol or part of
-  a name ranks matches and returns them in a list.
-- **Fund and money market NAVs** come from the open MUFAP dataset on GitHub
-  (`saadsalmankhan/pakistan-mutual-funds-data`), updated each business evening.
-- Any price can be entered by hand from the holding's sheet. Manual prices show
-  their date and are replaced by the next successful automatic refresh.
-
-Neither source is a licensed feed; both are used for private, low-volume
-personal tracking and can change without notice.
-
-## The daily job
-
-`GET /api/cron/daily` refreshes prices, writes one net-worth snapshot per asset
-kind, and returns a summary. It requires `Authorization: Bearer $CRON_SECRET`.
-
-`vercel.json` schedules it at `0 18 * * *` UTC — late evening in Pakistan, after
-the PSX close and the fund dataset update. On Vercel's Hobby plan it fires
-somewhere within that hour. Running it twice is safe.
-
-To run it by hand:
-
-```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://fin.devshub.xyz/api/cron/daily
+src/app/            routes: (app) shell pages, (auth) login, api/auth, api/cron, api/logo
+src/components/     ui (shadcn, themed), shell (sidebar, top bar), shared, charts
+src/features/       investments, savings, expenses, subscriptions, overview, settings
+src/lib/            portfolio maths, dates, formatting, schemas, categories
+src/server/         db, better-auth, tRPC routers, price sources, daily job
+scripts/            create-user, seed-demo, sync-psx-symbols, rate-limit
+docs/screenshots/   README images
+plan/fin-bro/       the research, design system, architecture and phases this was built from
 ```
 
 ## Deploying
 
-1. Push the repository to GitHub.
-2. In Vercel, import it and add the environment variables above
-   (`BETTER_AUTH_URL=https://fin.devshub.xyz`).
-3. Add `fin.devshub.xyz` as a domain and create the DNS record Vercel shows.
-4. Run the migrations once against the production database:
-   `pnpm db:migrate` with the production `DATABASE_URL`.
-5. Create your account: `pnpm user:create`.
-6. Check that the sign-up endpoint is refused (it should answer
-   `EMAIL_PASSWORD_SIGN_UP_DISABLED`) and that `/api/cron/daily` returns 401
-   without the secret.
+1. Push to GitHub, import the repository in Vercel.
+2. Add the environment variables above, with `BETTER_AUTH_URL` set to your domain.
+3. Point the domain at Vercel and wait for the certificate.
+4. Run `pnpm db:migrate` once against the production database.
+5. Create your account with `pnpm user:create`.
+6. Confirm the sign-up endpoint answers `EMAIL_PASSWORD_SIGN_UP_DISABLED`, and
+   that `/api/cron/daily` returns 401 without the secret.
 
-## Before you deploy
+Backups: `pg_dump "$DATABASE_URL" > finbro-$(date +%F).sql`, now and then.
 
-The local database has a demo account, `dev-tester@finbro.local`, with seeded
-data. It uses a known password, so remove it before the app is public:
+## Notes
 
-```bash
-pnpm user:delete dev-tester@finbro.local
-```
+- The app opens in **dark mode** by default; light and system are one click away.
+- The fonts are Inter (variable) at weights 360/420/480 — Mercury's arcadia
+  substitute, and the reason nothing on screen is bold.
+- The demo account used for the screenshots is `dev-tester@finbro.local`; delete
+  it before making the app reachable with `pnpm user:delete`.
+- Company logos are trademarks of their owners, shown only to identify a holding.
 
-## Backups
+## License
 
-```bash
-pg_dump "$DATABASE_URL" > finbro-$(date +%F).sql
-```
-
-Neon keeps point-in-time history for a limited window; take a dump now and then
-as well.
-
-## Layout
-
-```
-src/app/            routes: (app) shell pages, (auth) login, api/auth, api/cron
-src/components/     ui (shadcn, themed), shell (sidebar, top bar), shared
-src/features/       investments, savings, expenses, subscriptions, overview, settings
-src/lib/            portfolio maths, dates, formatting, schemas, categories
-src/server/         db, better-auth, tRPC routers, price sources, daily job
-scripts/            create-user, seed-demo, clear-rate-limit
-```
+Personal project. The code is not licensed for redistribution; the design
+language it follows belongs to [Mercury](https://mercury.com), and the PSX and
+MUFAP data belongs to its publishers.
