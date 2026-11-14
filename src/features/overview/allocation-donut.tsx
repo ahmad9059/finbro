@@ -68,6 +68,7 @@ export function AllocationDonut({
               outerRadius={86}
               paddingAngle={2}
               strokeWidth={0}
+              isAnimationActive={false}
             >
               {data.map((slice) => (
                 <Cell key={slice.kind} fill={COLORS[slice.kind]} />

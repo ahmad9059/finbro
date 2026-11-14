@@ -23,7 +23,7 @@ The shell follows the theme. Mercury brackets its marketing pages in dark, but i
 
 Active navigation is the same in both worlds: a lavender (light) or night-raised (dark) row with a 3px indigo bar on the left edge.
 
-The theme follows the system setting by default, with a toggle in the top bar (`next-themes`, class strategy).
+The app opens in **dark mode** by default, with a toggle in the top bar (`next-themes`, class strategy). Light and System are one click away in the toggle and in Settings.
 
 ## Colour tokens
 

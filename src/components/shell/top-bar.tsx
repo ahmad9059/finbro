@@ -9,7 +9,11 @@ import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 
 /** The shell follows the theme: a white rail by day, night at night. */
-export function TopBar({ user }: { user: { name: string; email: string } }) {
+export function TopBar({
+  user,
+}: {
+  user: { name: string; email: string; image?: string | null };
+}) {
   const pathname = usePathname();
   const title = findNavItem(pathname)?.title ?? "finbro";
 
@@ -20,7 +24,7 @@ export function TopBar({ user }: { user: { name: string; email: string } }) {
         {title}
       </h1>
       <ThemeToggle />
-      <UserMenu name={user.name} email={user.email} />
+      <UserMenu name={user.name} email={user.email} image={user.image} />
     </header>
   );
 }

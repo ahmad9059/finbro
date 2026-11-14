@@ -18,7 +18,11 @@ export default async function AppLayout({
       <AppSidebar />
       <SidebarInset className="min-w-0">
         <TopBar
-          user={{ name: session.user.name, email: session.user.email }}
+          user={{
+            name: session.user.name,
+            email: session.user.email,
+            image: session.user.image,
+          }}
         />
         <div className="flex-1 px-4 py-6 lg:px-8 lg:py-8">
           <div className="mx-auto w-full max-w-[1200px]">

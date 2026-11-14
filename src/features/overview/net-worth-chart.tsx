@@ -114,6 +114,7 @@ export function NetWorthChart({
             fill="url(#networth)"
             dot={false}
             activeDot={{ r: 4 }}
+            isAnimationActive={false}
           />
         </AreaChart>
       </ChartContainer>

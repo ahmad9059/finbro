@@ -2,7 +2,7 @@
 
 Personal investment and expense tracker for `fin.devshub.xyz`. PSX stocks, mutual
 funds, money market funds, savings accounts, monthly expenses and subscriptions —
-in one dashboard, light and dark.
+in one dashboard, dark by default with a light theme one click away.
 
 The plan this was built from lives in [`plan/fin-bro/`](plan/fin-bro/README.md).
 

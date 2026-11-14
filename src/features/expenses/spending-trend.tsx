@@ -58,6 +58,7 @@ export function SpendingTrend({
           dataKey="total"
           radius={[6, 6, 0, 0]}
           maxBarSize={44}
+          isAnimationActive={false}
           onClick={(point) => {
             const month = (point as unknown as TrendPoint)?.month;
             if (month && onSelect) onSelect(month);

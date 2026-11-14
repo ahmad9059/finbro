@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +26,16 @@ function initials(name: string) {
     .join("");
 }
 
-export function UserMenu({ name, email }: { name: string; email: string }) {
+export function UserMenu({
+  name,
+  email,
+  image,
+}: {
+  name: string;
+  email: string;
+  /** A URL from the user record; falls back to public/avatar.jpg. */
+  image?: string | null;
+}) {
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
 
@@ -48,7 +57,8 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
         aria-label="Account menu"
         className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
-        <Avatar className="size-9">
+        <Avatar className="size-9 ring-1 ring-sidebar-border">
+          <AvatarImage src={image ?? "/avatar.jpg"} alt="" className="object-cover" />
           <AvatarFallback className="bg-secondary text-sm font-medium text-secondary-foreground">
             {initials(name) || "?"}
           </AvatarFallback>
