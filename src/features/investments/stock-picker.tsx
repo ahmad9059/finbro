@@ -150,7 +150,8 @@ export function StockPicker({
                     index === active ? "bg-accent" : "hover:bg-accent",
                   )}
                 >
-                  <span className="w-16 shrink-0 font-mono tabular-nums text-ui-sm text-foreground">
+                  <CompanyLogo symbol={stock.symbol} name={stock.name} size={28} />
+                  <span className="w-14 shrink-0 font-mono tabular-nums text-ui-sm text-foreground">
                     {stock.symbol}
                   </span>
                   <span className="min-w-0 flex-1">
