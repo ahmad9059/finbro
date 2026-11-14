@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "~/components/shared/placeholder-page";
+import { OverviewPage } from "~/features/overview/overview-page";
 
 export const metadata: Metadata = { title: "Overview" };
 
 export default function Page() {
-  return <PlaceholderPage href="/" />;
+  return <OverviewPage />;
 }

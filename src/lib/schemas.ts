@@ -60,6 +60,10 @@ export type AssetInput = z.input<typeof assetInput>;
 
 export const assetUpdateInput = assetInput.omit({ kind: true }).extend({
   id: z.number().int(),
+  /** Optional new price. Left alone when null. */
+  price: z.number().positive().nullable(),
+  priceAsOf: isoDate.nullable(),
+  priceSource: z.enum(["auto", "manual"]).nullable(),
 });
 
 export const manualPriceInput = z.object({
@@ -70,33 +74,54 @@ export const manualPriceInput = z.object({
 
 /* ----------------------------- Transactions ------------------------------ */
 
+export const txnShape = {
+  kind: txnKindSchema,
+  date: isoDate,
+  units: positive("the quantity").nullable(),
+  unitPrice: nonNegative.nullable(),
+  amount: nonNegative,
+  fees: nonNegative,
+  notes: optionalText(500),
+};
+
+type TxnValues = {
+  kind: z.infer<typeof txnKindSchema>;
+  amount: number;
+  units: number | null;
+};
+
+export function refineTxn(value: TxnValues, ctx: z.RefinementCtx) {
+  if (txnNeedsUnits(value.kind) && value.units === null) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["units"],
+      message: "Enter the quantity.",
+    });
+  }
+  if (value.kind !== "bonus" && value.amount <= 0) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["amount"],
+      message: "The amount must be more than zero.",
+    });
+  }
+}
+
 export const txnInput = z
-  .object({
-    assetId: z.number().int(),
-    kind: txnKindSchema,
-    date: isoDate,
-    units: positive("the quantity").nullable(),
-    unitPrice: nonNegative.nullable(),
-    amount: nonNegative,
-    fees: nonNegative,
-    notes: optionalText(500),
-  })
-  .superRefine((value, ctx) => {
-    if (txnNeedsUnits(value.kind) && value.units === null) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["units"],
-        message: "Enter the quantity.",
-      });
-    }
-    if (value.kind !== "bonus" && value.amount <= 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["amount"],
-        message: "The amount must be more than zero.",
-      });
-    }
-  });
+  .object({ assetId: z.number().int(), ...txnShape })
+  .superRefine(refineTxn);
+
+/**
+ * The fields of a transaction before it has an asset id. Deliberately not
+ * refined: a checked schema cannot be embedded in `extend`, so `asset.create`
+ * runs `refineTxn` on it itself.
+ */
+export const openingTxnShape = z.object(txnShape);
+
+export const txnUpdateInput = z
+  .object({ id: z.number().int(), assetId: z.number().int(), ...txnShape })
+  .superRefine(refineTxn);
+
 export type TxnInput = z.input<typeof txnInput>;
 
 /* ------------------------------- Expenses -------------------------------- */

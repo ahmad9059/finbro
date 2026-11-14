@@ -9,7 +9,8 @@ import {
   assetKindSchema,
   assetUpdateInput,
   isoDate,
-  txnInput,
+  openingTxnShape,
+  refineTxn,
 } from "~/lib/schemas";
 import {
   getOwnedAsset,
@@ -26,7 +27,7 @@ const createInput = assetInput
     priceAsOf: isoDate.nullable().default(null),
     priceSource: z.enum(["auto", "manual"]).default("manual"),
     /** Optional first transaction, entered together with the asset. */
-    opening: txnInput.omit({ assetId: true }).nullable().default(null),
+    opening: openingTxnShape.nullable().default(null),
   })
   .superRefine((value, ctx) => {
     if (value.kind === "stock" && !value.symbol) {
@@ -36,6 +37,7 @@ const createInput = assetInput
         message: "Enter the PSX symbol.",
       });
     }
+    if (value.opening) refineTxn(value.opening, ctx);
   });
 
 export const assetRouter = createTRPCRouter({
@@ -107,7 +109,7 @@ export const assetRouter = createTRPCRouter({
   update: protectedProcedure
     .input(assetUpdateInput)
     .mutation(async ({ ctx, input }) => {
-      const { id, ...fields } = input;
+      const { id, price, priceAsOf, priceSource, ...fields } = input;
       const existing = await getOwnedAsset(ctx.db, ctx.session.user.id, id);
       if (existing.kind === "stock" && !fields.symbol) {
         throw new TRPCError({
@@ -117,7 +119,16 @@ export const assetRouter = createTRPCRouter({
       }
       await ctx.db
         .update(asset)
-        .set(fields)
+        .set({
+          ...fields,
+          ...(price === null
+            ? {}
+            : {
+                lastPrice: price,
+                priceAsOf: priceAsOf ?? todayPK(),
+                priceSource: priceSource ?? "manual",
+              }),
+        })
         .where(and(eq(asset.id, id), eq(asset.userId, ctx.session.user.id)));
       return { id };
     }),

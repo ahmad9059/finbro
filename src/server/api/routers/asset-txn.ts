@@ -3,7 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { allowedTxnKinds, type Txn } from "~/lib/portfolio";
-import { txnInput } from "~/lib/schemas";
+import { txnInput, txnUpdateInput } from "~/lib/schemas";
 import {
   getOwnedAsset,
   positionOrThrow,
@@ -15,7 +15,7 @@ import { assetTxn } from "~/server/db/schema";
 
 import { normalizeOpening } from "./asset";
 
-const updateInput = txnInput.safeExtend({ id: z.number().int() });
+
 
 async function history(database: DbOrTx, userId: string, assetId: number) {
   return database
@@ -60,7 +60,7 @@ export const assetTxnRouter = createTRPCRouter({
     });
   }),
 
-  update: protectedProcedure.input(updateInput).mutation(async ({ ctx, input }) => {
+  update: protectedProcedure.input(txnUpdateInput).mutation(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
     const { id, ...rest } = input;
     const parent = await getOwnedAsset(ctx.db, userId, input.assetId);

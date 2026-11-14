@@ -8,7 +8,7 @@ import {
   type Position,
   type Txn,
 } from "~/lib/portfolio";
-import { db } from "~/server/db";
+import type { db } from "~/server/db";
 import {
   asset,
   assetTxn,

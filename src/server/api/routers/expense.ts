@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -10,6 +10,7 @@ import {
 } from "~/lib/dates";
 import { expenseInput, isoMonth } from "~/lib/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type { Db } from "~/server/db";
 import { expense, expenseCategory } from "~/server/db/schema";
 
 const round = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
@@ -176,14 +177,11 @@ export const expenseRouter = createTRPCRouter({
     }),
 });
 
-type Db = typeof import("~/server/db").db;
-
-async function assertCategory(db: Db, userId: string, categoryId: number) {
-  const [row] = await db
+async function assertCategory(database: Db, userId: string, categoryId: number) {
+  const [row] = await database
     .select({ id: expenseCategory.id })
     .from(expenseCategory)
     .where(and(eq(expenseCategory.id, categoryId), eq(expenseCategory.userId, userId)))
-    .orderBy(asc(expenseCategory.id))
     .limit(1);
   if (!row) {
     throw new TRPCError({ code: "BAD_REQUEST", message: "Choose a category." });

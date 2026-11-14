@@ -14,6 +14,7 @@ import {
   subscriptionInput,
 } from "~/lib/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type { Db } from "~/server/db";
 import { expense, expenseCategory, subscription } from "~/server/db/schema";
 
 const round = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
@@ -22,8 +23,8 @@ const statusInput = z.object({
   status: z.enum(["active", "paused"]),
 });
 
-async function getOwned(db: typeof import("~/server/db").db, userId: string, id: number) {
-  const [row] = await db
+async function getOwned(database: Db, userId: string, id: number) {
+  const [row] = await database
     .select()
     .from(subscription)
     .where(and(eq(subscription.id, id), eq(subscription.userId, userId)))

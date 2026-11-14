@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "~/components/shared/placeholder-page";
+import { SubscriptionsPage } from "~/features/subscriptions/subscriptions-page";
 
 export const metadata: Metadata = { title: "Subscriptions" };
 
 export default function Page() {
-  return <PlaceholderPage href="/subscriptions" />;
+  return <SubscriptionsPage />;
 }

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lt, lte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, lt, sql } from "drizzle-orm";
 
 import {
   addCycle,
@@ -10,6 +10,7 @@ import {
 import { ASSET_KINDS, summarize } from "~/lib/portfolio";
 import { loadAssetViews } from "~/server/api/helpers";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import type { Db } from "~/server/db";
 import {
   expense,
   expenseCategory,
@@ -120,16 +121,16 @@ export const overviewRouter = createTRPCRouter({
 });
 
 export async function writeSnapshot(
-  db: typeof import("~/server/db").db,
+  database: Db,
   userId: string,
   date = todayPK(),
 ) {
-  const views = await loadAssetViews(db, userId);
+  const views = await loadAssetViews(database, userId);
   const summary = summarize(
     views.map(({ asset: a, position }) => ({ kind: a.kind, position })),
   );
 
-  await db.transaction(async (tx) => {
+  await database.transaction(async (tx) => {
     for (const kind of ASSET_KINDS) {
       const totals = summary.byKind[kind];
       await tx

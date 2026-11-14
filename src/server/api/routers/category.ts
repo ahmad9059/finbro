@@ -5,10 +5,8 @@ import { z } from "zod";
 import { DEFAULT_CATEGORIES } from "~/lib/categories";
 import { categoryInput } from "~/lib/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { db } from "~/server/db";
+import type { Db } from "~/server/db";
 import { expense, expenseCategory, subscription } from "~/server/db/schema";
-
-type Db = typeof db;
 
 /** Inserts any default category the user does not have yet. Safe to repeat. */
 export async function ensureDefaultCategories(database: Db, userId: string) {
