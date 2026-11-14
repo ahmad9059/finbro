@@ -122,6 +122,16 @@
   --sidebar-border: rgb(195 195 204 / 0.6);
   --sidebar-ring: #5266eb;
 
+  /* Motion: short, purposeful, and easings tuned per direction. */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-press: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-primary: 0 8px 20px -12px rgb(82 102 235 / 0.55);
+
   --elevation-soft:
     0 1px 2px rgb(40 37 59 / 0.04), 0 6px 16px rgb(40 37 59 / 0.05);
   --elevation-modal:
@@ -172,6 +182,16 @@
   --sidebar-primary-foreground: #ffffff;
   --sidebar-border: rgb(112 112 125 / 0.3);
   --sidebar-ring: #5266eb;
+
+  /* Motion: short, purposeful, and easings tuned per direction. */
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-slow: 240ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-press: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --shadow-primary: 0 8px 20px -12px rgb(82 102 235 / 0.55);
 
   --elevation-soft: 0 0 #0000;
   --elevation-modal: 0 16px 40px rgb(0 0 0 / 0.35);

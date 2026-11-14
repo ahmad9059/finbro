@@ -240,10 +240,15 @@ export function OverviewPage() {
                 <li key={row.id} className="py-3 first:pt-0 last:pb-0">
                   <Link
                     href={KIND_PATHS[row.kind]}
-                    className="flex items-center justify-between gap-3 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="group/top flex items-center justify-between gap-3 rounded-md outline-none transition-colors duration-150 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="flex min-w-0 items-center gap-3">
-                      <CompanyLogo symbol={row.symbol} name={row.name} size={28} />
+                      <CompanyLogo
+                        symbol={row.symbol}
+                        institution={row.institution}
+                        name={row.name}
+                        size={28}
+                      />
                       <span className="min-w-0">
                         <span className="block truncate type-ui-sm">{row.name}</span>
                         <span className="type-legal text-muted-foreground">
@@ -256,7 +261,7 @@ export function OverviewPage() {
                         <Money value={row.marketValue} />
                       </span>
                       <ArrowRight
-                        className="size-4 text-muted-foreground"
+                        className="size-4 text-muted-foreground transition-transform duration-200 ease-[var(--ease-out)] group-hover/top:translate-x-0.5"
                         aria-hidden="true"
                       />
                     </span>

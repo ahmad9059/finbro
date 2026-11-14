@@ -4,13 +4,14 @@ import { cn } from "cn"
 import { Slot } from "radix-ui"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-150 outline-none select-none active:scale-[0.985] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-full border border-transparent bg-clip-padding font-medium whitespace-nowrap transition-[background-color,color,box-shadow,transform] duration-[var(--motion-base)] ease-[var(--ease-out)] outline-none select-none active:scale-[0.97] focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default:
+          "bg-primary text-primary-foreground hover:-translate-y-px hover:bg-primary/92 hover:shadow-[var(--shadow-primary)] active:translate-y-0 dark:hover:shadow-none",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_srgb,var(--secondary),var(--foreground)_8%)] aria-expanded:bg-[color-mix(in_srgb,var(--secondary),var(--foreground)_8%)]",
+          "bg-secondary text-secondary-foreground hover:-translate-y-px hover:bg-[color-mix(in_srgb,var(--secondary),var(--foreground)_9%)] active:translate-y-0 aria-expanded:bg-[color-mix(in_srgb,var(--secondary),var(--foreground)_9%)]",
         ghost:
           "text-foreground hover:bg-accent hover:text-accent-foreground aria-expanded:bg-accent",
         destructive:

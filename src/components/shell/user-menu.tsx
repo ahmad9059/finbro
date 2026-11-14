@@ -55,7 +55,7 @@ export function UserMenu({
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Account menu"
-        className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        className="rounded-full outline-none transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:ring-2 hover:ring-ring/40 hover:ring-offset-2 hover:ring-offset-background"
       >
         <Avatar className="size-9 ring-1 ring-sidebar-border">
           <AvatarImage src={image ?? "/avatar.jpg"} alt="" className="object-cover" />

@@ -25,8 +25,7 @@ export function Section({
   return (
     <section
       className={cn(
-        "group/section overflow-hidden rounded-lg bg-card text-card-foreground shadow-soft",
-        "transition-shadow duration-200",
+        "overflow-hidden rounded-lg bg-card text-card-foreground shadow-soft",
         className,
       )}
     >
@@ -36,7 +35,7 @@ export function Section({
             <h2 className="flex items-center gap-2 type-eyebrow text-muted-foreground">
               {Icon ? (
                 <Icon
-                  className="size-3.5 transition-transform duration-200 group-hover/section:scale-110"
+                  className="size-3.5"
                   aria-hidden="true"
                 />
               ) : null}

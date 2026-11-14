@@ -8,6 +8,7 @@ import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Money } from "~/components/shared/money";
 import { PageHeader } from "~/components/shared/page-header";
 import { TableSkeleton } from "~/components/shared/table-skeleton";
+import { CompanyLogo } from "~/components/shared/company-logo";
 import { Button } from "~/components/ui/button";
 import {
   Table,
@@ -104,11 +105,16 @@ export function SavingsPage() {
                   onClick={() => setOpenId(asset.id)}
                 >
                   <TableCell>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-medium text-foreground">{asset.name}</span>
-                      <span className="type-legal text-muted-foreground">
-                        {asset.institution ?? "—"}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <CompanyLogo institution={asset.institution} name={asset.name} />
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="truncate font-medium text-foreground">
+                          {asset.name}
+                        </span>
+                        <span className="truncate type-legal text-muted-foreground">
+                          {asset.institution ?? "—"}
+                        </span>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="hidden text-right tabular-nums sm:table-cell">

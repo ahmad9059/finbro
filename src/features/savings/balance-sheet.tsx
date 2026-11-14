@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { errorMessage } from "~/lib/errors";
 
+import { CompanyLogo } from "~/components/shared/company-logo";
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { Money } from "~/components/shared/money";
 import { Button } from "~/components/ui/button";
@@ -73,7 +74,14 @@ export function BalanceSheet({
           ) : (
             <>
               <SheetHeader className="gap-1 border-b pb-6">
-                <SheetTitle className="pr-10">{asset.name}</SheetTitle>
+                <div className="flex items-center gap-3 pr-10">
+                  <CompanyLogo
+                    institution={asset.institution}
+                    name={asset.name}
+                    size={40}
+                  />
+                  <SheetTitle className="min-w-0 truncate">{asset.name}</SheetTitle>
+                </div>
                 <SheetDescription>
                   {asset.institution ?? "Savings account"}
                   {asset.profitRate === null ? "" : ` · ${asset.profitRate}% a year`}

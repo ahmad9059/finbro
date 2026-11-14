@@ -278,7 +278,7 @@ MUI X Charts (`@mui/x-charts`), wrapped in a small `ChartTheme` bridge that maps
 
 ### Company logos
 
-Holdings show the company mark beside the name: a 32px (40px in the detail sheet, 28px in lists) white disc with a hairline ring, the mark inset 15%. Logos are fetched through `/api/logo/{symbol}` and cached for a week; until one arrives — or when a company has none — a tinted monogram with the company's initials sits underneath, so a row never shows an empty ring. Mutual funds and savings accounts always use the monogram, since they have no company mark.
+Holdings show the company mark beside the name: a 32px (40px in the detail sheet, 28px in lists) white disc with a hairline ring, the mark inset 15%. Logos are fetched through `/api/logo/{symbol}` for stocks and `/api/logo/institution/{name}` for the bank or asset manager behind a fund or savings account — a committed map of 25 AMCs and 30 banks decides the host, so no arbitrary domain is ever fetched. Both are cached for a week; until one arrives — or when an institution has none — a tinted monogram with its initials sits underneath, so a row never shows an empty ring.
 
 ### Icons
 

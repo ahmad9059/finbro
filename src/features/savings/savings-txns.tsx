@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { errorMessage } from "~/lib/errors";
 
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
+import { REVEAL } from "~/components/shared/reveal";
 import { Money } from "~/components/shared/money";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -80,7 +81,10 @@ export function SavingsTransactions({
       ) : (
         <ul className="divide-y">
           {data?.txns.map((txn) => (
-            <li key={txn.id} className="flex items-center justify-between gap-3 py-3">
+            <li
+              key={txn.id}
+              className="group/row flex items-center justify-between gap-3 py-3"
+            >
               <div className="min-w-0">
                 <p className="flex items-center gap-2 type-ui-sm">
                   <Badge variant="secondary">
@@ -104,6 +108,7 @@ export function SavingsTransactions({
                 >
                   <Money value={txn.kind === "withdrawal" ? -txn.amount : txn.amount} />
                 </span>
+                <span className={`flex gap-1 ${REVEAL}`}>
                 <Button
                   size="icon-sm"
                   variant="ghost"
@@ -123,6 +128,7 @@ export function SavingsTransactions({
                 >
                   <Trash2 />
                 </Button>
+                </span>
               </div>
             </li>
           ))}

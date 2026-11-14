@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { errorMessage } from "~/lib/errors";
 
 import { CompanyLogo } from "~/components/shared/company-logo";
+import { REVEAL } from "~/components/shared/reveal";
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { Delta, Money } from "~/components/shared/money";
 import { Badge } from "~/components/ui/badge";
@@ -121,7 +122,12 @@ export function HoldingSheet({
             <>
               <SheetHeader className="gap-1 border-b pb-6">
                 <div className="flex items-center gap-3 pr-10">
-                  <CompanyLogo symbol={asset.symbol} name={asset.name} size={40} />
+                  <CompanyLogo
+                    symbol={asset.symbol}
+                    institution={asset.institution}
+                    name={asset.name}
+                    size={40}
+                  />
                   <SheetTitle className="min-w-0 truncate">{asset.name}</SheetTitle>
                 </div>
                 <SheetDescription className="flex flex-wrap items-center gap-2">
@@ -218,7 +224,7 @@ export function HoldingSheet({
                       {data.txns.map((txn) => (
                         <li
                           key={txn.id}
-                          className="flex items-center justify-between gap-3 py-3"
+                          className="group/row flex items-center justify-between gap-3 py-3"
                         >
                           <div className="min-w-0">
                             <p className="flex items-center gap-2 type-ui-sm">
@@ -240,6 +246,7 @@ export function HoldingSheet({
                             <span className="tabular-nums type-ui-sm">
                               <Money value={txn.amount} />
                             </span>
+                            <span className={`flex gap-1 ${REVEAL}`}>
                             <Button
                               size="icon-sm"
                               variant="ghost"
@@ -259,6 +266,7 @@ export function HoldingSheet({
                             >
                               <Trash2 />
                             </Button>
+                            </span>
                           </div>
                         </li>
                       ))}

@@ -25,6 +25,7 @@ import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Delta, Money } from "~/components/shared/money";
 import { PageHeader } from "~/components/shared/page-header";
 import { Section } from "~/components/shared/section";
+import { REVEAL } from "~/components/shared/reveal";
 import { TableSkeleton } from "~/components/shared/table-skeleton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -213,7 +214,7 @@ export function ExpensesPage() {
                       <Money value={row.amount} decimals={2} />
                     </TableCell>
                     <TableCell>
-                      <div className="flex justify-end gap-1">
+                      <div className={`flex justify-end gap-1 ${REVEAL}`}>
                         <Button
                           size="icon-sm"
                           variant="ghost"

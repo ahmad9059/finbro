@@ -25,16 +25,14 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "group/kpi flex min-w-0 flex-col gap-3 rounded-lg bg-tint p-6 text-tint-foreground",
-        "transition-[transform,box-shadow,background-color] duration-200 ease-out",
-        "hover:-translate-y-0.5 hover:shadow-soft dark:hover:bg-[color-mix(in_srgb,var(--tint),white_3%)]",
+        "flex min-w-0 flex-col gap-3 rounded-lg bg-tint p-6 text-tint-foreground",
         className,
       )}
     >
       <p className="flex items-center gap-2 type-eyebrow text-muted-foreground">
         {Icon ? (
           <Icon
-            className="size-3.5 transition-transform duration-200 group-hover/kpi:scale-110"
+            className="size-3.5"
             aria-hidden="true"
           />
         ) : null}

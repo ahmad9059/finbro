@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -37,7 +38,19 @@ function NavLink({ item }: { item: NavItem }) {
           aria-current={active ? "page" : undefined}
           onClick={() => setOpenMobile(false)}
         >
-          <item.icon strokeWidth={1.5} />
+          {active ? (
+            <motion.span
+              layoutId="sidebar-active"
+              layout="position"
+              aria-hidden="true"
+              className="absolute inset-y-2.5 left-0 w-[3px] rounded-r-full bg-sidebar-primary"
+              transition={{ type: "spring", stiffness: 520, damping: 42 }}
+            />
+          ) : null}
+          <item.icon
+            strokeWidth={1.5}
+            className="transition-transform duration-200 ease-[var(--ease-out)] group-hover/menu-button:translate-x-0.5"
+          />
           <span>{item.title}</span>
         </Link>
       </SidebarMenuButton>

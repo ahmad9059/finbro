@@ -55,7 +55,7 @@ worlds, one indigo action per view, light type, and numbers that line up.
 | --- | --- |
 | **Overview** | Net worth, unrealized gain, allocation donut, net-worth history, a stacked "value by kind" chart, what is due in the next 30 days, top holdings |
 | **PSX stocks** | Search every listed equity and ETF by company name or symbol, add holdings, buy/sell/bonus/dividend transactions, average-cost P&L (realized and unrealized), company logos, per-holding value chart |
-| **Mutual funds & money market** | Fund search over 573 MUFAP funds, 4-decimal NAVs, invest by amount or by units, reinvested dividends as bonus units |
+| **Mutual funds & money market** | Fund search over 573 MUFAP funds with the AMC's mark, 4-decimal NAVs, invest by amount or by units, reinvested dividends as bonus units |
 | **Savings accounts** | Balance, net deposited and profit earned, deposits and withdrawals, one-tap reconciliation against your bank app |
 | **Monthly expenses** | `E` opens the add-expense popup anywhere, month switcher in the URL, category breakdown, six-month trend |
 | **Subscriptions** | Monthly or yearly, monthly cost, overdue flags, "Mark paid" records the expense and advances the due date, with Undo |
@@ -132,7 +132,7 @@ one open dataset, with the stored price kept when a source fails.
 | --- | --- | --- |
 | Stock quotes | `dps.psx.com.pk/company/{SYMBOL}` (HTML), falling back to `/timeseries/int/{SYMBOL}` | Daily job + first visit to an investments page + the Refresh button; cached 5 minutes |
 | Company directory | Bundled JSON of 617 symbols — every equity and ETF on the Exchange's own listing, names enriched from a CC0 dataset | `pnpm psx:sync` (`--all` also names the long tail) |
-| Company logos | The company's own website, read from its PSX page → Google favicon cache → DuckDuckGo → the site's `favicon.ico` | Cached a week (memory, framework data cache, HTTP) |
+| Company logos | The company's own website, read from its PSX page, or the bank/AMC behind a fund from a committed map → Google favicon cache → DuckDuckGo → the site's `favicon.ico` | Cached a week (memory + HTTP) |
 | Fund NAVs | [Pakistan mutual funds dataset](https://github.com/saadsalmankhan/pakistan-mutual-funds-data) (MUFAP scrape, 4 decimals) | Daily job, cached 12 hours |
 
 The daily job (`/api/cron/daily`, Vercel cron `0 18 * * *` UTC — late evening in

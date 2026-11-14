@@ -3,6 +3,7 @@
 import { Check, Loader2, Search } from "lucide-react";
 import { useState } from "react";
 
+import { CompanyLogo } from "~/components/shared/company-logo";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -84,6 +85,7 @@ export function FundPicker({
                 }}
                 className="flex w-full items-start gap-2 rounded-md px-3 py-2 text-left hover:bg-accent"
               >
+                <CompanyLogo institution={fund.amc} name={fund.amc} size={28} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate type-ui-sm text-foreground">
                     {fund.name}

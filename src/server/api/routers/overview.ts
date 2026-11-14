@@ -76,6 +76,7 @@ export const overviewRouter = createTRPCRouter({
         name: a.name,
         kind: a.kind,
         symbol: a.symbol,
+        institution: a.institution,
         marketValue: position.marketValue,
         unrealized: position.unrealized,
         unrealizedPct: position.unrealizedPct,

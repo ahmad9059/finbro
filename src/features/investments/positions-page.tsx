@@ -275,7 +275,11 @@ export function PositionsPage({
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <CompanyLogo symbol={asset.symbol} name={asset.name} />
+                      <CompanyLogo
+                        symbol={asset.symbol}
+                        institution={asset.institution}
+                        name={asset.name}
+                      />
                       <div className="flex min-w-0 flex-col gap-0.5">
                         <span className="truncate font-medium text-foreground">
                           {asset.name}

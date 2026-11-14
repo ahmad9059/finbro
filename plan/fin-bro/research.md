@@ -95,8 +95,17 @@ to find a mark:
 | `https://{host}/favicon.ico`, `/apple-touch-icon.png` | Works where the site allows bots (ubldigital.com, lucky-cement.com); some sites answer 403 |
 
 The route tries all three in order and treats Google's 16px globe as "no logo"
-by reading the PNG header. Logos are trademarks of their owners and are shown
-here only as identification for a private dashboard.
+by reading the PNG header. Some sites only answer with a browser agent, so the
+fetch sends one; Google's cache can return a 200 HTML page for a missing icon,
+so nothing upstream is cached by the framework, only successfully decoded
+images are kept.
+
+Funds and savings accounts have no ticker, so their mark comes from the bank or
+asset manager: `institutions.json` maps 25 AMCs and 30 banks by keyword
+("ubl fund" before "ubl", "al meezan" before "meezan") to a hostname. 21 of the
+25 AMCs and every major bank resolve to a real mark; the rest fall back to a
+monogram. Logos are trademarks of their owners and are shown here only as
+identification for a private dashboard.
 
 ### Capital Stake
 

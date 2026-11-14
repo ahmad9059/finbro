@@ -31,11 +31,15 @@ function initials(name: string) {
  */
 export function CompanyLogo({
   symbol,
+  institution,
   name,
   size = 32,
   className,
 }: {
-  symbol: string | null;
+  /** A PSX ticker. Takes precedence over `institution`. */
+  symbol?: string | null;
+  /** The bank or asset manager behind a fund or savings account. */
+  institution?: string | null;
   name: string;
   /** Edge length in pixels. */
   size?: number;
@@ -43,6 +47,12 @@ export function CompanyLogo({
 }) {
   const [failed, setFailed] = useState(false);
   const [loaded, setLoaded] = useState(false);
+
+  const source = symbol
+    ? `/api/logo/${encodeURIComponent(symbol)}`
+    : institution
+      ? `/api/logo/institution/${encodeURIComponent(institution)}`
+      : null;
   const tint =
     TINTS[
       [...(symbol ?? name)].reduce((sum, char) => sum + char.charCodeAt(0), 0) %
@@ -70,9 +80,9 @@ export function CompanyLogo({
       >
         {initials(name)}
       </span>
-      {symbol && !failed ? (
+      {source && !failed ? (
         <img
-          src={`/api/logo/${encodeURIComponent(symbol)}`}
+          src={source}
           alt=""
           width={size}
           height={size}
