@@ -3,6 +3,7 @@
 import { Check, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { CompanyLogo } from "~/components/shared/company-logo";
 import { Input } from "~/components/ui/input";
 import {
   Popover,

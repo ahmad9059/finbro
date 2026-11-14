@@ -8,13 +8,18 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { asset } from "~/server/db/schema";
 import { searchFunds } from "~/server/prices/funds";
 import { searchPsxSymbols } from "~/server/prices/symbols";
+import { rememberCompany } from "~/server/prices/companies";
 import { fetchStockPrice } from "~/server/prices/psx";
 import { refreshPrices } from "~/server/prices/refresh";
 
 export const priceRouter = createTRPCRouter({
   lookupStock: protectedProcedure
     .input(z.object({ symbol: z.string().min(1).max(20) }))
-    .query(async ({ input }) => fetchStockPrice(input.symbol)),
+    .query(async ({ input }) => {
+      const result = await fetchStockPrice(input.symbol);
+      if (result.ok) await rememberCompany(input.symbol, result);
+      return result;
+    }),
 
   /** Listed companies, matched on symbol or name. Runs from a bundled list. */
   searchStocks: protectedProcedure

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { errorMessage } from "~/lib/errors";
 
+import { CompanyLogo } from "~/components/shared/company-logo";
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { Delta, Money } from "~/components/shared/money";
 import { Badge } from "~/components/ui/badge";
@@ -119,7 +120,10 @@ export function HoldingSheet({
           ) : (
             <>
               <SheetHeader className="gap-1 border-b pb-6">
-                <SheetTitle className="pr-10">{asset.name}</SheetTitle>
+                <div className="flex items-center gap-3 pr-10">
+                  <CompanyLogo symbol={asset.symbol} name={asset.name} size={40} />
+                  <SheetTitle className="min-w-0 truncate">{asset.name}</SheetTitle>
+                </div>
                 <SheetDescription className="flex flex-wrap items-center gap-2">
                   {asset.symbol ? <span>{asset.symbol}</span> : null}
                   {asset.institution ? <span>· {asset.institution}</span> : null}

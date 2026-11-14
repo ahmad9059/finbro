@@ -53,12 +53,26 @@ export function parseCompanyPage(html: string): PriceResult {
   }
   const name = $(".quote__name").first().clone().children().remove().end().text().trim();
   const category = $(".quote__sector span").first().text().trim();
+
+  // The company profile links to the company's own site. The markup is not
+  // consistent (it usually sits under ADDRESS, sometimes under WEBSITE), so
+  // take the first external link in the profile that is not social or PSX.
+  const IGNORED_LINK =
+    /facebook|twitter|x\.com|linkedin|youtube|instagram|secp\.gov|psx\.com|capitalstake|mailto:/i;
+  let website: string | undefined;
+  $("#profile a[href^='http'], .profile__item a[href^='http']").each((_, el) => {
+    if (website) return;
+    const href = $(el).attr("href");
+    if (href && !IGNORED_LINK.test(href)) website = href;
+  });
+
   return {
     ok: true,
     price,
     asOf: parseAsOf($(".quote__date").first().text()) ?? todayPK(),
     name: name || undefined,
     category: category || undefined,
+    website: website === "" ? undefined : website,
   };
 }
 

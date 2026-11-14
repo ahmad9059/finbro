@@ -276,6 +276,10 @@ MUI X Charts (`@mui/x-charts`), wrapped in a small `ChartTheme` bridge that maps
 - **Six-month spending trend**: vertical bars, the current month in indigo and earlier months in the tint colour.
 - Axis labels in `type-legal`, secondary colour. Grid lines use `--border`, horizontal only. Tooltips use the popover surface.
 
+### Company logos
+
+Holdings show the company mark beside the name: a 32px (40px in the detail sheet, 28px in lists) white disc with a hairline ring, the mark inset 15%. Logos are fetched through `/api/logo/{symbol}` and cached for a week; until one arrives — or when a company has none — a tinted monogram with the company's initials sits underneath, so a row never shows an empty ring. Mutual funds and savings accounts always use the monogram, since they have no company mark.
+
 ### Icons
 
 lucide, 1.5px stroke. Every navigation item, page title, KPI card label, section title and empty state carries one; buttons carry one when the action has an obvious mark (plus, pencil, trash, refresh, check). Icons are decorative and `aria-hidden` unless they are the only label, in which case the control gets an `aria-label`.

@@ -4,6 +4,7 @@ import type { AssetKind } from "~/lib/portfolio";
 import type { DbOrTx } from "~/server/api/helpers";
 import { asset } from "~/server/db/schema";
 
+import { rememberCompany } from "./companies";
 import { fetchFundNav } from "./funds";
 import { fetchStockPrice } from "./psx";
 import type { PriceResult } from "./types";
@@ -74,7 +75,9 @@ export async function refreshPrices(
   const stocks = due.filter((row) => row.symbol);
   for (const [index, row] of stocks.entries()) {
     if (index > 0) await sleep(PSX_PAUSE_MS);
-    await apply(row, await fetchStockPrice(row.symbol!));
+    const result = await fetchStockPrice(row.symbol!);
+    if (result.ok) await rememberCompany(row.symbol!, result);
+    await apply(row, result);
   }
 
   const funds = due.filter((row) => !row.symbol && row.fundId);

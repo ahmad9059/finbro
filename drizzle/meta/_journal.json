@@ -15,6 +15,13 @@
       "when": 1794665841905,
       "tag": "0001_huge_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794674789579,
+      "tag": "0002_yellow_crystal",
+      "breakpoints": true
     }
   ]
 }

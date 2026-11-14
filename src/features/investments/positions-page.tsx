@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { errorMessage } from "~/lib/errors";
 
 import { HoldingsChart } from "~/components/charts/holdings-chart";
+import { CompanyLogo } from "~/components/shared/company-logo";
 import { EmptyState } from "~/components/shared/empty-state";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Delta, Money } from "~/components/shared/money";
@@ -273,13 +274,16 @@ export function PositionsPage({
                   onClick={() => setOpenId(asset.id)}
                 >
                   <TableCell>
-                    <div className="flex flex-col gap-0.5">
-                      <span className="font-medium text-foreground">
-                        {asset.name}
-                      </span>
-                      <span className="type-legal text-muted-foreground">
-                        {asset.symbol ?? asset.institution ?? asset.category ?? "—"}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <CompanyLogo symbol={asset.symbol} name={asset.name} />
+                      <div className="flex min-w-0 flex-col gap-0.5">
+                        <span className="truncate font-medium text-foreground">
+                          {asset.name}
+                        </span>
+                        <span className="truncate type-legal text-muted-foreground">
+                          {asset.symbol ?? asset.institution ?? asset.category ?? "—"}
+                        </span>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-right tabular-nums">

@@ -19,6 +19,7 @@ import { toast } from "sonner";
 
 import { errorMessage } from "~/lib/errors";
 
+import { CompanyLogo } from "~/components/shared/company-logo";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Delta, Money } from "~/components/shared/money";
 import { PageHeader } from "~/components/shared/page-header";
@@ -241,10 +242,13 @@ export function OverviewPage() {
                     href={KIND_PATHS[row.kind]}
                     className="flex items-center justify-between gap-3 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="min-w-0">
-                      <span className="block truncate type-ui-sm">{row.name}</span>
-                      <span className="type-legal text-muted-foreground">
-                        {row.symbol ?? formatPercent(row.unrealizedPct)}
+                    <span className="flex min-w-0 items-center gap-3">
+                      <CompanyLogo symbol={row.symbol} name={row.name} size={28} />
+                      <span className="min-w-0">
+                        <span className="block truncate type-ui-sm">{row.name}</span>
+                        <span className="type-legal text-muted-foreground">
+                          {row.symbol ?? formatPercent(row.unrealizedPct)}
+                        </span>
                       </span>
                     </span>
                     <span className="flex shrink-0 items-center gap-3">

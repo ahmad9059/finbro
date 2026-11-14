@@ -69,6 +69,22 @@ Metadata" on Hugging Face: 468 listed symbols with name and sector, updated
 weekly by its author. The JSON is committed, so search works offline and cannot
 break when PSX changes its markup.
 
+### Company logos
+
+PSX company pages carry no logo image, but they do list the company's own
+website (usually filed under ADDRESS, sometimes WEBSITE). That host is enough
+to find a mark:
+
+| Source | Result from this machine |
+| --- | --- |
+| `google.com/s2/favicons?domain={host}&sz=128` | 128×128 PNG/JPEG for OGDC, MCB, ENGROH, LUCK, MEEZAN; 48px for HBL; 32px for PSO; 404 for UBL |
+| `icons.duckduckgo.com/ip3/{host}.ico` | Hit or miss, 16–512px |
+| `https://{host}/favicon.ico`, `/apple-touch-icon.png` | Works where the site allows bots (ubldigital.com, lucky-cement.com); some sites answer 403 |
+
+The route tries all three in order and treats Google's 16px globe as "no logo"
+by reading the PNG header. Logos are trademarks of their owners and are shown
+here only as identification for a private dashboard.
+
 ### Capital Stake
 
 `https://www.capitalstake.com` offers a REST API (`csapis.com/3.0/market/...`).

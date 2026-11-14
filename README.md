@@ -64,6 +64,9 @@ again with an existing email changes nothing.
 - **Stocks** come from the PSX data portal (`dps.psx.com.pk`). It has no official
   API; the app reads the company page and falls back to the JSON tick endpoint.
   If PSX cannot be reached the stored price stays and is marked stale.
+- **Company logos** are read from each company's own website (the host is taken
+  from its PSX page, the image from a favicon service) and cached for a week;
+  companies without one fall back to a monogram.
 - **Stock search** uses a bundled directory of listed companies (symbol, name,
   sector), refreshed with `pnpm psx:sync` from a CC0 dataset. Searching never
   touches the network, so the picker opens instantly; typing a symbol or part of

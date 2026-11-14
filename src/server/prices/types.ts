@@ -4,6 +4,8 @@ export type PriceQuote = {
   asOf: string;
   name?: string;
   category?: string;
+  /** The company's own website, as listed on its PSX page. */
+  website?: string;
 };
 
 export type PriceFailure = { ok: false; reason: string };

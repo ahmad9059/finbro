@@ -265,6 +265,17 @@ export const expense = pgTable(
   (t) => [index("expense_user_date_idx").on(t.userId, t.date)],
 );
 
+/**
+ * What we know about a listed company: its website (read from the PSX page)
+ * and name. Shared across assets; the logo route reads the website from here.
+ */
+export const psxCompany = pgTable("psx_company", {
+  symbol: text("symbol").primaryKey(),
+  name: text("name"),
+  website: text("website"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const assetRelations = relations(asset, ({ many }) => ({
   txns: many(assetTxn),
 }));
