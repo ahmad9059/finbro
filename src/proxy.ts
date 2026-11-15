@@ -15,6 +15,8 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!login|api/|_next/static|_next/image|icon.svg|.*\\.(?:svg|png|ico|webp)$).*)",
+    // Public: the login page, the offline page, the PWA files and anything the
+    // service worker has to cache, or it cannot install.
+    "/((?!login|offline|api/|_next/static|_next/image|sw\\.js|manifest\\.webmanifest|icons/|avatar\\.jpg|icon\\.svg|.*\\.(?:svg|png|ico|webp|jpg|jpeg|webmanifest)$).*)",
   ],
 };

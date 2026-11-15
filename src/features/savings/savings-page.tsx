@@ -93,8 +93,8 @@ export function SavingsPage() {
                 <TableHead className="hidden text-right sm:table-cell">
                   Net deposited
                 </TableHead>
-                <TableHead className="text-right">Profit</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Profit</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Balance</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -123,10 +123,10 @@ export function SavingsPage() {
                   <TableCell className="hidden text-right tabular-nums sm:table-cell">
                     <Money value={position.cost} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums text-gain">
+                  <TableCell className="hidden text-right tabular-nums text-gain sm:table-cell">
                     <Money value={position.income} />
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
                     <Money value={position.marketValue} />
                   </TableCell>
                 </TableRow>

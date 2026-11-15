@@ -178,6 +178,14 @@ plan/fin-bro/       the research, design system, architecture and phases this wa
 
 Backups: `pg_dump "$DATABASE_URL" > finbro-$(date +%F).sql`, now and then.
 
+## Installable
+
+finbro is a PWA: open it on your phone and use **Add to Home Screen** (iOS Safari:
+Share → Add to Home Screen; Android Chrome: menu → Install app). It opens
+full-screen with the app icon, remembers the last screen you visited, and shows
+an offline page when the network drops. The manifest, icons and service worker
+all ship in this repo (`app/manifest.ts`, `public/icons`, `public/sw.js`).
+
 ## Notes
 
 - The app opens in **dark mode** by default; light and system are one click away.

@@ -111,10 +111,15 @@ function clearUserCache(userId: string) {
   }
 }
 
-const cacheMiddleware = t.middleware(async ({ path, type, input, ctx, next }) => {
+const cacheMiddleware = t.middleware(async ({ path, type, ctx, next, getRawInput }) => {
   if (type !== "query" || !ctx.session?.user) return next();
 
-  const key = `${ctx.session.user.id}|${path}|${JSON.stringify(input ?? null)}`;
+  // Middleware runs before input parsing, so the raw input is what identifies
+  // the call: `asset.list({kind:"stock"})` and `{kind:"savings"}` must not
+  // share a cache entry.
+  const raw = await getRawInput();
+  const serialized = raw === undefined ? "" : JSON.stringify(raw);
+  const key = `${ctx.session.user.id}|${path}|${serialized}`;
   const hit = readCache.get(key);
   if (hit && hit.expires > Date.now()) {
     return { ok: true, data: hit.value } as never;

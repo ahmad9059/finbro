@@ -165,8 +165,8 @@ export function SubscriptionsPage() {
               <TableRow>
                 <TableHead>Service</TableHead>
                 <TableHead className="hidden sm:table-cell">Billed</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead>Next due</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">Amount</TableHead>
+                <TableHead className="hidden sm:table-cell">Next due</TableHead>
                 <TableHead className="w-32" />
               </TableRow>
             </TableHeader>
@@ -178,10 +178,21 @@ export function SubscriptionsPage() {
                 >
                   <TableCell>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-medium text-foreground">{row.name}</span>
+                      <span className="block max-w-[42vw] truncate font-medium text-foreground sm:max-w-none">
+                        {row.name}
+                      </span>
                       <span className="type-legal text-muted-foreground">
                         {row.categoryName}
                         {row.status === "paused" ? " · paused" : ""}
+                      </span>
+                      <span className="flex flex-wrap items-center gap-2 type-legal text-muted-foreground sm:hidden">
+                        <span className="tabular-nums text-foreground">
+                          <Money value={row.amount} decimals={2} />
+                        </span>
+                        <span>{formatDate(row.nextDueDate)}</span>
+                        {row.overdue ? (
+                          <Badge variant="destructive">Overdue</Badge>
+                        ) : null}
                       </span>
                     </div>
                   </TableCell>
@@ -190,10 +201,10 @@ export function SubscriptionsPage() {
                       {row.cycle === "monthly" ? "Monthly" : "Yearly"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
                     <Money value={row.amount} decimals={2} />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center gap-2">
                       <span className="tabular-nums">{formatDate(row.nextDueDate)}</span>
                       {row.overdue ? (

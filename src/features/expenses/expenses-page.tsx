@@ -183,7 +183,7 @@ export function ExpensesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
+                  <TableHead className="hidden sm:table-cell">Date</TableHead>
                   <TableHead>What</TableHead>
                   <TableHead className="hidden sm:table-cell">Category</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
@@ -193,11 +193,16 @@ export function ExpensesPage() {
               <TableBody>
                 {list.data?.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="text-muted-foreground">
+                    <TableCell className="hidden text-muted-foreground sm:table-cell">
                       {formatDate(row.date)}
                     </TableCell>
                     <TableCell>
-                      <span className="font-medium text-foreground">{row.title}</span>
+                      <span className="block max-w-[40vw] truncate font-medium text-foreground sm:max-w-none">
+                        {row.title}
+                      </span>
+                      <span className="block type-legal text-muted-foreground sm:hidden">
+                        {formatDate(row.date)}
+                      </span>
                       {row.notes ? (
                         <span className="block truncate type-legal text-muted-foreground">
                           {row.notes}

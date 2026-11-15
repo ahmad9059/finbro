@@ -257,14 +257,14 @@ export function PositionsPage({
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead className="text-right">{copy.units}</TableHead>
+                <TableHead className="hidden text-right sm:table-cell">{copy.units}</TableHead>
                 <TableHead className="hidden text-right sm:table-cell">
                   {copy.avgCost}
                 </TableHead>
                 <TableHead className="hidden text-right sm:table-cell">
                   {copy.price}
                 </TableHead>
-                <TableHead className="text-right">
+                <TableHead className="hidden text-right sm:table-cell">
                   <button
                     type="button"
                     onClick={() => setSort("value")}
@@ -277,7 +277,7 @@ export function PositionsPage({
                     ) : null}
                   </button>
                 </TableHead>
-                <TableHead className="text-right">
+                <TableHead className="hidden text-right sm:table-cell">
                   <button
                     type="button"
                     onClick={() => setSort("pnl")}
@@ -307,7 +307,7 @@ export function PositionsPage({
                         name={asset.name}
                       />
                       <div className="flex min-w-0 flex-col gap-0.5">
-                        <span className="truncate font-medium text-foreground">
+                        <span className="max-w-[38vw] truncate font-medium text-foreground sm:max-w-[22rem]">
                           {asset.name}
                         </span>
                         <span className="flex items-center gap-1.5 type-legal text-muted-foreground">
@@ -320,10 +320,19 @@ export function PositionsPage({
                             </span>
                           ) : null}
                         </span>
+                        <span className="flex items-center gap-2 type-legal text-muted-foreground sm:hidden">
+                          <span className="tabular-nums">
+                            <Money value={position.marketValue} />
+                          </span>
+                          <Delta
+                            value={position.unrealized}
+                            ratio={position.unrealizedPct}
+                          />
+                        </span>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
                     {formatUnits(position.units)}
                   </TableCell>
                   <TableCell className="hidden text-right tabular-nums sm:table-cell">
@@ -345,10 +354,10 @@ export function PositionsPage({
                       <PriceTag asOf={asset.priceAsOf} source={asset.priceSource} />
                     </div>
                   </TableCell>
-                  <TableCell className="text-right tabular-nums">
+                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
                     <Money value={position.marketValue} />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="hidden text-right sm:table-cell">
                     {position.units === 0 ? (
                       <span className="text-muted-foreground">—</span>
                     ) : (
