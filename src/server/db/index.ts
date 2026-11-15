@@ -14,7 +14,12 @@ const globalForDb = globalThis as unknown as {
 
 // Neon's pooled connection runs PgBouncer in transaction mode, which does not
 // support prepared statements.
-const conn = globalForDb.conn ?? postgres(env.DATABASE_URL, { prepare: false });
+const conn = globalForDb.conn ?? postgres(env.DATABASE_URL, {
+  prepare: false,
+  max: 3,
+  idle_timeout: 60,
+  connect_timeout: 10,
+});
 if (env.NODE_ENV !== "production") globalForDb.conn = conn;
 
 export const db = drizzle(conn, { schema });

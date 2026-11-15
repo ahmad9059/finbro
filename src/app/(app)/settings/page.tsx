@@ -9,7 +9,7 @@ import { ThemePicker } from "~/features/settings/theme-picker";
 
 export const metadata: Metadata = { title: "Settings" };
 
-export default function SettingsPage() {
+export default function Page() {
   return (
     <div className="flex flex-col gap-8">
       <PageHeader description={settingsItem.description} />

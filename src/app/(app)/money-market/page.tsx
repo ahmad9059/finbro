@@ -15,7 +15,7 @@ export default function Page() {
     <PositionsPage
       kind={kind}
       copy={positionsCopy[kind]}
-      title="Money market funds"
+      title="Holdings"
     />
   );
 }

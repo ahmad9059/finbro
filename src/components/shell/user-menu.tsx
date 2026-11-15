@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -37,6 +38,7 @@ export function UserMenu({
   image?: string | null;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [signingOut, setSigningOut] = useState(false);
 
   async function signOut() {
@@ -47,6 +49,8 @@ export function UserMenu({
       toast.error("Could not sign out. Try again.");
       return;
     }
+    queryClient.clear();
+    window.localStorage.removeItem("finbro:query-cache");
     router.push("/login");
     router.refresh();
   }

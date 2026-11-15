@@ -1,6 +1,8 @@
 "use client";
 
-import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { httpBatchStreamLink, loggerLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import type { inferRouterInputs, inferRouterOutputs } from "@trpc/server";
@@ -9,6 +11,20 @@ import SuperJSON from "superjson";
 
 import type { AppRouter } from "~/server/api/root";
 import { createQueryClient } from "./query-client";
+
+/** Where the last response for every query is kept between visits. */
+export const QUERY_CACHE_KEY = "finbro:query-cache";
+const CACHE_VERSION = "1";
+const CACHE_MAX_AGE = 10 * 60 * 1000;
+
+const noopStorage: Storage = {
+  length: 0,
+  clear: () => undefined,
+  getItem: () => null,
+  key: () => null,
+  removeItem: () => undefined,
+  setItem: () => undefined,
+};
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;
 const getQueryClient = () => {
@@ -41,6 +57,17 @@ export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
   const queryClient = getQueryClient();
 
+  // Every response is cached in localStorage, so a reload paints from disk
+  // first and revalidates behind it. The server-rendered data still wins as
+  // soon as it arrives.
+  const [persister] = useState(() =>
+    createSyncStoragePersister({
+      storage: typeof window === "undefined" ? noopStorage : window.localStorage,
+      key: QUERY_CACHE_KEY,
+      throttleTime: 800,
+    }),
+  );
+
   const [trpcClient] = useState(() =>
     api.createClient({
       links: [
@@ -63,11 +90,21 @@ export function TRPCReactProvider(props: { children: React.ReactNode }) {
   );
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        maxAge: CACHE_MAX_AGE,
+        buster: CACHE_VERSION,
+        dehydrateOptions: {
+          shouldDehydrateQuery: (query) => query.state.status === "success",
+        },
+      }}
+    >
       <api.Provider client={trpcClient} queryClient={queryClient}>
         {props.children}
       </api.Provider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
 

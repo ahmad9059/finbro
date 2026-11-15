@@ -96,6 +96,47 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * guarantee that a user querying is authorized, but you can still access user session data if they
  * are logged in.
  */
+/**
+ * Every read is cached for a user in memory for a short window, and any write
+ * clears that user's cache. The database is small but far away, so this turns
+ * a 1–3 s round trip into a map lookup on repeat views, without the client
+ * ever showing data older than the write that changed it.
+ */
+const READ_TTL_MS = 30_000;
+const readCache = new Map<string, { expires: number; value: unknown }>();
+
+function clearUserCache(userId: string) {
+  for (const key of readCache.keys()) {
+    if (key.startsWith(`${userId}|`)) readCache.delete(key);
+  }
+}
+
+const cacheMiddleware = t.middleware(async ({ path, type, input, ctx, next }) => {
+  if (type !== "query" || !ctx.session?.user) return next();
+
+  const key = `${ctx.session.user.id}|${path}|${JSON.stringify(input ?? null)}`;
+  const hit = readCache.get(key);
+  if (hit && hit.expires > Date.now()) {
+    return { ok: true, data: hit.value } as never;
+  }
+
+  const result = await next();
+  if (result.ok) {
+    if (readCache.size > 500) readCache.clear();
+    readCache.set(key, { expires: Date.now() + READ_TTL_MS, value: result.data });
+  }
+  return result;
+});
+
+/** Writes clear what they touched. */
+const invalidateMiddleware = t.middleware(async ({ type, ctx, next }) => {
+  const result = await next();
+  if (type === "mutation" && result.ok && ctx.session?.user) {
+    clearUserCache(ctx.session.user.id);
+  }
+  return result;
+});
+
 export const publicProcedure = t.procedure.use(timingMiddleware);
 
 /**
@@ -118,4 +159,6 @@ export const protectedProcedure = t.procedure
         session: { ...ctx.session, user: ctx.session.user },
       },
     });
-  });
+  })
+  .use(cacheMiddleware)
+  .use(invalidateMiddleware);
