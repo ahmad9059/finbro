@@ -72,7 +72,10 @@ export function ExpenseDialog({
   keepOpenAfterSave?: boolean;
 }) {
   const utils = api.useUtils();
+  // Only when the popup is open: the category list should not cost the page a
+  // cold database round trip just because the provider is mounted.
   const { data: categories } = api.category.list.useQuery(undefined, {
+    enabled: open,
     staleTime: 60_000,
   });
   const create = api.expense.create.useMutation();

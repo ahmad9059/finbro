@@ -74,6 +74,7 @@ export function SubscriptionDialog({
 }) {
   const utils = api.useUtils();
   const { data: categories } = api.category.list.useQuery(undefined, {
+    enabled: open,
     staleTime: 60_000,
   });
   const create = api.subscription.create.useMutation();
