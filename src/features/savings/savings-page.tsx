@@ -105,14 +105,20 @@ export function SavingsPage() {
                   onClick={() => setOpenId(asset.id)}
                 >
                   <TableCell>
-                    <div className="flex items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
                       <CompanyLogo institution={asset.institution} name={asset.name} />
                       <div className="flex min-w-0 flex-col gap-0.5">
-                        <span className="truncate font-medium text-foreground">
+                        <span className="max-w-[42vw] truncate font-medium text-foreground sm:max-w-none">
                           {asset.name}
                         </span>
                         <span className="truncate type-legal text-muted-foreground">
                           {asset.institution ?? "—"}
+                        </span>
+                        <span className="flex flex-wrap items-center gap-2 type-legal sm:hidden">
+                          <span className="tabular-nums text-foreground">
+                            <Money value={position.marketValue} />
+                          </span>
+                          <span className="text-gain">+<Money value={position.income} /></span>
                         </span>
                       </div>
                     </div>
