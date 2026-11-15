@@ -240,7 +240,15 @@ export const subscription = pgTable(
     notes: text("notes"),
     createdAt: createdAt(),
   },
-  (t) => [index("subscription_user_status_idx").on(t.userId, t.status)],
+  (t) => [
+    // Active list, already ordered by the next due date.
+    index("subscription_user_status_due_idx").on(
+      t.userId,
+      t.status,
+      t.nextDueDate,
+    ),
+    index("subscription_category_idx").on(t.categoryId),
+  ],
 );
 
 export const expense = pgTable(
@@ -262,7 +270,14 @@ export const expense = pgTable(
     ),
     createdAt: createdAt(),
   },
-  (t) => [index("expense_user_date_idx").on(t.userId, t.date)],
+  (t) => [
+    // Serves the month list and its "newest first" order in one index walk.
+    index("expense_user_date_id_idx").on(t.userId, t.date, t.id),
+    // Joins and the per-category totals.
+    index("expense_category_idx").on(t.categoryId),
+    // "Undo mark paid" looks expenses up by subscription.
+    index("expense_subscription_idx").on(t.subscriptionId),
+  ],
 );
 
 /**
