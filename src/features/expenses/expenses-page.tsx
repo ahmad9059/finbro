@@ -21,7 +21,9 @@ import { errorMessage } from "~/lib/errors";
 
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
 import { EmptyState } from "~/components/shared/empty-state";
+import { HiddenChart } from "~/components/shared/hidden-chart";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
+import { MASK, usePrivacy } from "~/components/shared/privacy-context";
 import { Delta, Money } from "~/components/shared/money";
 import { PageHeader } from "~/components/shared/page-header";
 import { Section } from "~/components/shared/section";
@@ -55,6 +57,7 @@ export function ExpensesPage() {
 
   const utils = api.useUtils();
   const { open } = useExpenseDialog();
+  const { hidden } = usePrivacy();
   const summary = api.expense.summary.useQuery({ month });
   const list = api.expense.list.useQuery({ month });
   const trend = api.expense.trend.useQuery();
@@ -146,7 +149,7 @@ export function ExpensesPage() {
               biggest ? (
                 <span>
                   <Money value={biggest.total} /> ·{" "}
-                  {formatPercent(biggest.share, { signed: false })}
+                  {hidden ? MASK : formatPercent(biggest.share, { signed: false })}
                 </span>
               ) : (
                 "Nothing yet"
@@ -247,13 +250,21 @@ export function ExpensesPage() {
 
         <div className="flex flex-col gap-6">
           <Section title="Where it went" icon={PieChart}>
-            <CategoryBars data={summary.data?.categories ?? []} />
+            {hidden ? (
+              <HiddenChart label="The category split" />
+            ) : (
+              <CategoryBars data={summary.data?.categories ?? []} />
+            )}
           </Section>
           <Section title="Six months" icon={BarChart3}>
-            <SpendingTrend
-              data={trend.data ?? []}
-              onSelect={(next) => goTo(next)}
-            />
+            {hidden ? (
+              <HiddenChart label="The six-month trend" />
+            ) : (
+              <SpendingTrend
+                data={trend.data ?? []}
+                onSelect={(next) => goTo(next)}
+              />
+            )}
           </Section>
         </div>
       </div>

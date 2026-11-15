@@ -9,7 +9,7 @@ import { errorMessage } from "~/lib/errors";
 import { CompanyLogo } from "~/components/shared/company-logo";
 import { REVEAL } from "~/components/shared/reveal";
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
-import { Delta, Money } from "~/components/shared/money";
+import { Delta, Masked, Money } from "~/components/shared/money";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -154,7 +154,8 @@ export function HoldingSheet({
                     <dd className="mt-1.5">
                       <Delta value={position.unrealized} className="type-title" />
                       <span className="block type-legal text-muted-foreground">
-                        {formatPercent(position.unrealizedPct)} on what you paid
+                        <Masked>{formatPercent(position.unrealizedPct)}</Masked> on
+                        what you paid
                       </span>
                     </dd>
                   </div>
@@ -162,19 +163,21 @@ export function HoldingSheet({
                     <dt className="type-eyebrow text-muted-foreground">
                       {copy.units}
                     </dt>
-                    <dd className="mt-1.5 tabular-nums">
-                      {formatUnits(position.units)}
+                    <dd className="mt-1.5">
+                      <Masked>{formatUnits(position.units)}</Masked>
                     </dd>
                   </div>
                   <div>
                     <dt className="type-eyebrow text-muted-foreground">
                       {copy.avgCost}
                     </dt>
-                    <dd className="mt-1.5 tabular-nums">
-                      {position.avgCost.toLocaleString("en-US", {
-                        minimumFractionDigits: copy.priceDecimals,
-                        maximumFractionDigits: copy.priceDecimals,
-                      })}
+                    <dd className="mt-1.5">
+                      <Masked>
+                        {position.avgCost.toLocaleString("en-US", {
+                          minimumFractionDigits: copy.priceDecimals,
+                          maximumFractionDigits: copy.priceDecimals,
+                        })}
+                      </Masked>
                     </dd>
                   </div>
                   <div>
@@ -236,10 +239,12 @@ export function HoldingSheet({
                               </span>
                             </p>
                             <p className="mt-1 truncate type-legal text-muted-foreground">
-                              {txn.units !== null
-                                ? `${formatUnits(txn.units)} × ${formatUnits(Number(txn.unitPrice ?? 0), 4)}`
-                                : "Cash movement"}
-                              {txn.fees > 0 ? ` · fees ${txn.fees}` : ""}
+                              <Masked>
+                                {txn.units !== null
+                                  ? `${formatUnits(txn.units)} × ${formatUnits(Number(txn.unitPrice ?? 0), 4)}`
+                                  : "Cash movement"}
+                                {txn.fees > 0 ? ` · fees ${txn.fees}` : ""}
+                              </Masked>
                             </p>
                           </div>
                           <div className="flex shrink-0 items-center gap-1">

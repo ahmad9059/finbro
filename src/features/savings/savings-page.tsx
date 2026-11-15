@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { EmptyState } from "~/components/shared/empty-state";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
-import { Money } from "~/components/shared/money";
+import { Masked, Money } from "~/components/shared/money";
 import { PageHeader } from "~/components/shared/page-header";
 import { TableSkeleton } from "~/components/shared/table-skeleton";
 import { CompanyLogo } from "~/components/shared/company-logo";
@@ -123,8 +123,8 @@ export function SavingsPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
-                    {asset.profitRate === null ? "—" : `${asset.profitRate}%`}
+                  <TableCell className="hidden text-right sm:table-cell">
+                    {asset.profitRate === null ? "—" : <Masked>{asset.profitRate}%</Masked>}
                   </TableCell>
                   <TableCell className="hidden text-right tabular-nums sm:table-cell">
                     <Money value={position.cost} />

@@ -1,6 +1,7 @@
 import { Sparkles } from "lucide-react";
 
 import { Money } from "~/components/shared/money";
+import { PrivacyToggle } from "~/components/shared/privacy-toggle";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { formatDate } from "~/lib/format";
@@ -56,6 +57,7 @@ export function OverviewBanner({
               Add expense
             </Button>
           ) : null}
+          <PrivacyToggle size="icon" />
         </div>
       </div>
     </section>

@@ -1,9 +1,13 @@
+"use client";
+
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
 import { formatPKR, formatPercent } from "~/lib/format";
 import { cn } from "~/lib/utils";
 
-/** A PKR amount in tabular figures. */
+import { MASK, usePrivacy } from "./privacy-context";
+
+/** A PKR amount in tabular figures, or a mask when amounts are hidden. */
 export function Money({
   value,
   decimals = 0,
@@ -13,9 +17,10 @@ export function Money({
   decimals?: number;
   className?: string;
 }) {
+  const { hidden } = usePrivacy();
   return (
     <span className={cn("tabular-nums", className)}>
-      {formatPKR(value, { decimals })}
+      {hidden ? MASK : formatPKR(value, { decimals })}
     </span>
   );
 }
@@ -39,6 +44,15 @@ export function Delta({
   invert?: boolean;
   className?: string;
 }) {
+  const { hidden } = usePrivacy();
+  if (hidden) {
+    return (
+      <span className={cn("inline-flex items-center gap-1 tabular-nums", className)}>
+        {MASK}
+      </span>
+    );
+  }
+
   const up = value > 0;
   const flat = value === 0;
   const good = invert ? !up : up;
@@ -57,6 +71,22 @@ export function Delta({
         {formatPKR(value, { decimals, signed: true })}
         {ratio === undefined ? null : ` (${formatPercent(ratio)})`}
       </span>
+    </span>
+  );
+}
+
+/** Wraps a number that is not money — units, prices, rates, percentages. */
+export function Masked({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const { hidden } = usePrivacy();
+  return (
+    <span className={cn("tabular-nums", className)}>
+      {hidden ? MASK : children}
     </span>
   );
 }

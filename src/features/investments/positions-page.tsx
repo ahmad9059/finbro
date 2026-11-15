@@ -25,6 +25,9 @@ import { errorMessage } from "~/lib/errors";
 import { HoldingsChart } from "~/components/charts/holdings-chart";
 import { CompanyLogo } from "~/components/shared/company-logo";
 import { EmptyState } from "~/components/shared/empty-state";
+import { HiddenChart } from "~/components/shared/hidden-chart";
+import { Masked } from "~/components/shared/money";
+import { usePrivacy } from "~/components/shared/privacy-context";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
 import { Delta, Money } from "~/components/shared/money";
 import { PageHeader } from "~/components/shared/page-header";
@@ -72,6 +75,7 @@ export function PositionsPage({
   const [openId, setOpenId] = useState<number | null>(null);
   const [showClosed, setShowClosed] = useState(false);
   const [sort, setSort] = useState<SortKey>("value");
+  const { hidden } = usePrivacy();
   const refresh = api.price.refresh.useMutation();
   const [justRefreshed, setJustRefreshed] = useState(false);
   const reduceMotion = useReducedMotion();
@@ -206,9 +210,14 @@ export function PositionsPage({
             icon={TrendingUp}
             value={<Delta value={totals?.unrealized ?? 0} />}
             footer={
-              totals && totals.cost > 0
-                ? `${formatPercent(totals.unrealized / totals.cost)} on what you paid`
-                : "Value minus what you paid"
+              totals && totals.cost > 0 ? (
+                <>
+                  <Masked>{formatPercent(totals.unrealized / totals.cost)}</Masked>{" "}
+                  on what you paid
+                </>
+              ) : (
+                "Value minus what you paid"
+              )
             }
           />
           <KpiCard
@@ -332,14 +341,16 @@ export function PositionsPage({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
-                    {formatUnits(position.units)}
+                  <TableCell className="hidden text-right sm:table-cell">
+                    <Masked>{formatUnits(position.units)}</Masked>
                   </TableCell>
-                  <TableCell className="hidden text-right tabular-nums sm:table-cell">
-                    {position.avgCost.toLocaleString("en-US", {
-                      minimumFractionDigits: copy.priceDecimals,
-                      maximumFractionDigits: copy.priceDecimals,
-                    })}
+                  <TableCell className="hidden text-right sm:table-cell">
+                    <Masked>
+                      {position.avgCost.toLocaleString("en-US", {
+                        minimumFractionDigits: copy.priceDecimals,
+                        maximumFractionDigits: copy.priceDecimals,
+                      })}
+                    </Masked>
                   </TableCell>
                   <TableCell className="hidden text-right sm:table-cell">
                     <div className="flex flex-col items-end gap-0.5">
@@ -380,12 +391,16 @@ export function PositionsPage({
           description="Value of each position, largest first"
           icon={BarChart3}
         >
-          <HoldingsChart
-            data={rows.map(({ asset, position }) => ({
-              name: asset.symbol ?? asset.name,
-              value: position.marketValue,
-            }))}
-          />
+          {hidden ? (
+            <HiddenChart label="The value by holding" />
+          ) : (
+            <HoldingsChart
+              data={rows.map(({ asset, position }) => ({
+                name: asset.symbol ?? asset.name,
+                value: position.marketValue,
+              }))}
+            />
+          )}
         </Section>
       ) : null}
 

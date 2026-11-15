@@ -1,6 +1,6 @@
 "use client";
 
-import { Money } from "~/components/shared/money";
+import { Masked, Money } from "~/components/shared/money";
 import { formatPercent } from "~/lib/format";
 
 export type CategoryTotal = {
@@ -27,7 +27,8 @@ export function CategoryBars({ data }: { data: CategoryTotal[] }) {
           <div className="flex items-baseline justify-between gap-3">
             <span className="truncate type-ui-sm">{row.name}</span>
             <span className="shrink-0 tabular-nums type-legal text-muted-foreground">
-              <Money value={row.total} /> · {formatPercent(row.share, { signed: false })}
+              <Money value={row.total} /> ·{" "}
+              <Masked>{formatPercent(row.share, { signed: false })}</Masked>
             </span>
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-muted">

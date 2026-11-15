@@ -53,7 +53,7 @@ worlds, one indigo action per view, light type, and numbers that line up.
 
 | Area | What you get |
 | --- | --- |
-| **Overview** | Net worth, unrealized gain, allocation donut, net-worth history, a stacked "value by kind" chart, what is due in the next 30 days, top holdings |
+| **Overview** | Net worth, unrealized gain, allocation donut, net-worth history, a stacked "value by kind" chart, what is due in the next 30 days, top holdings, and a privacy eye that masks every amount |
 | **PSX stocks** | Search every listed equity and ETF by company name or symbol, add holdings, buy/sell/bonus/dividend transactions, average-cost P&L (realized and unrealized), company logos, per-holding value chart |
 | **Mutual funds & money market** | Fund search over 573 MUFAP funds with the AMC's mark, 4-decimal NAVs, invest by amount or by units, reinvested dividends as bonus units |
 | **Savings accounts** | Balance, net deposited and profit earned, deposits and withdrawals, one-tap reconciliation against your bank app |
@@ -189,6 +189,7 @@ all ship in this repo (`app/manifest.ts`, `public/icons`, `public/sw.js`).
 ## Notes
 
 - The app opens in **dark mode** by default; light and system are one click away.
+- The eye next to net worth (and in the top bar) hides every amount, percentage and chart behind `••••••`, for screenshots or a shared screen. The choice sticks per browser.
 - The fonts are Inter (variable) at weights 360/420/480 — Mercury's arcadia
   substitute, and the reason nothing on screen is bold.
 - The demo account used for the screenshots is `dev-tester@finbro.local`; delete

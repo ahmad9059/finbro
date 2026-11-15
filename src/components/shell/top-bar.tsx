@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 
+import { PrivacyToggle } from "~/components/shared/privacy-toggle";
 import { SidebarTrigger } from "~/components/ui/sidebar";
 
 import { findNavItem } from "./nav";
@@ -32,6 +33,7 @@ export function TopBar({
         ) : null}
         <span className="truncate">{title}</span>
       </h1>
+      <PrivacyToggle />
       <ThemeToggle />
       <UserMenu name={user.name} email={user.email} image={user.image} />
     </header>

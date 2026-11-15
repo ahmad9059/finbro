@@ -19,8 +19,11 @@ import { toast } from "sonner";
 import { errorMessage } from "~/lib/errors";
 
 import { CompanyLogo } from "~/components/shared/company-logo";
+import { HiddenChart } from "~/components/shared/hidden-chart";
+import { MASK, usePrivacy } from "~/components/shared/privacy-context";
+import { PrivacyToggle } from "~/components/shared/privacy-toggle";
 import { KpiCard, KpiGrid, KpiSkeleton } from "~/components/shared/kpi-card";
-import { Delta, Money } from "~/components/shared/money";
+import { Delta, Masked, Money } from "~/components/shared/money";
 import { Section } from "~/components/shared/section";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -48,6 +51,7 @@ export function OverviewPage() {
   const utils = api.useUtils();
   const { data, isLoading } = api.overview.get.useQuery();
   const { open } = useExpenseDialog();
+  const { hidden } = usePrivacy();
   const [paying, setPaying] = useState<number | null>(null);
   const markPaid = api.subscription.markPaid.useMutation();
 
@@ -146,7 +150,11 @@ export function OverviewPage() {
           label="Unrealized"
           icon={TrendingUp}
           value={<Delta value={data.unrealized} />}
-          footer={`${formatPercent(data.unrealizedPct)} on what you paid`}
+          footer={
+            <>
+              <Masked>{formatPercent(data.unrealizedPct)}</Masked> on what you paid
+            </>
+          }
         />
         <KpiCard
           label="Spent this month"
@@ -176,14 +184,22 @@ export function OverviewPage() {
           description="Share of your net worth"
           icon={PieChart}
         >
-          <AllocationDonut data={data.allocation} total={data.netWorth} />
+          {hidden ? (
+            <HiddenChart label="Allocation" />
+          ) : (
+            <AllocationDonut data={data.allocation} total={data.netWorth} />
+          )}
         </Section>
         <Section
           title="Net worth"
           description="One point is added each evening"
           icon={LineChart}
         >
-          <NetWorthChart data={data.snapshots} />
+          {hidden ? (
+            <HiddenChart label="The net-worth history" />
+          ) : (
+            <NetWorthChart data={data.snapshots} />
+          )}
         </Section>
       </div>
 
@@ -193,7 +209,11 @@ export function OverviewPage() {
           description="How each part of the portfolio moved"
           icon={Layers}
         >
-          <ValueByKindChart series={data.byKind} />
+          {hidden ? (
+            <HiddenChart label="The split by asset kind" />
+          ) : (
+            <ValueByKindChart series={data.byKind} />
+          )}
         </Section>
       ) : null}
 
@@ -272,7 +292,7 @@ export function OverviewPage() {
                       <span className="min-w-0">
                         <span className="block truncate type-ui-sm">{row.name}</span>
                         <span className="type-legal text-muted-foreground">
-                          {row.symbol ?? formatPercent(row.unrealizedPct)}
+                          {row.symbol ?? (hidden ? MASK : formatPercent(row.unrealizedPct))}
                         </span>
                       </span>
                     </span>

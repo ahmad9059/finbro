@@ -8,7 +8,7 @@ import { errorMessage } from "~/lib/errors";
 
 import { CompanyLogo } from "~/components/shared/company-logo";
 import { ConfirmDialog } from "~/components/shared/confirm-dialog";
-import { Money } from "~/components/shared/money";
+import { Masked, Money } from "~/components/shared/money";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
@@ -84,7 +84,12 @@ export function BalanceSheet({
                 </div>
                 <SheetDescription>
                   {asset.institution ?? "Savings account"}
-                  {asset.profitRate === null ? "" : ` · ${asset.profitRate}% a year`}
+                  {asset.profitRate === null ? null : (
+                    <>
+                      {" · "}
+                      <Masked>{asset.profitRate}%</Masked> a year
+                    </>
+                  )}
                 </SheetDescription>
               </SheetHeader>
 

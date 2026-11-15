@@ -284,6 +284,16 @@ Holdings show the company mark beside the name: a 32px (40px in the detail sheet
 
 lucide, 1.5px stroke. Every navigation item, page title, KPI card label, section title and empty state carries one; buttons carry one when the action has an obvious mark (plus, pencil, trash, refresh, check). Icons are decorative and `aria-hidden` unless they are the only label, in which case the control gets an `aria-label`.
 
+### Privacy mode
+
+An eye in the top bar — and at the right edge of the Overview banner, beside the number it protects — masks every amount in the app with `••••••`. It is one switch for every route:
+
+- Money, deltas, percentages, units, average costs, rates and fees are masked; counts ("3 holdings", "11 expenses") and dates stay readable.
+- Charts are replaced by a small panel explaining that the chart is hidden, with a "Show amounts" button. A chart's shape is numbers too.
+- Public market prices (a stock's price, a fund's NAV) stay visible: they are not yours. Everything derived from your position — units, cost, value, P&L — is hidden.
+- Titles, categories and notes stay readable, so the page remains navigable.
+- The choice is remembered per browser in `localStorage` and follows the account across tabs.
+
 ### Micro-interactions
 
 Motion is feedback, never decoration. Only things you can act on move; a card that cannot be clicked has no hover state.
