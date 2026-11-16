@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -54,9 +54,22 @@ export const chatRouter = createTRPCRouter({
   createThread: protectedProcedure
     .input(z.object({ title: z.string().min(1).max(120).default("New chat") }))
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      // Chat rows are cheap but they add up; drop abandoned empty ones.
+      await db.execute(sql`
+        delete from chat_thread t
+        where t.user_id = ${userId}
+          and t.title = 'New chat'
+          and t.created_at < now() - interval '1 hour'
+          and not exists (
+            select 1 from chat_message m where m.thread_id = t.id
+          )
+      `);
+
       const [row] = await db
         .insert(chatThread)
-        .values({ userId: ctx.session.user.id, title: input.title })
+        .values({ userId, title: input.title })
         .returning({ id: chatThread.id, title: chatThread.title });
       return row!;
     }),
