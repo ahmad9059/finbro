@@ -13,6 +13,12 @@ export const env = createEnv({
     AUTH_ALLOW_SIGNUP: z.enum(["true", "false"]).optional(),
     CRON_SECRET: z.string().min(16).optional(),
     DATABASE_URL: z.string().url(),
+    /** Google AI Studio key for the assistant. Optional: the app builds without it. */
+    GEMINI_API_KEY: z.string().min(10).optional(),
+    /** Model name; the default is a Flash model that supports tools and search. */
+    GEMINI_MODEL: z.string().min(3).optional(),
+    /** Development only: stream scripted replies instead of calling Gemini. */
+    ASSISTANT_MOCK: z.enum(["true", "false"]).optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -37,6 +43,9 @@ export const env = createEnv({
     AUTH_ALLOW_SIGNUP: process.env.AUTH_ALLOW_SIGNUP,
     CRON_SECRET: process.env.CRON_SECRET,
     DATABASE_URL: process.env.DATABASE_URL,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GEMINI_MODEL: process.env.GEMINI_MODEL,
+    ASSISTANT_MOCK: process.env.ASSISTANT_MOCK,
     NODE_ENV: process.env.NODE_ENV,
   },
   /**

@@ -1,6 +1,7 @@
 import { assetRouter } from "~/server/api/routers/asset";
 import { assetTxnRouter } from "~/server/api/routers/asset-txn";
 import { categoryRouter } from "~/server/api/routers/category";
+import { chatRouter } from "~/server/api/routers/chat";
 import { expenseRouter } from "~/server/api/routers/expense";
 import { healthRouter } from "~/server/api/routers/health";
 import { overviewRouter } from "~/server/api/routers/overview";
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
   expense: expenseRouter,
   category: categoryRouter,
   subscription: subscriptionRouter,
+  chat: chatRouter,
   overview: overviewRouter,
 });
 

@@ -148,6 +148,20 @@ Notes:
 - Vercel sends `Authorization: Bearer $CRON_SECRET` to cron routes when that env var is set. (Read; confirm when wiring in Phase 10)
 - Neon free tier is assumed to be enough for a few megabytes of personal data. Current limits are **Unverified**; check the pricing page when creating the project.
 
+## Assistant model notes
+
+Checked 2026-11-16 with the project's Google AI Studio key:
+
+| Model | Result |
+| --- | --- |
+| `gemini-2.5-flash`, `gemini-2.5-pro` | **404 — "no longer available to new users"**; Google points at `gemini-3.8-flash` and the Interactions API |
+| `gemini-3.8-flash` | Recognised, but **503 "high demand"** throughout testing |
+| `gemini-flash-latest`, `gemini-4-*`, `gemini-3.1-pro-preview` | Quota exceeded on the free tier |
+| **`gemini-3.5-flash`** | Worked: plain text, function calling with `stopWhen`, and streaming. **Chosen as the default** |
+| `gemini-3.1-flash-lite` | Worked, but weaker for tool use |
+
+So the default is `gemini-3.5-flash`, overridable with `GEMINI_MODEL`. Free-tier keys have a small per-minute quota — a handful of requests in a minute exhausts it — which is why the UI maps 429/503 to a sentence rather than a stack trace, and why `ASSISTANT_MOCK=true` exists to exercise the whole chat and approval flow without spending quota. Google Search grounding is wired through the provider's `google.tools.googleSearch({})`; it is subject to the same quota.
+
 ## Open risks
 
 | Risk | Effect | Mitigation |

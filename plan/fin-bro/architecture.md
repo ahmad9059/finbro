@@ -211,6 +211,24 @@ refreshPrices(userId, kind?)
 
 See research.md for what was tested and the terms-of-use caveat.
 
+## Assistant
+
+```
+Browser (chat UI)
+   └─ POST /api/chat ──► session check ──► account snapshot (context.ts)
+                                   └─► Gemini streamText
+                                         ├─ read tools   (execute immediately)
+                                         ├─ write tools  (needsApproval → UI card)
+                                         └─ google_search (grounding + citations)
+```
+
+- **Context** (`server/assistant/context.ts`) rebuilds a compact snapshot per request — net worth, holdings with positions, this month's spending, subscriptions, categories — so the model never relies on client-supplied data.
+- **Tools** (`server/assistant/tools.ts`) are constructed per request with the session user id; every query is scoped to it. Write tools are marked `needsApproval`, so the SDK pauses for a human decision; the UI calls `addToolApprovalResponse`, and `sendAutomaticallyWhen` resumes the run. Tools validate with the same portfolio rules as the tRPC routers.
+- **Prompt** (`server/assistant/prompt.ts`): tool-first answers, PKR formatting, no invented numbers, no repeat after a denial, no price predictions.
+- **Persistence**: `chat_thread` and `chat_message` (jsonb parts). The client replaces a thread's messages after each completed run, which keeps approvals and regenerations consistent.
+- **Limits**: 120 messages and 80 parts per message, 8 tool steps, 2,500 output tokens, one server-side retry.
+- **Failure modes**: 429 (quota), 503 (busy), auth, safety and unknown errors each map to a readable sentence; the key can be absent and the rest of the app still runs.
+
 ## Daily job
 
 `GET /api/cron/daily`, guarded by `Authorization: Bearer $CRON_SECRET`.

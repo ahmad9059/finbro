@@ -5,6 +5,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   numeric,
   pgEnum,
   pgTable,
@@ -322,3 +323,39 @@ export type AssetTxn = typeof assetTxn.$inferSelect;
 export type Expense = typeof expense.$inferSelect;
 export type ExpenseCategory = typeof expenseCategory.$inferSelect;
 export type Subscription = typeof subscription.$inferSelect;
+
+/* -------------------------------------------------------------------------- */
+/*  Assistant                                                                  */
+/* -------------------------------------------------------------------------- */
+
+/** One conversation. The title is derived from the first message and renameable. */
+export const chatThread = pgTable(
+  "chat_thread",
+  {
+    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    userId: ownerId(),
+    title: text("title").notNull().default("New chat"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (t) => [index("chat_thread_user_updated_idx").on(t.userId, t.updatedAt)],
+);
+
+/** A message as the AI SDK models it: role plus an array of typed parts. */
+export const chatMessage = pgTable(
+  "chat_message",
+  {
+    id: text("id").primaryKey(),
+    threadId: integer("thread_id")
+      .notNull()
+      .references(() => chatThread.id, { onDelete: "cascade" }),
+    userId: ownerId(),
+    role: text("role").notNull(),
+    parts: jsonb("parts").notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index("chat_message_thread_idx").on(t.threadId, t.createdAt)],
+);
+
+export type ChatThread = typeof chatThread.$inferSelect;
+export type ChatMessageRow = typeof chatMessage.$inferSelect;

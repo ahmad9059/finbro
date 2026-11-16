@@ -59,6 +59,7 @@ worlds, one indigo action per view, light type, and numbers that line up.
 | **Savings accounts** | Balance, net deposited and profit earned, deposits and withdrawals, one-tap reconciliation against your bank app |
 | **Monthly expenses** | `E` opens the add-expense popup anywhere, month switcher in the URL, category breakdown, six-month trend |
 | **Subscriptions** | Monthly or yearly, monthly cost, overdue flags, "Mark paid" records the expense and advances the due date, with Undo |
+| **Assistant** | Ask about anything in the account, search the web for market news, and make changes through an approval card. Every conversation is saved |
 | **Settings** | Light/dark/system theme, category management with usage counts, password change |
 
 <details>
@@ -69,7 +70,24 @@ worlds, one indigo action per view, light type, and numbers that line up.
   <img src="docs/screenshots/expenses-light.webp" alt="Monthly expenses with charts" width="49%">
 </p>
 
+<p align="center">
+  <img src="docs/screenshots/assistant-dark.webp" alt="The assistant, with an approval card before a write" width="100%">
+</p>
+
 </details>
+
+## The assistant
+
+A chat that has read access to the whole account and can change it with your approval.
+
+- **Reads** — net worth, every holding with units, average cost and P&L, transactions, monthly spending and categories, subscriptions, plus live PSX quotes. Every number in an answer comes from a tool call, never from the model's memory.
+- **Writes** — add or delete an expense, record a buy/sell/dividend/deposit/profit, add a holding or savings account, set a price by hand, add a subscription, mark one paid. Each one stops at an approval card showing exactly what will change; nothing runs until you press Approve.
+- **Web search** — Gemini's Google Search grounding, used for news, rates and anything after the model's cutoff. Sources render under the answer.
+- **History** — threads and messages are stored in Postgres per user, titled from the first message, renameable and deletable.
+
+The model is Gemini (`GEMINI_MODEL`, default `gemini-3.5-flash`). The key needs the Generative Language API enabled; free-tier keys have low rate limits, and the app explains a 429 or 503 instead of showing a stack trace.
+
+`ASSISTANT_MOCK=true` (development only) streams scripted replies — including a full approval round-trip — without calling Gemini. It is ignored in production.
 
 ## Stack
 
@@ -105,6 +123,9 @@ Node 22+ and pnpm 10+ are expected; the repo was built on Node 26 and pnpm 12.
 | `BETTER_AUTH_URL` | `http://localhost:3000` locally, `https://fin.devshub.xyz` in production |
 | `CRON_SECRET` | Guards `/api/cron/daily`; Vercel sends it automatically |
 | `AUTH_ALLOW_SIGNUP` | Set to `true` only while `pnpm user:create` runs |
+| `GEMINI_API_KEY` | Google AI Studio key for the assistant (optional: the app builds and runs without it) |
+| `GEMINI_MODEL` | Model name, default `gemini-3.5-flash` |
+| `ASSISTANT_MOCK` | `true` in development to stream scripted replies instead of calling Gemini |
 
 ### Commands
 
@@ -158,9 +179,9 @@ history charts. Everything is scoped to the signed-in user.
 ```
 src/app/            routes: (app) shell pages, (auth) login, api/auth, api/cron, api/logo
 src/components/     ui (shadcn, themed), shell (sidebar, top bar), shared, charts
-src/features/       investments, savings, expenses, subscriptions, overview, settings
+src/features/       investments, savings, expenses, subscriptions, overview, assistant, settings
 src/lib/            portfolio maths, dates, formatting, schemas, categories
-src/server/         db, better-auth, tRPC routers, price sources, daily job
+src/server/         db, better-auth, tRPC routers, assistant (context, tools, prompt), price sources, daily job
 scripts/            create-user, seed-demo, sync-psx-symbols, rate-limit
 docs/screenshots/   README images
 plan/fin-bro/       the research, design system, architecture and phases this was built from

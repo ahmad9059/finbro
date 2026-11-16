@@ -6,6 +6,7 @@ import {
   ReceiptText,
   Repeat,
   Settings,
+  Sparkles,
   Vault,
   type LucideIcon,
 } from "lucide-react";
@@ -30,6 +31,12 @@ export const navGroups: NavGroup[] = [
         href: "/",
         icon: LayoutDashboard,
         description: "Your net worth and this month at a glance.",
+      },
+      {
+        title: "Assistant",
+        href: "/assistant",
+        icon: Sparkles,
+        description: "Ask about your holdings, spending and subscriptions.",
       },
     ],
   },

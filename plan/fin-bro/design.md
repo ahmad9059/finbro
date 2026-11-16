@@ -308,6 +308,16 @@ Motion is feedback, never decoration. Only things you can act on move; a card th
 - **Toasts**: bottom right, popover surface, 4s, with an Undo action where a write can be reversed.
 - Everything above is disabled under `prefers-reduced-motion`, including the spring on the navigation bar, which becomes an instant swap.
 
+### Assistant
+
+A dedicated screen in the sidebar, laid out like a two-pane mail client: a 240px thread rail (collapses to a sheet under `lg`) and the conversation.
+
+- **Messages** — your own words sit right-aligned in a `secondary` bubble with a 16px radius; answers sit on the page with the logo mark and no bubble, so long text stays readable. Answers are markdown: lists, tables (only when comparing three or more things), inline code, links.
+- **Tool calls** — reads are one quiet line (icon, label, chevron) that expands to the raw input and output. Writes are a bordered card: the tool, "needs your approval", each field as a plain line, then Approve (primary) and Deny (secondary). After it runs, the same row shows the result summary in one truncated line.
+- **Sources** — small muted chips under the answer, one per citation.
+- **Composer** — a 16px-radius field with the send button inside on the right, a stop button while streaming, Enter to send and Shift+Enter for a new line. The hint line also states that changes need approval, and warns when privacy mode is on that answers still show amounts.
+- **States** — an empty thread offers five suggested questions; while waiting, three bouncing dots under the logo; errors appear as a `loss`-tinted banner with Retry.
+
 ### Small pieces
 
 - **Tag**: 4px radius, `type-legal`, tint fill. For category, cycle ("Monthly"), price age. "Overdue" uses the `--loss` text colour with an icon.
