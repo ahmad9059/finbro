@@ -98,6 +98,9 @@ export async function POST(request: Request) {
 
     const result = streamText({
       model: google(env.GEMINI_MODEL ?? "gemini-3.5-flash"),
+      // Low thinking keeps tool-calling reliable without a long pause before
+      // the first token. Read the numbers from tools, not from reasoning.
+      providerOptions: { google: { thinkingConfig: { thinkingLevel: "low" } } },
       system,
       messages: await convertToModelMessages(
         parsed.data.messages as UIMessage[],
