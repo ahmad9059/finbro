@@ -54,3 +54,18 @@ export function formatDate(isoDate: string) {
   if (!year || !month || !day) return isoDate;
   return `${day} ${MONTHS[month - 1]} ${year}`;
 }
+
+/**
+ * Short amounts for chart axes: 950 → "950", 12,400 → "12.4k",
+ * 1,285,000 → "1.29M". No currency prefix, so labels stay narrow.
+ */
+export function formatCompact(value: number) {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? MINUS : "";
+  const trim = (n: number, digits: number) =>
+    n.toFixed(digits).replace(/\.0+$|(\.\d*[1-9])0+$/, "$1");
+  if (abs >= 1_000_000_000) return `${sign}${trim(abs / 1_000_000_000, 2)}B`;
+  if (abs >= 1_000_000) return `${sign}${trim(abs / 1_000_000, 2)}M`;
+  if (abs >= 1_000) return `${sign}${trim(abs / 1_000, 1)}k`;
+  return `${sign}${Math.round(abs)}`;
+}

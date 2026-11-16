@@ -6,15 +6,18 @@ import {
   ChevronLeft,
   ChevronRight,
   PieChart,
+  Download,
+  Gauge,
   Pencil,
   Plus,
+  Search,
   ReceiptText,
   Tags,
   Trash2,
   TrendingUp,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { errorMessage } from "~/lib/errors";
@@ -31,6 +34,7 @@ import { REVEAL } from "~/components/shared/reveal";
 import { TableSkeleton } from "~/components/shared/table-skeleton";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -39,6 +43,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { downloadCsv, toCsv } from "~/lib/csv";
 import { currentMonthPK, formatMonth, shiftMonth } from "~/lib/dates";
 import { formatDate, formatPercent } from "~/lib/format";
 import { api } from "~/trpc/react";
@@ -62,6 +67,34 @@ export function ExpensesPage() {
   const list = api.expense.list.useQuery({ month });
   const trend = api.expense.trend.useQuery();
   const [deleting, setDeleting] = useState<EditableExpense | null>(null);
+  const [query, setQuery] = useState("");
+  const rows = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const all = list.data ?? [];
+    if (!needle) return all;
+    return all.filter((row) =>
+      [row.title, row.categoryName, row.notes ?? ""].some((field) =>
+        field.toLowerCase().includes(needle),
+      ),
+    );
+  }, [list.data, query]);
+
+  function exportMonth() {
+    downloadCsv(
+      `finbro-expenses-${month}.csv`,
+      toCsv(
+        ["Date", "Title", "Category", "Amount (PKR)", "Notes", "Subscription"],
+        (list.data ?? []).map((row) => [
+          row.date,
+          row.title,
+          row.categoryName,
+          row.amount,
+          row.notes,
+          row.subscriptionId ? "yes" : "",
+        ]),
+      ),
+    );
+  }
   const remove = api.expense.delete.useMutation();
 
   function goTo(nextMonth: string) {
@@ -120,9 +153,9 @@ export function ExpensesPage() {
       </PageHeader>
 
       {summary.isLoading ? (
-        <KpiSkeleton count={3} />
+        <KpiSkeleton count={4} />
       ) : (
-        <KpiGrid className="xl:grid-cols-3">
+        <KpiGrid>
           <KpiCard
             label="Spent this month"
             icon={ReceiptText}
@@ -140,6 +173,20 @@ export function ExpensesPage() {
               />
             }
             footer={<Money value={summary.data?.previousTotal ?? 0} />}
+          />
+          <KpiCard
+            label="Daily pace"
+            icon={Gauge}
+            value={<Money value={summary.data?.dailyAverage ?? 0} />}
+            footer={
+              summary.data?.projected != null ? (
+                <span>
+                  On course for <Money value={summary.data.projected} />
+                </span>
+              ) : (
+                "Average per day"
+              )
+            }
           />
           <KpiCard
             label="Biggest category"
@@ -166,6 +213,27 @@ export function ExpensesPage() {
           icon={CalendarDays}
           flush
         >
+          {(list.data?.length ?? 0) > 0 ? (
+            <div className="flex items-center gap-2 border-b px-6 py-3">
+              <div className="relative flex-1">
+                <Search
+                  className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <Input
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="Search title, category or note"
+                  aria-label="Search expenses"
+                  className="pl-9"
+                />
+              </div>
+              <Button variant="secondary" size="sm" onClick={exportMonth}>
+                <Download />
+                CSV
+              </Button>
+            </div>
+          ) : null}
           {list.isLoading ? (
             <div className="p-6">
               <TableSkeleton rows={4} />
@@ -194,7 +262,17 @@ export function ExpensesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {list.data?.map((row) => (
+                {rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="py-8 text-center text-muted-foreground"
+                    >
+                      No expense matches “{query}”.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+                {rows.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell className="hidden text-muted-foreground sm:table-cell">
                       {formatDate(row.date)}

@@ -8,7 +8,7 @@ import {
   useKindColors,
 } from "~/components/charts/chart-theme";
 import { Money } from "~/components/shared/money";
-import { formatDate, formatPKR } from "~/lib/format";
+import { formatCompact, formatDate, formatPKR } from "~/lib/format";
 import type { AssetKind } from "~/lib/portfolio";
 
 const LABELS: Record<AssetKind, string> = {
@@ -88,9 +88,8 @@ function Inner({ series, dates }: { series: KindSeries[]; dates: string[] }) {
       ]}
       yAxis={[
         {
-          width: 46,
-          valueFormatter: (value: number) =>
-            value >= 1000 ? `${Math.round(value / 1000)}k` : String(value),
+          width: 50,
+          valueFormatter: (value: number) => formatCompact(value),
           ...axis,
         },
       ]}

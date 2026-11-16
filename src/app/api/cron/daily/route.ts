@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 
 import { env } from "~/env";
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
       { status: 500 },
     );
   }
-  if (request.headers.get("authorization") !== `Bearer ${env.CRON_SECRET}`) {
+  if (!isAuthorized(request.headers.get("authorization"), env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -29,4 +30,12 @@ export async function GET(request: Request) {
       { status: 500 },
     );
   }
+}
+
+/** Constant-time comparison, so response timing never leaks the secret. */
+function isAuthorized(header: string | null, secret: string) {
+  if (!header) return false;
+  const given = Buffer.from(header);
+  const wanted = Buffer.from(`Bearer ${secret}`);
+  return given.length === wanted.length && timingSafeEqual(given, wanted);
 }

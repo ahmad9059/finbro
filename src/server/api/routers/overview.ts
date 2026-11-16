@@ -48,6 +48,7 @@ export const overviewRouter = createTRPCRouter({
           date: portfolioSnapshot.date,
           kind: portfolioSnapshot.kind,
           marketValue: portfolioSnapshot.marketValue,
+          costBasis: portfolioSnapshot.costBasis,
         })
         .from(portfolioSnapshot)
         .where(eq(portfolioSnapshot.userId, userId))
@@ -82,6 +83,33 @@ export const overviewRouter = createTRPCRouter({
         unrealizedPct: position.unrealizedPct,
       }));
 
+    const holdings = views.filter(({ asset: a }) => a.kind !== "savings");
+    const ranked = holdings
+      .filter(({ position }) => position.cost > 0 && position.units > 0)
+      .sort((a, b) => b.position.unrealizedPct - a.position.unrealizedPct);
+    const pick = ({ asset: a, position }: (typeof ranked)[number]) => ({
+      id: a.id,
+      name: a.name,
+      kind: a.kind,
+      unrealized: position.unrealized,
+      unrealizedPct: position.unrealizedPct,
+    });
+    const largest = [...views].sort(
+      (a, b) => b.position.marketValue - a.position.marketValue,
+    )[0];
+    const insights = {
+      best: ranked.length > 1 ? pick(ranked[0]!) : null,
+      worst: ranked.length > 1 ? pick(ranked[ranked.length - 1]!) : null,
+      largest:
+        largest && summary.total.marketValue > 0
+          ? {
+              name: largest.asset.name,
+              share: largest.position.marketValue / summary.total.marketValue,
+            }
+          : null,
+      income: round(views.reduce((sum, { position }) => sum + position.income, 0)),
+      realized: round(views.reduce((sum, { position }) => sum + position.realized, 0)),
+    };
     const in30 = addCycle(today, "monthly");
     const due = dueRows.map((row) => ({
       ...row,
@@ -105,7 +133,15 @@ export const overviewRouter = createTRPCRouter({
         share: summary.byKind[kind].share,
         count: summary.byKind[kind].count,
       })).filter((row) => row.marketValue > 0),
-      snapshots: totalsByDate(snapshots),
+      insights,
+      // The stored history ends at the last evening run; today's live total
+      // is appended so the line always meets the headline number.
+      snapshots: withToday(
+        totalsByDate(snapshots),
+        today,
+        summary.total.marketValue,
+        summary.total.cost,
+      ),
       byKind: ASSET_KINDS.map((kind) => ({
         kind,
         points: snapshots
@@ -126,15 +162,34 @@ export const overviewRouter = createTRPCRouter({
 
 /** Adds the per-kind rows up to one total per day. */
 function totalsByDate(
-  rows: { date: string; kind: string; marketValue: number }[],
+  rows: { date: string; kind: string; marketValue: number; costBasis: number }[],
 ) {
-  const totals = new Map<string, number>();
+  const totals = new Map<string, { value: number; invested: number }>();
   for (const row of rows) {
-    totals.set(row.date, (totals.get(row.date) ?? 0) + Number(row.marketValue));
+    const entry = totals.get(row.date) ?? { value: 0, invested: 0 };
+    entry.value += Number(row.marketValue);
+    entry.invested += Number(row.costBasis);
+    totals.set(row.date, entry);
   }
   return [...totals.entries()]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([date, value]) => ({ date, value: round(value) }));
+    .map(([date, t]) => ({
+      date,
+      value: round(t.value),
+      invested: round(t.invested),
+    }));
+}
+
+function withToday(
+  points: { date: string; value: number; invested: number }[],
+  today: string,
+  value: number,
+  invested: number,
+) {
+  if (points.length === 0) return points;
+  const live = { date: today, value: round(value), invested: round(invested) };
+  const last = points[points.length - 1]!;
+  return last.date === today ? [...points.slice(0, -1), live] : [...points, live];
 }
 
 export async function writeSnapshot(

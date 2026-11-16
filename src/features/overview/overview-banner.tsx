@@ -41,7 +41,10 @@ export function OverviewBanner({
           {loading ? (
             <Skeleton className="mt-1 h-11 w-64" />
           ) : (
-            <p className="type-hero tabular-nums">
+            <p
+              className="type-hero tabular-nums"
+              style={{ fontWeight: 600, letterSpacing: "-0.01em" }}
+            >
               <Money value={netWorth} />
             </p>
           )}

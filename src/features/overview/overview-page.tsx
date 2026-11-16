@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CalendarClock,
   Check,
+  Lightbulb,
   Layers,
   LineChart,
   PieChart,
@@ -217,6 +218,70 @@ export function OverviewPage() {
         </Section>
       ) : null}
 
+      <Section
+        title="Worth knowing"
+        description="Plain facts from your own numbers"
+        icon={Lightbulb}
+      >
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Insight label="Best performer">
+            {data.insights.best ? (
+              <>
+                <span className="block truncate">{data.insights.best.name}</span>
+                <Delta
+                  value={data.insights.best.unrealized}
+                  ratio={data.insights.best.unrealizedPct}
+                />
+              </>
+            ) : (
+              <span className="text-muted-foreground">Needs two holdings</span>
+            )}
+          </Insight>
+          <Insight label="Weakest performer">
+            {data.insights.worst ? (
+              <>
+                <span className="block truncate">{data.insights.worst.name}</span>
+                <Delta
+                  value={data.insights.worst.unrealized}
+                  ratio={data.insights.worst.unrealizedPct}
+                />
+              </>
+            ) : (
+              <span className="text-muted-foreground">Needs two holdings</span>
+            )}
+          </Insight>
+          <Insight label="Biggest position">
+            {data.insights.largest ? (
+              <>
+                <span className="block truncate">{data.insights.largest.name}</span>
+                <span
+                  className={
+                    data.insights.largest.share > 0.5
+                      ? "text-loss"
+                      : "text-muted-foreground"
+                  }
+                >
+                  <Masked>
+                    {formatPercent(data.insights.largest.share, { signed: false })}
+                  </Masked>{" "}
+                  of net worth
+                  {data.insights.largest.share > 0.5 ? " · concentrated" : ""}
+                </span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">Nothing yet</span>
+            )}
+          </Insight>
+          <Insight label="Earned so far">
+            <Money value={data.insights.income + data.insights.realized} />
+            <span className="block text-muted-foreground">
+              <Money value={data.insights.income} /> income ·{" "}
+              <Money value={data.insights.realized} /> realized
+            </span>
+          </Insight>
+        </ul>
+      </Section>
+
       <div className="grid gap-6 lg:grid-cols-2">
         <Section
           icon={CalendarClock}
@@ -322,3 +387,18 @@ export function OverviewPage() {
   );
 }
 
+
+function Insight({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="flex min-w-0 flex-col gap-1 rounded-md bg-muted/50 p-4 type-ui-sm">
+      <span className="type-eyebrow text-muted-foreground">{label}</span>
+      {children}
+    </li>
+  );
+}

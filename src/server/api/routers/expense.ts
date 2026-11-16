@@ -4,9 +4,11 @@ import { z } from "zod";
 
 import {
   currentMonthPK,
+  daysInMonth,
   formatMonth,
   monthRange,
   shiftMonth,
+  todayPK,
 } from "~/lib/dates";
 import { expenseInput, isoMonth } from "~/lib/schemas";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -48,51 +50,51 @@ export const expenseRouter = createTRPCRouter({
     const range = monthRange(input.month);
     const previous = monthRange(shiftMonth(input.month, -1));
 
-    const [current] = await ctx.db
-      .select({ total: sql<string>`coalesce(sum(${expense.amount}), 0)` })
-      .from(expense)
-      .where(
-        and(
-          eq(expense.userId, userId),
-          gte(expense.date, range.start),
-          lt(expense.date, range.end),
-        ),
-      );
-    const [prior] = await ctx.db
-      .select({ total: sql<string>`coalesce(sum(${expense.amount}), 0)` })
-      .from(expense)
-      .where(
-        and(
-          eq(expense.userId, userId),
-          gte(expense.date, previous.start),
-          lt(expense.date, previous.end),
-        ),
-      );
-
-    const byCategory = await ctx.db
-      .select({
-        categoryId: expenseCategory.id,
-        name: expenseCategory.name,
-        total: sql<string>`sum(${expense.amount})`,
-      })
-      .from(expense)
-      .innerJoin(expenseCategory, eq(expense.categoryId, expenseCategory.id))
-      .where(
-        and(
-          eq(expense.userId, userId),
-          gte(expense.date, range.start),
-          lt(expense.date, range.end),
-        ),
-      )
-      .groupBy(expenseCategory.id, expenseCategory.name)
-      .orderBy(desc(sql`sum(${expense.amount})`));
+    const sumFor = (r: { start: string; end: string }) =>
+      ctx.db
+        .select({ total: sql<string>`coalesce(sum(${expense.amount}), 0)` })
+        .from(expense)
+        .where(
+          and(
+            eq(expense.userId, userId),
+            gte(expense.date, r.start),
+            lt(expense.date, r.end),
+          ),
+        );
+    const [[current], [prior], byCategory] = await Promise.all([
+      sumFor(range),
+      sumFor(previous),
+      ctx.db
+        .select({
+          categoryId: expenseCategory.id,
+          name: expenseCategory.name,
+          total: sql<string>`sum(${expense.amount})`,
+        })
+        .from(expense)
+        .innerJoin(expenseCategory, eq(expense.categoryId, expenseCategory.id))
+        .where(
+          and(
+            eq(expense.userId, userId),
+            gte(expense.date, range.start),
+            lt(expense.date, range.end),
+          ),
+        )
+        .groupBy(expenseCategory.id, expenseCategory.name)
+        .orderBy(desc(sql`sum(${expense.amount})`)),
+    ]);
 
     const total = round(Number(current?.total ?? 0));
     const previousTotal = round(Number(prior?.total ?? 0));
 
+    const isCurrentMonth = input.month === currentMonthPK();
+    const [year, monthNumber] = input.month.split("-").map(Number) as [number, number];
+    const monthDays = daysInMonth(year, monthNumber);
+    const elapsed = isCurrentMonth ? Number(todayPK().slice(8, 10)) : monthDays;
     return {
       month: input.month,
       label: formatMonth(input.month),
+      dailyAverage: round(total / Math.max(elapsed, 1)),
+      projected: isCurrentMonth ? round((total / Math.max(elapsed, 1)) * monthDays) : null,
       total,
       previousTotal,
       difference: round(total - previousTotal),
@@ -102,7 +104,7 @@ export const expenseRouter = createTRPCRouter({
         total: round(Number(row.total)),
         share: total > 0 ? Number(row.total) / total : 0,
       })),
-      isCurrentMonth: input.month === currentMonthPK(),
+      isCurrentMonth,
     };
   }),
 

@@ -10,6 +10,7 @@ import {
   todayPK,
 } from "~/lib/dates";
 import {
+  isoDate,
   markPaidInput,
   subscriptionInput,
 } from "~/lib/schemas";
@@ -22,6 +23,17 @@ const statusInput = z.object({
   id: z.number().int(),
   status: z.enum(["active", "paused"]),
 });
+
+async function assertCategory(database: Db, userId: string, categoryId: number) {
+  const [row] = await database
+    .select({ id: expenseCategory.id })
+    .from(expenseCategory)
+    .where(and(eq(expenseCategory.id, categoryId), eq(expenseCategory.userId, userId)))
+    .limit(1);
+  if (!row) {
+    throw new TRPCError({ code: "BAD_REQUEST", message: "Choose a category." });
+  }
+}
 
 async function getOwned(database: Db, userId: string, id: number) {
   const [row] = await database
@@ -112,6 +124,7 @@ export const subscriptionRouter = createTRPCRouter({
   create: protectedProcedure
     .input(subscriptionInput)
     .mutation(async ({ ctx, input }) => {
+      await assertCategory(ctx.db, ctx.session.user.id, input.categoryId);
       const [row] = await ctx.db
         .insert(subscription)
         .values({
@@ -128,6 +141,7 @@ export const subscriptionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, ...fields } = input;
       await getOwned(ctx.db, ctx.session.user.id, id);
+      await assertCategory(ctx.db, ctx.session.user.id, fields.categoryId);
       await ctx.db
         .update(subscription)
         .set({ ...fields, billingDay: Number(fields.nextDueDate.slice(8, 10)) })
@@ -195,7 +209,7 @@ export const subscriptionRouter = createTRPCRouter({
 
   /** Removes the expense created by markPaid and restores the due date. */
   undoMarkPaid: protectedProcedure
-    .input(z.object({ expenseId: z.number().int(), previousDueDate: z.string() }))
+    .input(z.object({ expenseId: z.number().int(), previousDueDate: isoDate }))
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
       return ctx.db.transaction(async (tx) => {

@@ -7,7 +7,7 @@ import {
   useChartAxis,
   useChartColors,
 } from "~/components/charts/chart-theme";
-import { formatPKR } from "~/lib/format";
+import { formatCompact, formatPKR } from "~/lib/format";
 
 export type HoldingBar = { name: string; value: number };
 
@@ -58,8 +58,7 @@ function Inner({ rows }: { rows: HoldingBar[] }) {
       xAxis={[
         {
           height: 24,
-          valueFormatter: (value: number) =>
-            value >= 1000 ? `${Math.round(value / 1000)}k` : String(value),
+          valueFormatter: (value: number) => formatCompact(value),
           ...axis,
         },
       ]}
