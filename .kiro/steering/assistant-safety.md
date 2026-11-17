@@ -27,3 +27,9 @@ A write tool is not done until it has all of these:
 
 Notes in `src/server/assistant/knowledge/entries.ts` explain concepts and what to check. They never state a tax rate, policy rate, yield, index level or fee schedule; put a `verify` search hint instead. The test suite rejects stray percentages. Do not use finbro command words ("expense", "subscription") as keywords, or plain commands start retrieving advice.
 
+
+## Chat persistence and approval cards
+
+- Save the conversation on every settled turn (finished answer, approval that resumed the run, denial), not only when a run finishes. Approving an in-place message does not add a message, so a save guard keyed on message ids silently drops it.
+- Fingerprint a save by message id plus each part's type, state and approval.
+- A card must never render Approve/Deny again for an approval already answered, or after a later message moved the conversation on. Show the outcome (approved, not applied, unanswered) instead.

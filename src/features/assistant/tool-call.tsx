@@ -111,7 +111,7 @@ function describeInput(name: string, input: Record<string, unknown>): string[] {
   const holding = () =>
     add(
       "Holding",
-      input.holding ?? (input.holdingId ? `id ${text(input.holdingId)}` : ""),
+      input.holding ?? (input.holdingId ? `#${text(input.holdingId)}` : ""),
     );
 
   switch (name) {
@@ -208,9 +208,12 @@ function describeInput(name: string, input: Record<string, unknown>): string[] {
  */
 export function ToolCall({
   part,
+  expired = false,
   onApprove,
 }: {
   part: ToolPart;
+  /** A later message moved the conversation on, so an open card is dead. */
+  expired?: boolean;
   onApprove: (approvalId: string, approved: boolean) => void;
 }) {
   const name = toolNameOf(part.type);
@@ -219,10 +222,17 @@ export function ToolCall({
   const [open, setOpen] = useState(false);
 
   const state = part.state ?? "input-available";
+  const answered = part.approval?.approved !== undefined;
   const pendingApproval =
-    state === "approval-requested" && part.approval?.id
+    state === "approval-requested" && part.approval?.id && !answered && !expired
       ? part.approval.id
       : null;
+  // Approved, but the run has not reported back yet.
+  const approvedRunning =
+    state === "approval-responded" && part.approval?.approved === true;
+  const expiredCard =
+    (state === "approval-requested" && (expired || answered)) ||
+    (state === "approval-responded" && part.approval?.approved === false);
   const running = state === "input-available" || state === "input-streaming";
   const denied = state === "output-denied" || part.approval?.approved === false;
   const done = state === "output-available";
@@ -279,6 +289,35 @@ export function ToolCall({
     );
   }
 
+  if (expiredCard) {
+    // Either it was answered, or the conversation moved on before an answer.
+    const approved = part.approval?.approved;
+    const label =
+      approved === true
+        ? "approved"
+        : approved === false
+          ? "not applied"
+          : "unanswered";
+    const detail =
+      approved === true
+        ? "recorded"
+        : approved === false
+          ? "no change made"
+          : "this card is closed; check the entry before asking again";
+    return (
+      <div className="border-border/70 bg-muted/30 my-2 flex flex-wrap items-center gap-2 rounded-md border px-3 py-2">
+        <Icon
+          className="text-muted-foreground size-3.5 shrink-0"
+          aria-hidden="true"
+        />
+        <span className="type-legal text-muted-foreground">
+          {meta.label} · {label}
+        </span>
+        <span className="type-legal text-muted-foreground/70">{detail}</span>
+      </div>
+    );
+  }
+
   return (
     <div className="my-2">
       <button
@@ -312,15 +351,17 @@ export function ToolCall({
         />
         <span className="type-legal text-muted-foreground">
           {meta.label}
-          {state === "approval-requested"
-            ? " · waiting"
-            : denied
-              ? " · denied"
-              : refused && meta.write
-                ? " · not recorded"
-                : done && meta.write
-                  ? " · approved"
-                  : ""}
+          {approvedRunning
+            ? " · approved, applying"
+            : state === "approval-requested"
+              ? " · waiting"
+              : denied
+                ? " · not applied"
+                : refused && meta.write
+                  ? " · not recorded"
+                  : done && meta.write
+                    ? " · approved"
+                    : ""}
         </span>
         {refused && typeof refusal === "string" ? (
           <span className="type-legal text-loss min-w-0 flex-1 truncate">
