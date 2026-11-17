@@ -121,7 +121,7 @@ export function ChatWindow({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="mx-auto flex w-full max-w-[760px] flex-col gap-6 px-4 py-6 lg:px-2">
+        <div className="mx-auto flex w-full max-w-[920px] 2xl:max-w-[1180px] flex-col gap-6 px-4 py-6 lg:px-2">
           {isEmpty ? (
             <div className="flex flex-col items-center gap-6 pt-10 text-center sm:pt-16">
               <div className="flex size-14 items-center justify-center rounded-full bg-tint">
@@ -184,13 +184,13 @@ export function ChatWindow({
         </div>
       </div>
 
-      <div className="border-t border-border/70 bg-background/80 backdrop-blur">
+      <div className="border-t border-border/70 bg-background">
         <form
           onSubmit={(event) => {
             event.preventDefault();
             submit(input);
           }}
-          className="mx-auto flex w-full max-w-[760px] flex-col gap-2 px-4 py-4 lg:px-2"
+          className="mx-auto flex w-full max-w-[920px] 2xl:max-w-[1180px] flex-col gap-2 px-4 py-4 lg:px-2"
         >
           <div className="flex items-end gap-2 rounded-2xl border border-input bg-card p-2 shadow-soft focus-within:ring-2 focus-within:ring-ring/30">
             <textarea

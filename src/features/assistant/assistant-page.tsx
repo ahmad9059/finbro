@@ -5,7 +5,6 @@ import {
   MessageSquarePlus,
   MoreHorizontal,
   Pencil,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -183,17 +182,13 @@ export function AssistantPage() {
   );
 
   return (
-    <div className="-my-2 flex h-[calc(100svh-6.5rem)] min-h-0 overflow-hidden rounded-lg bg-card shadow-soft lg:h-[calc(100svh-7.5rem)]">
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border/70 p-3 lg:flex">
-        <div className="mb-2 flex items-center gap-2 px-1">
-          <Sparkles className="size-4 text-primary" aria-hidden="true" />
-          <span className="type-eyebrow text-muted-foreground">Assistant</span>
-        </div>
+    <div className="flex h-full min-h-0 w-full overflow-hidden">
+      <aside className="hidden w-[268px] shrink-0 flex-col border-r border-border/70 bg-card p-3 lg:flex">
         {history}
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b border-border/70 px-3 lg:px-5">
+      <div className="flex min-w-0 flex-1 flex-col bg-background">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b border-border/70 px-4 lg:px-6">
           <Button
             variant="ghost"
             size="icon-sm"

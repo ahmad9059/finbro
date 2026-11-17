@@ -310,7 +310,7 @@ Motion is feedback, never decoration. Only things you can act on move; a card th
 
 ### Assistant
 
-A dedicated screen in the sidebar, laid out like a two-pane mail client: a 240px thread rail (collapses to a sheet under `lg`) and the conversation.
+A dedicated **full-bleed** screen: it owns the whole area under the top bar, with no page padding or card, and scrolls internally. A 268px thread rail on the left (collapses to a sheet under `lg`) and the conversation pane, whose readable column widens to 1180px on very large screens. The rail starts with **New chat**; the page title lives only in the top bar, so nothing is repeated.
 
 - **Messages** — your own words sit right-aligned in a `secondary` bubble with a 16px radius; answers sit on the page with the logo mark and no bubble, so long text stays readable. Answers are markdown: lists, tables (only when comparing three or more things), inline code, links.
 - **Tool calls** — reads are one quiet line (icon, label, chevron) that expands to the raw input and output. Writes are a bordered card: the tool, "needs your approval", each field as a plain line, then Approve (primary) and Deny (secondary). After it runs, the same row shows the result summary in one truncated line.

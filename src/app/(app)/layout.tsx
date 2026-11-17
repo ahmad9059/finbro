@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { AppContent } from "~/components/shell/app-content";
 import { AppSidebar } from "~/components/shell/app-sidebar";
 import { ExpenseDialogProvider } from "~/features/expenses/expense-dialog-provider";
 import { TopBar } from "~/components/shell/top-bar";
@@ -24,11 +25,9 @@ export default async function AppLayout({
             image: session.user.image,
           }}
         />
-        <div className="flex-1 px-4 py-6 lg:px-8 lg:py-8">
-          <div className="mx-auto w-full max-w-[1200px]">
-            <ExpenseDialogProvider>{children}</ExpenseDialogProvider>
-          </div>
-        </div>
+        <AppContent>
+          <ExpenseDialogProvider>{children}</ExpenseDialogProvider>
+        </AppContent>
       </SidebarInset>
     </SidebarProvider>
   );
