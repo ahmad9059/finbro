@@ -22,15 +22,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { useMounted } from "~/hooks/use-mounted";
 import { errorMessage } from "~/lib/errors";
 import { api } from "~/trpc/react";
+
+/**
+ * The account's assistant settings. Held back until mounted: a cached copy
+ * from this browser's storage would otherwise render on the client but not in
+ * the server HTML, which breaks hydration.
+ */
+function useAssistantSettings(options?: { staleTime?: number }) {
+  const mounted = useMounted();
+  const { data } = api.assistant.settings.useQuery(undefined, options);
+  return mounted ? data : undefined;
+}
 
 /** The model picker. Applies to the next message. */
 export function ModelSelect({ className }: { className?: string }) {
   const utils = api.useUtils();
-  const { data } = api.assistant.settings.useQuery(undefined, {
-    staleTime: 60_000,
-  });
+  const data = useAssistantSettings({ staleTime: 60_000 });
   const save = api.assistant.saveSettings.useMutation({
     onSuccess: () => {
       void utils.assistant.settings.invalidate();
@@ -67,9 +77,7 @@ export function ModelSelect({ className }: { className?: string }) {
 /** Bring-your-own-key entry point for the chat header. */
 export function AssistantKeyButton({ withLabel = false }: { withLabel?: boolean }) {
   const [open, setOpen] = useState(false);
-  const { data } = api.assistant.settings.useQuery(undefined, {
-    staleTime: 60_000,
-  });
+  const data = useAssistantSettings({ staleTime: 60_000 });
 
   return (
     <>
@@ -215,7 +223,7 @@ export function AssistantKeyDialog({
 
 /** Full-width version for the Settings page. */
 export function AssistantSettingsCard() {
-  const { data } = api.assistant.settings.useQuery();
+  const data = useAssistantSettings();
 
   return (
     <div className="flex flex-col gap-5">

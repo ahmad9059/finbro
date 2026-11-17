@@ -33,6 +33,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
+import { useMounted } from "~/hooks/use-mounted";
 import { formatDate } from "~/lib/format";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -45,6 +46,9 @@ import { ChatSkeleton, HistorySkeleton } from "./assistant-skeleton";
 import { ChatWindow } from "./chat-window";
 
 export function AssistantPage() {
+  // Cached chats come from this browser's storage, so the server cannot know
+  // them. Until mounted, show the same skeleton the server rendered.
+  const mounted = useMounted();
   const router = useRouter();
   const params = useSearchParams();
   const requested = Number(params.get("t"));
@@ -58,14 +62,14 @@ export function AssistantPage() {
   const [deleting, setDeleting] = useState<{ id: number; title: string } | null>(null);
   const startedRef = useRef(false);
 
-  const list = threads.data ?? [];
+  const list = mounted ? (threads.data ?? []) : [];
   const threadId = Number.isFinite(requested) && requested > 0 ? requested : null;
   const current = list.find((thread) => thread.id === threadId);
 
   // Opening the assistant always lands in a conversation: the latest one, or a
   // fresh one if this is the first visit.
   useEffect(() => {
-    if (threadId || threads.isLoading || startedRef.current) return;
+    if (!mounted || threadId || threads.isLoading || startedRef.current) return;
     if (list.length > 0) {
       router.replace(`/assistant?t=${list[0]!.id}`);
       return;
@@ -75,7 +79,7 @@ export function AssistantPage() {
       .mutateAsync({ title: "New chat" })
       .then((thread) => router.replace(`/assistant?t=${thread.id}`));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run when the list settles
-  }, [threadId, threads.isLoading, list]);
+  }, [mounted, threadId, threads.isLoading, list]);
 
   const messages = api.chat.messages.useQuery(
     { threadId: threadId ?? 0 },
@@ -119,7 +123,7 @@ export function AssistantPage() {
         New chat
       </Button>
       <div className="mt-2 min-h-0 flex-1 overflow-y-auto">
-        {threads.isPending ? (
+        {!mounted || threads.isPending ? (
           <HistorySkeleton />
         ) : list.length === 0 ? (
           <p className="px-1 type-ui-sm text-muted-foreground">No chats yet.</p>
@@ -215,7 +219,7 @@ export function AssistantPage() {
           </Button>
         </header>
 
-        {threadId === null || messages.isPending ? (
+        {!mounted || threadId === null || messages.isPending ? (
           <ChatSkeleton />
         ) : (
           <ChatWindow
