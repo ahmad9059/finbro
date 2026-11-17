@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Typecheck and lint when the agent finishes",
+      "description": "Catch type and lint errors before the owner reads the answer. Exit 1 starts another turn so the agent fixes them.",
+      "trigger": "Stop",
+      "action": {
+        "type": "command",
+        "command": "pnpm -s typecheck >/tmp/finbro-typecheck.log 2>&1 || { cat /tmp/finbro-typecheck.log; exit 1; }"
+      },
+      "timeout": 180
+    }
+  ]
+}

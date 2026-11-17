@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Schema change checklist",
+      "description": "A schema edit needs a migration, an env/docs check and a matching data-model section.",
+      "trigger": "PostFileSave",
+      "matcher": "^.*src/server/db/schema\\.ts$",
+      "action": {
+        "type": "agent",
+        "prompt": "src/server/db/schema.ts changed. Check that: (1) a migration was generated with `pnpm db:generate` and no applied migration in drizzle/ was edited; (2) every new table has a userId column with a cascade FK to the Better Auth user and every query on it filters by ctx.session.user.id; (3) the data-model section of plan/fin-bro/architecture.md and the README paragraph 'Data model in one paragraph' still match; (4) scripts/delete-user.ts still removes everything the user owns. Report what you fixed or what still needs the owner."
+      }
+    }
+  ]
+}

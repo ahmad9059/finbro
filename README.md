@@ -14,6 +14,7 @@
   <a href="#running-it">Running it</a> ·
   <a href="#how-prices-work">How prices work</a> ·
   <a href="#deploying">Deploying</a> ·
+  <a href="#built-with-kiro">Built with Kiro</a> ·
   <a href="plan/fin-bro/README.md">The plan</a>
 </p>
 
@@ -86,7 +87,7 @@ A chat that has read access to the whole account and can change it with your app
 
 - **Reads** — net worth, every holding with units, average cost and P&L, transactions, monthly spending and categories, subscriptions, plus live PSX quotes. Every number in an answer comes from a tool call, never from the model's memory.
 - **Writes** — add or delete an expense, record a buy/sell/dividend/deposit/profit, add a holding or savings account, set a price by hand, add a subscription, mark one paid. Each one stops at an approval card showing exactly what will change; nothing runs until you press Approve.
-- **Web search** — Gemini's Google Search grounding, used for news, rates and anything after the model's cutoff. Sources render under the answer.
+- **Web search** — Anthropic's built-in web search tool (up to five searches per answer), used for news, rates and anything after the model's cutoff. Sources render under the answer.
 - **History** — threads and messages are stored in Postgres per user, titled from the first message, renameable and deletable.
 
 **Claude only, by design.** The chat runs on Anthropic. A dropdown in the header picks the model — Haiku 4.5 (fastest), Sonnet 4.5 (default), Sonnet 5, Opus 4.5 (most capable) — and the choice is saved per account.
@@ -131,7 +132,7 @@ Node 22+ and pnpm 10+ are expected; the repo was built on Node 26 and pnpm 12.
 | `AUTH_ALLOW_SIGNUP` | Set to `true` only while `pnpm user:create` runs |
 | `ANTHROPIC_API_KEY` | Server key, used when the account has no key of its own |
 | `ANTHROPIC_MODEL` | Default model when the account has not chosen one, `claude-sonnet-4-5` |
-| `ASSISTANT_MOCK` | `true` in development to stream scripted replies instead of calling Gemini |
+| `ASSISTANT_MOCK` | `true` in development to stream scripted replies instead of calling Anthropic |
 
 ### Commands
 
@@ -140,7 +141,7 @@ Node 22+ and pnpm 10+ are expected; the repo was built on Node 26 and pnpm 12.
 | `pnpm dev` | Development server |
 | `pnpm build` | Production build |
 | `pnpm check` | Lint + typecheck |
-| `pnpm test` | Unit tests for the money maths and date helpers |
+| `pnpm test` | Unit and property-based tests for the money maths, dates, CSV and assistant settings |
 | `pnpm db:generate` | Write a migration from `src/server/db/schema.ts` |
 | `pnpm db:migrate` | Apply migrations |
 | `pnpm db:studio` | Browse the database |
@@ -213,6 +214,23 @@ full-screen with the app icon, remembers the last screen you visited, and shows
 an offline page when the network drops. The manifest, icons and service worker
 all ship in this repo (`app/manifest.ts`, `public/icons`, `public/sw.js`).
 
+## Built with Kiro
+
+Built for [Kiroween 2026](https://kiroween.devpost.com) in the **Frankenstein** category: a PSX
+scraper, a MUFAP dataset, an exact-decimal ledger, a tool-calling Claude assistant with human
+approval, and an installable PWA, stitched into one app.
+
+The Kiro configuration that guides work on this repo is committed under [`.kiro/`](.kiro):
+
+| Feature | What is in the repo |
+| --- | --- |
+| **Steering** | [`product.md`](.kiro/steering/product.md), [`tech.md`](.kiro/steering/tech.md) and [`structure.md`](.kiro/steering/structure.md) are always loaded. [`money-math.md`](.kiro/steering/money-math.md) and [`assistant-safety.md`](.kiro/steering/assistant-safety.md) load only when the matching files are open. |
+| **Hooks** | Run tests when `src/lib` changes; a schema-change checklist when `schema.ts` changes; block writes to `.env`; typecheck when the agent finishes a turn. |
+| **Specs** | [`portfolio-invariants`](.kiro/specs/portfolio-invariants): requirements, design and tasks for the property-based tests. |
+| **Property-based testing** | [`src/lib/portfolio.property.test.ts`](src/lib/portfolio.property.test.ts) checks cost conservation, oversell and overdraft rejection, and ledger balances for any valid history, using fast-check. |
+
+The original product plan, design system and ten build phases are in [`plan/fin-bro/`](plan/fin-bro/README.md).
+
 ## Notes
 
 - The app opens in **dark mode** by default; light and system are one click away.
@@ -225,6 +243,6 @@ all ship in this repo (`app/manifest.ts`, `public/icons`, `public/sw.js`).
 
 ## License
 
-Personal project. The code is not licensed for redistribution; the design
-language it follows belongs to [Mercury](https://mercury.com), and the PSX and
-MUFAP data belongs to its publishers.
+The code is released under the [MIT License](LICENSE). The design language it
+follows belongs to [Mercury](https://mercury.com), and the PSX and MUFAP data
+belongs to its publishers.

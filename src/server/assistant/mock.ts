@@ -55,12 +55,12 @@ function decidedApproval(messages: UIMessage[]) {
 }
 
 /**
- * A scripted assistant used only when `ASSISTANT_MOCK=1` in development.
+ * A scripted assistant used only when `ASSISTANT_MOCK=true` in development.
  *
  * It streams the same chunk shapes the real route produces — text, a tool
  * call, an approval request and its result — so the chat UI, approval flow,
- * persistence and error handling can be exercised without spending Gemini
- * quota. It never writes to the database.
+ * persistence and error handling can be exercised without spending Anthropic
+ * credit. It never writes to the database.
  */
 export function mockChatResponse(messages: UIMessage[], context: AssistantContext) {
   const stream = createUIMessageStream({
@@ -151,7 +151,7 @@ export function mockChatResponse(messages: UIMessage[], context: AssistantContex
       } else {
         writeText(
           writer,
-          "Mock mode is on, so I will not call Gemini. Ask about your net worth, or try *add 2,500 for groceries* to see the approval flow.",
+          "Mock mode is on, so I will not call Anthropic. Ask about your net worth, or try *add 2,500 for groceries* to see the approval flow.",
         );
       }
 

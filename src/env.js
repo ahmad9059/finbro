@@ -17,7 +17,7 @@ export const env = createEnv({
     ANTHROPIC_API_KEY: z.string().min(10).optional(),
     /** Default model when the user has not chosen one. */
     ANTHROPIC_MODEL: z.string().min(3).optional(),
-    /** Development only: stream scripted replies instead of calling Gemini. */
+    /** Development only: stream scripted replies instead of calling Anthropic. */
     ASSISTANT_MOCK: z.enum(["true", "false"]).optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
