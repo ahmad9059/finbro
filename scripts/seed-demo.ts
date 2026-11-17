@@ -256,6 +256,8 @@ months.forEach((target, index) => {
   for (const template of templates) {
     // Skip a few entries so every month does not look identical.
     if ((template.day + index) % 7 === 0) continue;
+    // Never date an expense after today.
+    if (target === month && template.day > Number(today.slice(8, 10))) continue;
     rows.push({
       userId,
       date: `${target}-${String(template.day).padStart(2, "0")}`,
