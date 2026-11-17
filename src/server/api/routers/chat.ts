@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, notInArray, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -147,26 +147,40 @@ export const chatRouter = createTRPCRouter({
       const userId = ctx.session.user.id;
       const thread = await assertThread(userId, input.threadId);
 
+      const ids = input.messages.map((message) => message.id);
+
       await db.transaction(async (tx) => {
+        // Remove only what the client no longer has, then upsert the rest, so
+        // two overlapping saves (finish and error) cannot collide.
         await tx
           .delete(chatMessage)
           .where(
             and(
               eq(chatMessage.threadId, thread.id),
               eq(chatMessage.userId, userId),
+              ids.length > 0 ? notInArray(chatMessage.id, ids) : undefined,
             ),
           );
 
         if (input.messages.length > 0) {
-          await tx.insert(chatMessage).values(
-            input.messages.map((message) => ({
-              id: message.id,
-              threadId: thread.id,
-              userId,
-              role: message.role,
-              parts: message.parts,
-            })),
-          );
+          await tx
+            .insert(chatMessage)
+            .values(
+              input.messages.map((message) => ({
+                id: message.id,
+                threadId: thread.id,
+                userId,
+                role: message.role,
+                parts: message.parts,
+              })),
+            )
+            .onConflictDoUpdate({
+              target: chatMessage.id,
+              set: {
+                role: sql`excluded.role`,
+                parts: sql`excluded.parts`,
+              },
+            });
         }
 
         const title =

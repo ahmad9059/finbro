@@ -160,7 +160,16 @@ Checked 2026-11-16 with the project's Google AI Studio key:
 | **`gemini-3.5-flash`** | Worked: plain text, function calling with `stopWhen`, and streaming. **Chosen as the default** |
 | `gemini-3.1-flash-lite` | Worked, but weaker for tool use |
 
-So the default is `gemini-3.5-flash`, overridable with `GEMINI_MODEL`. Free-tier keys have a small per-minute quota — a handful of requests in a minute exhausts it — which is why the UI maps 429/503 to a sentence rather than a stack trace, and why `ASSISTANT_MOCK=true` exists to exercise the whole chat and approval flow without spending quota. Google Search grounding is wired through the provider's `google.tools.googleSearch({})`; it is subject to the same quota.
+So Gemini's default is `gemini-3.5-flash`, overridable with `GEMINI_MODEL`.
+
+**Anthropic**, checked with a live key on 2026-11-17:
+
+| Model | Result |
+| --- | --- |
+| **`claude-sonnet-4-5`** | Worked end to end: streaming, function calling against the account tools, the approval round-trip (approve → tool executes → confirmation), and provider-native web search available as `webSearch_20250305` |
+| `anthropic-*` via `@ai-sdk/anthropic` 4.0.105 | The SDK lists models up to `claude-opus-4-8` / `claude-sonnet-5-5`; `claude-sonnet-4-5` is the cost/quality default here |
+
+Claude is therefore the **primary** provider (`ASSISTANT_PROVIDERS="anthropic,gemini"`), with Gemini kept as the fallback and still the cheaper option when its quota is available. A failed provider is retried on the next one in the same turn; the header badge shows which model answered. Free-tier keys have a small per-minute quota — a handful of requests in a minute exhausts it — which is why the UI maps 429/503 to a sentence rather than a stack trace, and why `ASSISTANT_MOCK=true` exists to exercise the whole chat and approval flow without spending quota. Google Search grounding is wired through the provider's `google.tools.googleSearch({})`; it is subject to the same quota.
 
 ## Open risks
 

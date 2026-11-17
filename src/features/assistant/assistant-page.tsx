@@ -40,7 +40,14 @@ import { api } from "~/trpc/react";
 
 import { ChatWindow } from "./chat-window";
 
-export function AssistantPage() {
+type ProviderOption = {
+  id: string;
+  label: string;
+  model: string;
+  configured: boolean;
+};
+
+export function AssistantPage({ providers = [] }: { providers?: ProviderOption[] }) {
   const router = useRouter();
   const params = useSearchParams();
   const requested = Number(params.get("t"));
@@ -50,6 +57,10 @@ export function AssistantPage() {
   const remove = api.chat.deleteThread.useMutation();
 
   const [historyOpen, setHistoryOpen] = useState(false);
+  const firstConfigured = providers.find((provider) => provider.configured);
+  const [activeProvider, setActiveProvider] = useState<ProviderOption | null>(
+    firstConfigured ?? null,
+  );
   const [renaming, setRenaming] = useState<{ id: number; title: string } | null>(null);
   const [deleting, setDeleting] = useState<{ id: number; title: string } | null>(null);
   const startedRef = useRef(false);
@@ -201,9 +212,14 @@ export function AssistantPage() {
           <h1 className="min-w-0 flex-1 truncate type-ui-sm font-medium">
             {current?.title ?? "New chat"}
           </h1>
-          <span className="hidden rounded-full bg-secondary px-2.5 py-1 type-legal text-secondary-foreground sm:inline">
-            Gemini
-          </span>
+          {activeProvider ? (
+            <span
+              title={activeProvider.model}
+              className="hidden rounded-full bg-secondary px-2.5 py-1 type-legal text-secondary-foreground sm:inline"
+            >
+              {activeProvider.label}
+            </span>
+          ) : null}
           <Button
             variant="secondary"
             size="sm"
@@ -226,6 +242,8 @@ export function AssistantPage() {
             threadId={threadId}
             initialMessages={messages.data ?? []}
             onSaved={() => void threads.refetch()}
+            onProvider={setActiveProvider}
+            providers={providers}
           />
         )}
       </div>

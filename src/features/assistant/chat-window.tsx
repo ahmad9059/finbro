@@ -44,19 +44,56 @@ export function ChatWindow({
   threadId,
   initialMessages,
   onSaved,
+  onProvider,
+  providers = [],
 }: {
   threadId: number;
   initialMessages: ChatMessage[];
   onSaved?: () => void;
+  /** Which provider actually answered; the server may fall back. */
+  onProvider?: (provider: {
+    id: string;
+    label: string;
+    model: string;
+    configured: boolean;
+  }) => void;
+  /** Configured providers, in the order to try. */
+  providers?: { id: string; label: string; configured: boolean }[];
 }) {
   const [input, setInput] = useState("");
   const { hidden } = usePrivacy();
+
+  const available = providers.filter((provider) => provider.configured);
+  const [providerId, setProviderId] = useState<string | undefined>(
+    available[0]?.id,
+  );
+  const [notice, setNotice] = useState<string | null>(null);
+  // Providers already tried for the current turn, so a failure cannot loop.
+  const triedRef = useRef<string[]>([]);
   const save = api.chat.saveMessages.useMutation();
   const savedRef = useRef<string>("");
 
   const transport = useMemo(
-    () => new DefaultChatTransport({ api: "/api/chat" }),
-    [],
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        // The badge follows the provider that actually answered, which is not
+        // always the one we asked for.
+        fetch: async (input, init) => {
+          const response = await fetch(input, init);
+          const id = response.headers.get("x-assistant-provider");
+          if (id) {
+            onProvider?.({
+              id,
+              label: id === "anthropic" ? "Claude" : id === "gemini" ? "Gemini" : id,
+              model: response.headers.get("x-assistant-model") ?? "",
+              configured: true,
+            });
+          }
+          return response;
+        },
+      }),
+    [onProvider],
   );
 
   const {
@@ -73,27 +110,53 @@ export function ChatWindow({
     transport,
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
     onFinish: ({ messages: finished }) => {
-      void persist(finished);
+      persist(finished);
     },
     onError: () => {
       void persist(messages);
     },
   });
 
+  /** One save at a time; a later one always supersedes an earlier one. */
+  const saveQueue = useRef<Promise<void>>(Promise.resolve());
   const persist = useCallback(
-    async (list: ChatMessage[]) => {
+    (list: ChatMessage[]) => {
       const fingerprint = `${list.length}:${list[list.length - 1]?.id ?? ""}`;
       if (savedRef.current === fingerprint) return;
       savedRef.current = fingerprint;
-      try {
-        await save.mutateAsync({ threadId, messages: list });
-        onSaved?.();
-      } catch {
-        // The next successful save will catch up; the chat still works.
-      }
+      saveQueue.current = saveQueue.current
+        .then(async () => {
+          await save.mutateAsync({ threadId, messages: list });
+          onSaved?.();
+        })
+        .catch(() => {
+          // A later save catches up; the chat itself is unaffected.
+        });
     },
     [onSaved, save, threadId],
   );
+
+  // A failed provider falls back to the next one configured, once per turn.
+  useEffect(() => {
+    if (status !== "error" || !error) return;
+    if (providerId && !triedRef.current.includes(providerId)) {
+      triedRef.current.push(providerId);
+    }
+    const next = available.find(
+      (provider) => !triedRef.current.includes(provider.id),
+    );
+    if (!next) {
+      setNotice(null);
+      return;
+    }
+    const failed = available.find((provider) => provider.id === providerId);
+    setProviderId(next.id);
+    setNotice(
+      `${failed?.label ?? "The model"} is unavailable — retrying with ${next.label}…`,
+    );
+    void regenerate({ body: { provider: next.id } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- react to the error only
+  }, [status, error]);
 
   const streaming = status === "streaming" || status === "submitted";
   const scroller = useRef<HTMLDivElement>(null);
@@ -109,7 +172,9 @@ export function ChatWindow({
     const trimmed = text.trim();
     if (!trimmed || streaming) return;
     setInput("");
-    void sendMessage({ text: trimmed });
+    triedRef.current = [];
+    setNotice(null);
+    void sendMessage({ text: trimmed }, { body: { provider: providerId } });
   }
 
   function approve(approvalId: string, approved: boolean) {
@@ -167,6 +232,10 @@ export function ChatWindow({
                 <Dot delay="300ms" />
               </span>
             </div>
+          ) : null}
+
+          {notice ? (
+            <p className="type-legal text-muted-foreground">{notice}</p>
           ) : null}
 
           {error ? (

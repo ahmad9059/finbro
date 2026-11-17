@@ -227,7 +227,9 @@ Browser (chat UI)
 - **Prompt** (`server/assistant/prompt.ts`): tool-first answers, PKR formatting, no invented numbers, no repeat after a denial, no price predictions.
 - **Persistence**: `chat_thread` and `chat_message` (jsonb parts). The client replaces a thread's messages after each completed run, which keeps approvals and regenerations consistent.
 - **Limits**: 120 messages and 80 parts per message, 8 tool steps, 2,500 output tokens, one server-side retry.
-- **Failure modes**: 429 (quota), 503 (busy), auth, safety and unknown errors each map to a readable sentence; the key can be absent and the rest of the app still runs.
+- **Providers** (`server/assistant/providers.ts`): Claude (Anthropic) and Gemini (Google) behind one interface — model, provider options and native web-search tool. `ASSISTANT_PROVIDERS` sets the order; providers without a key are skipped.
+- **Fallback**: the route tries the requested provider, then the rest of the order; if the first HTTP response fails, it moves on. On a failure that only surfaces mid-stream, the client retries the same turn with the next provider (once per provider), shows "…retrying with Claude" and updates the badge from the `x-assistant-provider` response header.
+- **Failure modes**: quota, credit balance, overloaded, rejected key, safety and unknown errors each map to a readable sentence; the keys can be absent and the rest of the app still runs.
 
 ## Daily job
 

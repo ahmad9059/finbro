@@ -85,9 +85,9 @@ A chat that has read access to the whole account and can change it with your app
 - **Web search** — Gemini's Google Search grounding, used for news, rates and anything after the model's cutoff. Sources render under the answer.
 - **History** — threads and messages are stored in Postgres per user, titled from the first message, renameable and deletable.
 
-The model is Gemini (`GEMINI_MODEL`, default `gemini-3.5-flash`). The key needs the Generative Language API enabled; free-tier keys have low rate limits, and the app explains a 429 or 503 instead of showing a stack trace.
+**Providers.** Claude (Anthropic) is the default, with Gemini as the fallback — or change the order with `ASSISTANT_PROVIDERS` (`anthropic,gemini` by default). If the first provider fails at request time (quota, overloaded, rejected key), the chat retries the same turn with the next one and the badge in the header follows whoever answered. When every provider fails, the reason is shown in plain language with a Retry button, not a stack trace.
 
-`ASSISTANT_MOCK=true` (development only) streams scripted replies — including a full approval round-trip — without calling Gemini. It is ignored in production.
+`ASSISTANT_MOCK=true` (development only) streams scripted replies — including a full approval round-trip — without calling any provider. It is ignored in production.
 
 ## Stack
 
@@ -123,8 +123,11 @@ Node 22+ and pnpm 10+ are expected; the repo was built on Node 26 and pnpm 12.
 | `BETTER_AUTH_URL` | `http://localhost:3000` locally, `https://fin.devshub.xyz` in production |
 | `CRON_SECRET` | Guards `/api/cron/daily`; Vercel sends it automatically |
 | `AUTH_ALLOW_SIGNUP` | Set to `true` only while `pnpm user:create` runs |
-| `GEMINI_API_KEY` | Google AI Studio key for the assistant (optional: the app builds and runs without it) |
+| `ANTHROPIC_API_KEY` | Anthropic key (primary provider by default) |
+| `ANTHROPIC_MODEL` | Model name, default `claude-sonnet-4-5` |
+| `GEMINI_API_KEY` | Google AI Studio key (fallback provider) |
 | `GEMINI_MODEL` | Model name, default `gemini-3.5-flash` |
+| `ASSISTANT_PROVIDERS` | Order to try, default `anthropic,gemini` |
 | `ASSISTANT_MOCK` | `true` in development to stream scripted replies instead of calling Gemini |
 
 ### Commands

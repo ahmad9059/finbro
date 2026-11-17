@@ -1,6 +1,7 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import {
   convertToModelMessages,
+  createUIMessageStream,
+  createUIMessageStreamResponse,
   stepCountIs,
   streamText,
   type UIMessage,
@@ -12,6 +13,10 @@ import { todayPK } from "~/lib/dates";
 import { loadAssistantContext, renderContext } from "~/server/assistant/context";
 import { buildSystemPrompt } from "~/server/assistant/prompt";
 import { mockChatResponse } from "~/server/assistant/mock";
+import {
+  modelFor,
+  providersToTry,
+} from "~/server/assistant/providers";
 import { createAssistantTools } from "~/server/assistant/tools";
 import { getSession } from "~/server/better-auth/server";
 
@@ -37,17 +42,59 @@ const bodySchema = z.object({
  * relies on data the browser could have edited. Tools are bound to the signed-in
  * user; write tools only execute after the owner approves them in the UI.
  */
+/**
+ * A streamed error, so the chat shows our sentence rather than a raw HTTP
+ * status with an empty body.
+ */
+function errorStream(message: string) {
+  return createUIMessageStreamResponse({
+    stream: createUIMessageStream({
+      execute: ({ writer }) => {
+        writer.write({ type: "start" });
+        writer.write({ type: "error", errorText: message });
+        writer.write({ type: "finish" });
+      },
+    }),
+  });
+}
+
+/** Every message in an error's cause chain, plus its HTTP status. */
+function describeError(error: unknown): string {
+  const parts: string[] = [];
+  let current: unknown = error;
+  for (let depth = 0; depth < 4 && current; depth += 1) {
+    if (current instanceof Error) {
+      parts.push(current.message);
+      const status = (current as { statusCode?: number }).statusCode;
+      if (status) parts.push(`status ${status}`);
+      const data = (current as { data?: unknown }).data;
+      if (data) parts.push(JSON.stringify(data).slice(0, 400));
+      current = (current as { cause?: unknown }).cause;
+    } else {
+      parts.push(typeof current === "string" ? current : JSON.stringify(current).slice(0, 200));
+      break;
+    }
+  }
+  return parts.join(" | ");
+}
+
 /** Turns provider noise into something a person can act on. */
 function friendlyError(error: unknown): string {
-  const message = error instanceof Error ? error.message : "";
+  const message = describeError(error);
   if (/quota|rate limit|429|RESOURCE_EXHAUSTED/i.test(message)) {
     return "Gemini's limit for this key is reached. Wait a minute and try again, or enable billing on the key.";
   }
   if (/high demand|503|UNAVAILABLE/i.test(message)) {
     return "Gemini is busy right now. Try again in a moment.";
   }
-  if (/API key|401|403/i.test(message)) {
-    return "The Gemini API key is missing or not accepted.";
+  if (/credit balance|billing|insufficient_quota/i.test(message)) {
+    return "The provider account has no credit. Add funds, or change the provider order.";
+  }
+  if (/invalid x-api-key|authentication_error|API key|401|403/i.test(message)) {
+    return "A provider key was rejected. Check GEMINI_API_KEY and ANTHROPIC_API_KEY.";
+  }
+  if (/overloaded_error|529/i.test(message)) {
+    return "The model is overloaded right now. Try again in a moment.";
   }
   if (/safety|blocked/i.test(message)) {
     return "Gemini declined to answer that. Try rephrasing it.";
@@ -74,6 +121,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return new Response("Invalid chat payload.", { status: 400 });
   }
+  const preferred = (json as { provider?: unknown } | null)?.provider;
 
   try {
     const context = await loadAssistantContext(session.user.id);
@@ -85,36 +133,59 @@ export async function POST(request: Request) {
       );
     }
 
-    const google = createGoogleGenerativeAI({ apiKey: env.GEMINI_API_KEY });
     const system = buildSystemPrompt(renderContext(context), todayPK());
     const accountTools = createAssistantTools({ userId: session.user.id });
+    const providers = providersToTry(preferred);
 
-    const tools = {
-      ...accountTools,
-      // Grounding through Gemini's own search: no extra key, sources come back
-      // as citations the UI renders under the answer.
-      google_search: google.tools.googleSearch({}),
-    };
+    if (providers.length === 0) {
+      return errorStream(
+        "No assistant provider is configured. Add GEMINI_API_KEY or ANTHROPIC_API_KEY.",
+      );
+    }
 
-    const result = streamText({
-      model: google(env.GEMINI_MODEL ?? "gemini-3.5-flash"),
-      // Low thinking keeps tool-calling reliable without a long pause before
-      // the first token. Read the numbers from tools, not from reasoning.
-      providerOptions: { google: { thinkingConfig: { thinkingLevel: "low" } } },
-      system,
-      messages: await convertToModelMessages(
-        parsed.data.messages as UIMessage[],
-        { tools },
-      ),
-      tools,
-      stopWhen: stepCountIs(8),
-      temperature: 0.3,
-      maxOutputTokens: 2500,
-      maxRetries: 1,
-      abortSignal: request.signal,
-    });
+    const messages = await convertToModelMessages(
+      parsed.data.messages as UIMessage[],
+      {},
+    );
 
-    return result.toUIMessageStreamResponse({ onError: friendlyError });
+    let lastError: unknown;
+    for (const provider of providers) {
+      const tools = { ...accountTools, ...provider.searchTool };
+      try {
+        const result = streamText({
+          model: provider.model as never,
+          providerOptions: provider.providerOptions as never,
+          system,
+          messages,
+          tools,
+          stopWhen: stepCountIs(8),
+          temperature: 0.3,
+          maxOutputTokens: 2500,
+          maxRetries: 1,
+          abortSignal: request.signal,
+        });
+
+        // Wait for the provider's first HTTP response: a quota or auth failure
+        // arrives here, before any token, so the next provider can take over.
+        await result.response;
+
+        const response = result.toUIMessageStreamResponse({
+          onError: friendlyError,
+        });
+        response.headers.set("x-assistant-provider", provider.id);
+        response.headers.set("x-assistant-model", modelFor(provider.id));
+        return response;
+      } catch (error) {
+        lastError = error;
+        console.warn(
+          `[assistant] ${provider.id} failed, trying the next provider:`,
+          error instanceof Error ? error.message.slice(0, 160) : error,
+        );
+      }
+    }
+
+    console.error("[assistant] every provider failed", lastError);
+    return errorStream(friendlyError(lastError));
   } catch (error) {
     console.error("[assistant] request failed", error);
     return new Response("The assistant is unavailable right now.", {

@@ -49,6 +49,7 @@ const TOOL_META: Record<
   },
   add_subscription: { label: "Add subscription", icon: CalendarClock, write: true },
   google_search: { label: "Web search", icon: Globe },
+  web_search: { label: "Web search", icon: Globe },
 };
 
 export type ToolPart = {
