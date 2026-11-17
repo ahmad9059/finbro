@@ -2,10 +2,13 @@
 
 import {
   CalendarClock,
+  BookOpen,
   Check,
   ChevronDown,
   CircleAlert,
   Globe,
+  HeartPulse,
+  Landmark,
   Loader2,
   Minus,
   PencilLine,
@@ -28,6 +31,10 @@ const TOOL_META: Record<
   { label: string; icon: LucideIcon; write?: boolean }
 > = {
   portfolio_summary: { label: "Portfolio summary", icon: Wallet },
+  portfolio_health: { label: "Health check", icon: HeartPulse },
+  simulate_trade: { label: "Trade check", icon: Search },
+  fund_search: { label: "Fund search", icon: Landmark },
+  search_knowledge: { label: "Background notes", icon: BookOpen },
   list_holdings: { label: "Holdings", icon: Wallet },
   list_transactions: { label: "Transactions", icon: ReceiptText },
   expense_report: { label: "Spending report", icon: ReceiptText },
@@ -38,7 +45,18 @@ const TOOL_META: Record<
   spending_trend: { label: "Spending trend", icon: ReceiptText },
   category_share: { label: "Allocation", icon: Wallet },
   add_expense: { label: "Add expense", icon: ReceiptText, write: true },
+  update_expense: { label: "Update expense", icon: PencilLine, write: true },
   delete_expense: { label: "Delete expense", icon: Trash2, write: true },
+  delete_transaction: {
+    label: "Delete transaction",
+    icon: Trash2,
+    write: true,
+  },
+  update_subscription: {
+    label: "Update subscription",
+    icon: CalendarClock,
+    write: true,
+  },
   add_transaction: { label: "Add transaction", icon: PencilLine, write: true },
   add_holding: { label: "Add holding", icon: Wallet, write: true },
   set_price: { label: "Set price", icon: TrendingUp, write: true },
@@ -47,7 +65,11 @@ const TOOL_META: Record<
     icon: Check,
     write: true,
   },
-  add_subscription: { label: "Add subscription", icon: CalendarClock, write: true },
+  add_subscription: {
+    label: "Add subscription",
+    icon: CalendarClock,
+    write: true,
+  },
   google_search: { label: "Web search", icon: Globe },
   web_search: { label: "Web search", icon: Globe },
 };
@@ -70,7 +92,8 @@ export function toolNameOf(partType: string) {
 /** A printable scalar, or an empty string for objects and null. */
 function text(value: unknown): string {
   if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "number" || typeof value === "boolean")
+    return String(value);
   return "";
 }
 
@@ -81,42 +104,101 @@ function describeInput(name: string, input: Record<string, unknown>): string[] {
     typeof value === "number"
       ? `Rs ${value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`
       : null;
+  const add = (label: string, value: unknown) => {
+    const shown = typeof value === "string" ? value : text(value);
+    if (shown !== "") lines.push(`${label}: ${shown}`);
+  };
+  const holding = () =>
+    add(
+      "Holding",
+      input.holding ?? (input.holdingId ? `id ${text(input.holdingId)}` : ""),
+    );
 
-  if (name === "add_expense") {
-    if (input.title) lines.push(`For: ${text(input.title)}`);
-    const amount = money(input.amount);
-    if (amount) lines.push(`Amount: ${amount}`);
-    if (input.category) lines.push(`Category: ${text(input.category)}`);
-    if (input.date) lines.push(`Date: ${text(input.date)}`);
-  } else if (name === "delete_expense") {
-    lines.push(`Expense id: ${text(input.id ?? "")}`);
-  } else if (name === "add_transaction") {
-    if (input.holding) lines.push(`Holding: ${text(input.holding)}`);
-    if (input.kind) lines.push(`Kind: ${text(input.kind)}`);
-    if (input.units) lines.push(`Units: ${text(input.units)}`);
-    const amount = money(input.amount);
-    if (input.price) lines.push(`Price: ${text(input.price)}`);
-    if (amount) lines.push(`Amount: ${amount}`);
-    if (input.date) lines.push(`Date: ${text(input.date)}`);
-  } else if (name === "add_holding") {
-    if (input.name || input.symbol)
-      lines.push(`Holding: ${text(input.symbol ?? "")} ${text(input.name ?? "")}`.trim());
-    if (input.units) lines.push(`Units: ${text(input.units)}`);
-    if (input.openingBalance) lines.push(`Opening balance: ${money(input.openingBalance)}`);
-  } else if (name === "set_price") {
-    if (input.holding) lines.push(`Holding: ${text(input.holding)}`);
-    if (input.price) lines.push(`New price: ${text(input.price)}`);
-  } else if (name === "mark_subscription_paid") {
-    if (input.subscription) lines.push(`Subscription: ${text(input.subscription)}`);
-    const amount = money(input.amount);
-    if (amount) lines.push(`Amount: ${amount}`);
-  } else if (name === "add_subscription") {
-    if (input.name) lines.push(`Subscription: ${text(input.name)}`);
-    const amount = money(input.amount);
-    if (amount) lines.push(`Amount: ${amount}`);
-    if (input.cycle) lines.push(`Cycle: ${text(input.cycle)}`);
+  switch (name) {
+    case "add_expense":
+      add("For", input.title);
+      add("Amount", money(input.amount));
+      add("Category", input.category);
+      add("Date", input.date);
+      break;
+    case "update_expense":
+      add("Expense id", input.id);
+      add("Title", input.title);
+      add("Amount", money(input.amount));
+      add("Category", input.category);
+      add("Date", input.date);
+      break;
+    case "delete_expense":
+      add("Expense id", input.id);
+      break;
+    case "add_transaction":
+      holding();
+      add("Kind", input.kind);
+      add("Units", input.units);
+      add("Price", input.price);
+      add("Amount", money(input.amount));
+      add(
+        "Fees",
+        typeof input.fees === "number" && input.fees > 0
+          ? money(input.fees)
+          : "",
+      );
+      add("Date", input.date);
+      break;
+    case "delete_transaction":
+      add("Transaction id", input.id);
+      break;
+    case "add_holding":
+      add("Holding", `${text(input.symbol)} ${text(input.name)}`.trim());
+      add("Kind", input.kind);
+      add("Units", input.units);
+      add("Bought at", input.price);
+      add("Opening balance", money(input.openingBalance));
+      add(
+        "Fees",
+        typeof input.fees === "number" && input.fees > 0
+          ? money(input.fees)
+          : "",
+      );
+      add("Date", input.date);
+      break;
+    case "set_price":
+      holding();
+      add("New price", input.price);
+      add("As of", input.date);
+      break;
+    case "add_subscription":
+      add("Subscription", input.name);
+      add("Amount", money(input.amount));
+      add("Cycle", input.cycle);
+      add("Next due", input.nextDueDate);
+      break;
+    case "update_subscription":
+      add(
+        "Subscription",
+        input.subscription ??
+          (input.subscriptionId ? `id ${text(input.subscriptionId)}` : ""),
+      );
+      add("Amount", money(input.amount));
+      add("Next due", input.nextDueDate);
+      add("Status", input.status);
+      break;
+    case "mark_subscription_paid":
+      add(
+        "Subscription",
+        input.subscription ??
+          (input.subscriptionId ? `id ${text(input.subscriptionId)}` : ""),
+      );
+      add("Amount", money(input.amount));
+      add("Date", input.date);
+      break;
   }
 
+  const confirm = Array.isArray(input.confirm)
+    ? (input.confirm as unknown[]).map(text).filter(Boolean)
+    : [];
+  if (confirm.length > 0)
+    lines.push(`You confirmed: ${confirm.join(", ").replaceAll("_", " ")}`);
   return lines;
 }
 
@@ -142,9 +224,16 @@ export function ToolCall({
       ? part.approval.id
       : null;
   const running = state === "input-available" || state === "input-streaming";
-  const failed = state === "output-error";
   const denied = state === "output-denied" || part.approval?.approved === false;
   const done = state === "output-available";
+  // A tool can complete and still refuse: the rules said no, nothing was written.
+  const refused =
+    done &&
+    typeof part.output === "object" &&
+    part.output !== null &&
+    (part.output as { ok?: unknown }).ok === false;
+  const failed = state === "output-error" || refused;
+  const refusal = refused ? (part.output as { error?: unknown }).error : null;
   const input =
     part.input && typeof part.input === "object"
       ? (part.input as Record<string, unknown>)
@@ -152,11 +241,11 @@ export function ToolCall({
 
   if (pendingApproval) {
     return (
-      <div className="my-3 overflow-hidden rounded-lg border border-border bg-card shadow-soft">
-        <div className="flex items-center gap-2 border-b border-border/70 px-4 py-2.5">
-          <Icon className="size-4 text-primary" aria-hidden="true" />
+      <div className="border-border bg-card shadow-soft my-3 overflow-hidden rounded-lg border">
+        <div className="border-border/70 flex items-center gap-2 border-b px-4 py-2.5">
+          <Icon className="text-primary size-4" aria-hidden="true" />
           <span className="type-ui-sm font-medium">{meta.label}</span>
-          <span className="ml-auto type-legal text-muted-foreground">
+          <span className="type-legal text-muted-foreground ml-auto">
             needs your approval
           </span>
         </div>
@@ -195,7 +284,7 @@ export function ToolCall({
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        className="flex w-full items-center gap-2 rounded-md px-1 py-1 text-left transition-colors hover:bg-accent"
+        className="hover:bg-accent flex w-full items-center gap-2 rounded-md px-1 py-1 text-left transition-colors"
       >
         <span
           className={cn(
@@ -217,25 +306,37 @@ export function ToolCall({
             <Minus className="size-3" aria-hidden="true" />
           )}
         </span>
-        <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <Icon
+          className="text-muted-foreground size-3.5 shrink-0"
+          aria-hidden="true"
+        />
         <span className="type-legal text-muted-foreground">
           {meta.label}
           {state === "approval-requested"
             ? " · waiting"
             : denied
               ? " · denied"
-              : done && meta.write
-                ? " · approved"
-                : ""}
+              : refused && meta.write
+                ? " · not recorded"
+                : done && meta.write
+                  ? " · approved"
+                  : ""}
         </span>
-        {done && typeof part.output === "object" && part.output && "summary" in part.output ? (
-          <span className="min-w-0 flex-1 truncate type-legal text-foreground">
+        {refused && typeof refusal === "string" ? (
+          <span className="type-legal text-loss min-w-0 flex-1 truncate">
+            {refusal}
+          </span>
+        ) : done &&
+          typeof part.output === "object" &&
+          part.output &&
+          "summary" in part.output ? (
+          <span className="type-legal text-foreground min-w-0 flex-1 truncate">
             {(part.output as { summary?: string }).summary}
           </span>
         ) : null}
         <ChevronDown
           className={cn(
-            "ml-auto size-3.5 shrink-0 text-muted-foreground transition-transform",
+            "text-muted-foreground ml-auto size-3.5 shrink-0 transition-transform",
             open && "rotate-180",
           )}
           aria-hidden="true"
@@ -243,8 +344,12 @@ export function ToolCall({
       </button>
 
       {open ? (
-        <pre className="mt-1 max-h-56 overflow-auto rounded-md bg-muted/50 p-3 type-legal text-muted-foreground">
-          {JSON.stringify({ input, output: part.output ?? part.errorText }, null, 2)}
+        <pre className="bg-muted/50 type-legal text-muted-foreground mt-1 max-h-56 overflow-auto rounded-md p-3">
+          {JSON.stringify(
+            { input, output: part.output ?? part.errorText },
+            null,
+            2,
+          )}
         </pre>
       ) : null}
     </div>

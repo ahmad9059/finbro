@@ -83,12 +83,21 @@ worlds, one indigo action per view, light type, and numbers that line up.
 
 ## The assistant
 
-A chat that has read access to the whole account and can change it with your approval.
+A senior-analyst persona for Pakistan's markets, with read access to the whole account and the ability to change it with your approval. It answers in your language (English or Roman Urdu), leads with the answer, and gives a recommendation with an amount, an order, a trade-off and what would change its mind. It does not predict prices, promise returns or push tips, leverage or margin.
 
-- **Reads** — net worth, every holding with units, average cost and P&L, transactions, monthly spending and categories, subscriptions, plus live PSX quotes. Every number in an answer comes from a tool call, never from the model's memory.
-- **Writes** — add or delete an expense, record a buy/sell/dividend/deposit/profit, add a holding or savings account, set a price by hand, add a subscription, mark one paid. Each one stops at an approval card showing exactly what will change; nothing runs until you press Approve.
-- **Web search** — Anthropic's built-in web search tool (up to five searches per answer), used for news, rates and anything after the model's cutoff. Sources render under the answer.
+- **Advice grounded in your data** — a health check is computed in code, not estimated by the model: liquid runway in months of spending, single-stock and sector concentration, idle cash, stale prices, large losers, subscription burn and spending pace, each with a severity. When nothing is wrong it says so.
+- **Pakistan knowledge base (RAG)** — about thirty curated notes on PSX structure, brokerage and CDC, dividend and capital-gains withholding, filer status, mutual funds, money market versus savings, policy-rate effects, T-bills, PIBs and National Savings, zakat, Shariah screening, concentration, emergency funds, allocation by horizon and Roman Urdu terms. BM25 retrieval picks the relevant notes per question and injects them into the prompt; `search_knowledge` fetches more on demand. Notes hold concepts only: **no tax rate, yield or index level is hard-coded**. Anything that changes with a budget or a policy meeting is confirmed by web search, with the source and date named.
+- **Reads** — net worth, holdings with sector, positions and P&L, transactions, spending and categories, subscriptions, live PSX quotes, MUFAP fund search. Account figures come from tools, never from the model's memory.
+- **Safe writes** — add, update or delete an expense; record or delete a holding transaction; add a stock, fund or savings account; set a price; add, update, pause or pay a subscription. Each stops at an approval card; nothing runs until you press Approve. Before it gets that far:
+  - `simulate_trade` runs the same rules as the write and shows the position before and after, and the gain a sale would realize;
+  - a name that matches two holdings is never guessed, it asks which;
+  - impossible or future dates, units × price that disagree with the amount, oversells, overdrafts, a price 40% off the last one, and duplicate entries are refused, with a confirmation step where a human might mean it;
+  - the write is locked and re-validated against the full history, and a holding and its first purchase are created in one database transaction;
+  - a failed write after approval shows its reason on the card, not a success mark.
+- **Web search** — Anthropic's built-in tool (up to five searches per answer) for news, rates, tax and anything after the model's cutoff. Sources render under the answer.
 - **History** — threads and messages are stored in Postgres per user, titled from the first message, renameable and deletable.
+
+This is analysis, not regulated financial advice, and the assistant says so once per conversation.
 
 **Claude only, by design.** The chat runs on Anthropic. A dropdown in the header picks the model — Haiku 4.5 (fastest), Sonnet 4.5 (default), Sonnet 5, Opus 4.5 (most capable) — and the choice is saved per account.
 
@@ -188,7 +197,7 @@ src/app/            routes: (app) shell pages, (auth) login, api/auth, api/cron,
 src/components/     ui (shadcn, themed), shell (sidebar, top bar), shared, charts
 src/features/       investments, savings, expenses, subscriptions, overview, assistant, settings
 src/lib/            portfolio maths, dates, formatting, schemas, categories
-src/server/         db, better-auth, tRPC routers, assistant (context, tools, prompt), price sources, daily job
+src/server/         db, better-auth, tRPC routers, assistant (context, analytics, knowledge, trade rules, tools, prompt), price sources, daily job
 scripts/            create-user, seed-demo, sync-psx-symbols, rate-limit
 docs/screenshots/   README images
 plan/fin-bro/       the research, design system, architecture and phases this was built from
@@ -225,8 +234,8 @@ The Kiro configuration that guides work on this repo is committed under [`.kiro/
 | Feature | What is in the repo |
 | --- | --- |
 | **Steering** | [`product.md`](.kiro/steering/product.md), [`tech.md`](.kiro/steering/tech.md) and [`structure.md`](.kiro/steering/structure.md) are always loaded. [`money-math.md`](.kiro/steering/money-math.md) and [`assistant-safety.md`](.kiro/steering/assistant-safety.md) load only when the matching files are open. |
-| **Hooks** | Run tests when `src/lib` changes; a schema-change checklist when `schema.ts` changes; block writes to `.env`; typecheck when the agent finishes a turn. |
-| **Specs** | [`portfolio-invariants`](.kiro/specs/portfolio-invariants): requirements, design and tasks for the property-based tests. |
+| **Hooks** | Run tests when `src/lib` or the assistant folder changes; a schema-change checklist when `schema.ts` changes; block writes to `.env`; typecheck when the agent finishes a turn. |
+| **Specs** | [`portfolio-invariants`](.kiro/specs/portfolio-invariants) (property-based tests for the money maths) and [`advisor-assistant`](.kiro/specs/advisor-assistant) (the Pakistan-market advisor, its knowledge base and the safe-write path). |
 | **Property-based testing** | [`src/lib/portfolio.property.test.ts`](src/lib/portfolio.property.test.ts) checks cost conservation, oversell and overdraft rejection, and ledger balances for any valid history, using fast-check. |
 
 The original product plan, design system and ten build phases are in [`plan/fin-bro/`](plan/fin-bro/README.md).

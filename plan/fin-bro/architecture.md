@@ -215,21 +215,28 @@ See research.md for what was tested and the terms-of-use caveat.
 
 ```
 Browser (chat UI)
-   └─ POST /api/chat ──► session check ──► account snapshot (context.ts)
-                                   └─► Gemini streamText
+   └─ POST /api/chat ──► session check ──► account snapshot (context.ts + analytics.ts)
+                                   ├─► retrieve notes for the question (knowledge/retrieve.ts)
+                                   └─► Anthropic streamText
+                                         ├─ system block 1: persona + procedures   (cached)
+                                         ├─ system block 2: date, snapshot, health check, notes
                                          ├─ read tools   (execute immediately)
+                                         ├─ simulate_trade (dry run of the write rules)
                                          ├─ write tools  (needsApproval → UI card)
-                                         └─ google_search (grounding + citations)
+                                         └─ web_search   (rates, tax, news, with citations)
 ```
 
-- **Context** (`server/assistant/context.ts`) rebuilds a compact snapshot per request — net worth, holdings with positions, this month's spending, subscriptions, categories — so the model never relies on client-supplied data.
-- **Tools** (`server/assistant/tools.ts`) are constructed per request with the session user id; every query is scoped to it. Write tools are marked `needsApproval`, so the SDK pauses for a human decision; the UI calls `addToolApprovalResponse`, and `sendAutomaticallyWhen` resumes the run. Tools validate with the same portfolio rules as the tRPC routers.
-- **Prompt** (`server/assistant/prompt.ts`): tool-first answers, PKR formatting, no invented numbers, no repeat after a denial, no price predictions.
-- **Persistence**: `chat_thread` and `chat_message` (jsonb parts). The client replaces a thread's messages after each completed run, which keeps approvals and regenerations consistent.
-- **Limits**: 120 messages and 80 parts per message, 8 tool steps, 2,500 output tokens, one server-side retry.
-- **Settings** (`server/assistant/settings.ts`): each account has a `assistant_settings` row with the chosen model and an optional BYOK key. The key is AES-256-GCM ciphertext (`crypto.ts`, cipher key derived from `BETTER_AUTH_SECRET`); the server decrypts it per request, and the client only ever receives `hasUserKey` and a `••••••1234` hint. A user key wins over `ANTHROPIC_API_KEY`.
-- **Model**: the account's choice, else `ANTHROPIC_MODEL`, else `claude-sonnet-4-5`. The route returns it in `x-assistant-model`.
-- **Failure modes**: credit balance, rate limit, overloaded, rejected key, safety and unknown errors each map to a readable sentence with a Retry button. With no key at all, the chat says where to add one.
+- **Context** (`context.ts`) rebuilds a compact snapshot per request (net worth, holdings with cost and sector, spending with a three-month baseline, subscriptions, categories) so the model never relies on client-supplied data.
+- **Analytics** (`analytics.ts`) is pure: allocation, liquid runway, concentration, sector exposure, stale prices, spending pace and severity-ranked flags, with thresholds in one place. The health check is part of every snapshot and also a tool.
+- **Knowledge** (`knowledge/`): about thirty hand-written notes and a BM25 retriever with synonyms and a relevance floor. Lexical retrieval was chosen over embeddings because the corpus is small and curated, it needs no service or index, and it is predictable and testable. Notes carry concepts and a `verify` search hint; volatile numbers are never stored.
+- **Prompt** (`prompt.ts`): a fixed block (persona, how facts are sourced, an advice procedure, a write procedure, boundaries) marked for Anthropic prompt caching, and a dynamic block for the date, snapshot and retrieved notes.
+- **Tools** (`tools.ts`) are built per request with the session user id; every query is scoped to it. Write tools are `needsApproval`, so the SDK pauses for a human decision and the UI resumes the run. Matching is strict (`validation.ts`): exact symbol, then exact name, then a single partial match; two matches ask, never guess.
+- **Trade rules** (`trade.ts`): one pure `evaluateTrade` used by both `simulate_trade` and `add_transaction`. It checks kind, a real and non-future date, units × price against amount, unusual price, duplicates, and replays the full history for oversell and overdraft. The write runs in a database transaction with the asset row locked.
+- **Persistence**: `chat_thread` and `chat_message` (jsonb parts).
+- **Limits**: 120 messages and 80 parts per message, 12 tool steps, 3,000 output tokens, one server-side retry.
+- **Settings** (`settings.ts`): each account has an `assistant_settings` row with the chosen model and an optional BYOK key, stored as AES-256-GCM ciphertext (`crypto.ts`). A user key wins over `ANTHROPIC_API_KEY`.
+- **Model**: the account's choice, else `ANTHROPIC_MODEL`, else `claude-sonnet-4-5`, returned in `x-assistant-model`.
+- **Failure modes**: credit balance, rate limit, overloaded, rejected key, safety and unknown errors each map to a readable sentence with a Retry button. A tool that refuses (`ok: false`) is shown as not recorded, with its reason.
 
 ## Daily job
 

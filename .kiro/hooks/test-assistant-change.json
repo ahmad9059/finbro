@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Run the assistant tests when its prompt, tools or notes change",
+      "description": "The prompt, the trade rules and the knowledge base each have tests that encode the safety rules. Run them on every save in the assistant folder.",
+      "trigger": "PostFileSave",
+      "matcher": "^.*src/server/assistant/.*\\.ts$",
+      "action": { "type": "command", "command": "pnpm vitest run src/server/assistant" },
+      "timeout": 120
+    }
+  ]
+}

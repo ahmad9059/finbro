@@ -11,9 +11,13 @@ import { z } from "zod";
 
 import { env } from "~/env";
 import { todayPK } from "~/lib/dates";
-import { loadAssistantContext, renderContext } from "~/server/assistant/context";
+import {
+  loadAssistantContext,
+  renderContext,
+} from "~/server/assistant/context";
+import { retrieveKnowledge } from "~/server/assistant/knowledge/retrieve";
 import { mockChatResponse } from "~/server/assistant/mock";
-import { buildSystemPrompt } from "~/server/assistant/prompt";
+import { buildSystemMessages } from "~/server/assistant/prompt";
 import { resolveApiKey, resolveModel } from "~/server/assistant/settings";
 import { createAssistantTools } from "~/server/assistant/tools";
 import { getSession } from "~/server/better-auth/server";
@@ -32,6 +36,20 @@ const bodySchema = z.object({
     .min(1)
     .max(120),
 });
+
+/** What the owner just asked, plus the message before it, for a follow-up like "and for funds?". */
+function recentUserText(messages: UIMessage[]): string {
+  return messages
+    .filter((message) => message.role === "user")
+    .slice(-2)
+    .map((message) =>
+      (message.parts as { type: string; text?: string }[])
+        .filter((part) => part.type === "text" && typeof part.text === "string")
+        .map((part) => part.text)
+        .join(" "),
+    )
+    .join(" ");
+}
 
 /**
  * Streamed errors, so the chat shows a sentence rather than a bare HTTP status.
@@ -62,7 +80,9 @@ function describeError(error: unknown): string {
       current = (current as { cause?: unknown }).cause;
     } else {
       parts.push(
-        typeof current === "string" ? current : JSON.stringify(current).slice(0, 200),
+        typeof current === "string"
+          ? current
+          : JSON.stringify(current).slice(0, 200),
       );
       break;
     }
@@ -133,9 +153,19 @@ export async function POST(request: Request) {
     const model = await resolveModel(session.user.id);
     const anthropic = createAnthropic({ apiKey: key.apiKey });
 
-    const system = buildSystemPrompt(renderContext(context), todayPK());
+    // Curated background for this question; concepts only, rates come from search.
+    const notes = retrieveKnowledge(
+      recentUserText(parsed.data.messages as UIMessage[]),
+    );
+    const system = buildSystemMessages(
+      renderContext(context),
+      todayPK(),
+      notes,
+    );
     const tools = {
       ...createAssistantTools({ userId: session.user.id }),
+      // The provider rejects Pakistan as a search location, so the prompt asks
+      // for "Pakistan" and the year in each query instead.
       web_search: anthropic.tools.webSearch_20250305({ maxUses: 5 }),
     };
 
@@ -149,14 +179,16 @@ export async function POST(request: Request) {
       system,
       messages,
       tools,
-      stopWhen: stepCountIs(8),
+      stopWhen: stepCountIs(12),
       temperature: 0.3,
-      maxOutputTokens: 2500,
+      maxOutputTokens: 3000,
       maxRetries: 1,
       abortSignal: request.signal,
     });
 
-    const response = result.toUIMessageStreamResponse({ onError: friendlyError });
+    const response = result.toUIMessageStreamResponse({
+      onError: friendlyError,
+    });
     response.headers.set("x-assistant-model", model);
     return response;
   } catch (error) {

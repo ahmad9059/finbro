@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { decryptSecret, encryptSecret, maskSecret } from "./crypto";
-import { DEFAULT_MODEL, MODEL_IDS, MODEL_OPTIONS, modelLabel, modelNote } from "./settings";
+import {
+  DEFAULT_MODEL,
+  MODEL_IDS,
+  MODEL_OPTIONS,
+  modelLabel,
+  modelNote,
+} from "./settings";
 
 describe("assistant models", () => {
   it("offers Claude models only, with a default that is listed", () => {
@@ -45,7 +51,12 @@ describe("API key storage", () => {
     const stored = encryptSecret(key);
     const parts = stored.split(":");
     const data = parts[3]!;
-    const tampered = [parts[0], parts[1], parts[2], `${data.slice(0, -2)}AA`].join(":");
+    const tampered = [
+      parts[0],
+      parts[1],
+      parts[2],
+      `${data.slice(0, -2)}AA`,
+    ].join(":");
     expect(() => decryptSecret(tampered)).toThrow();
   });
 

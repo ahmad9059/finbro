@@ -24,7 +24,8 @@ function partsOf(message: UIMessage): Part[] {
 
 function text(value: unknown): string {
   if (typeof value === "string") return value;
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  if (typeof value === "number" || typeof value === "boolean")
+    return String(value);
   return "";
 }
 
@@ -62,7 +63,10 @@ function decidedApproval(messages: UIMessage[]) {
  * persistence and error handling can be exercised without spending Anthropic
  * credit. It never writes to the database.
  */
-export function mockChatResponse(messages: UIMessage[], context: AssistantContext) {
+export function mockChatResponse(
+  messages: UIMessage[],
+  context: AssistantContext,
+) {
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
       writer.write({ type: "start" });
@@ -140,7 +144,9 @@ export function mockChatResponse(messages: UIMessage[], context: AssistantContex
               (row) =>
                 `${row.kind.replace("_", " ")}: Rs ${row.value.toLocaleString("en-US")}`,
             )
-            .join("\n- ")}\n\nThis is a mock reply; the numbers come from your real account.`,
+            .join(
+              "\n- ",
+            )}\n\nThis is a mock reply; the numbers come from your real account.`,
         );
         writer.write({
           type: "source-url",

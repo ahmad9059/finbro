@@ -24,9 +24,9 @@ Record on the device the app is meant for (desktop browser, or the installed PWA
 
 ## How Kiro was used (facts from the repo)
 
-- **Steering:** five files in `.kiro/steering/`. Three always-on (product, tech, structure) and two that load only on matching files (`money-math.md`, `assistant-safety.md`). The strategy: keep the always-on set short and put hard rules (approval gating, exact money, no `.env` writes) next to the files they protect.
-- **Hooks:** four in `.kiro/hooks/`. Tests on `src/lib` saves, an agent checklist on `schema.ts` saves, a `PreToolUse` guard that blocks writes to `.env`, and a `Stop` hook that typechecks and asks for another turn on failure.
-- **Spec:** `.kiro/specs/portfolio-invariants/` (requirements, design, tasks) for the property-based tests.
+- **Steering:** five files in `.kiro/steering/`. Three always-on (product, tech, structure) and two that load only on matching files (`money-math.md`, and `assistant-safety.md`, which now carries a checklist for adding a write tool and rules for writing knowledge notes). The strategy: keep the always-on set short and put hard rules (approval gating, exact money, no `.env` writes) next to the files they protect.
+- **Hooks:** five in `.kiro/hooks/`. Tests on `src/lib` saves, tests on assistant-folder saves (the prompt, trade rules and knowledge tests), an agent checklist on `schema.ts` saves, a `PreToolUse` guard that blocks writes to `.env`, and a `Stop` hook that typechecks and asks for another turn on failure.
+- **Specs:** `.kiro/specs/portfolio-invariants/` (property-based tests for the money maths) and `.kiro/specs/advisor-assistant/` (the Pakistan-market advisor, its curated knowledge base with BM25 retrieval, computed portfolio diagnostics, and the validated, atomic write path).
 - **Property-based testing:** `src/lib/portfolio.property.test.ts`, fast-check. Quick check of value: removing `+ txn.fees` from the buy cost in `computePosition` fails the property tests and one example test.
 
 ## Still yours to write

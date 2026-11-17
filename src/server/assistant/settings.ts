@@ -69,7 +69,9 @@ export type AssistantPreferences = {
   ready: boolean;
 };
 
-export async function getPreferences(userId: string): Promise<AssistantPreferences> {
+export async function getPreferences(
+  userId: string,
+): Promise<AssistantPreferences> {
   const row = await rowFor(userId);
   let keyHint: string | null = null;
   if (row?.apiKeyEncrypted) {
@@ -79,7 +81,9 @@ export async function getPreferences(userId: string): Promise<AssistantPreferenc
       keyHint = null;
     }
   }
-  const model = MODEL_IDS.includes(row?.model ?? "") ? row!.model : DEFAULT_MODEL;
+  const model = MODEL_IDS.includes(row?.model ?? "")
+    ? row!.model
+    : DEFAULT_MODEL;
   const hasServerKey = Boolean(env.ANTHROPIC_API_KEY);
   return {
     model,
@@ -93,7 +97,9 @@ export async function getPreferences(userId: string): Promise<AssistantPreferenc
 export type ResolvedKey = { apiKey: string; source: "user" | "server" };
 
 /** The user's own key wins; the server key is the fallback. */
-export async function resolveApiKey(userId: string): Promise<ResolvedKey | null> {
+export async function resolveApiKey(
+  userId: string,
+): Promise<ResolvedKey | null> {
   const row = await rowFor(userId);
   if (row?.apiKeyEncrypted) {
     try {
@@ -121,7 +127,10 @@ export async function savePreferences(
 ): Promise<void> {
   const existing = await rowFor(userId);
   const model =
-    input.model ?? (existing && MODEL_IDS.includes(existing.model) ? existing.model : env.ANTHROPIC_MODEL ?? DEFAULT_MODEL);
+    input.model ??
+    (existing && MODEL_IDS.includes(existing.model)
+      ? existing.model
+      : (env.ANTHROPIC_MODEL ?? DEFAULT_MODEL));
   const apiKeyEncrypted = input.apiKey
     ? encryptSecret(input.apiKey)
     : (existing?.apiKeyEncrypted ?? null);
