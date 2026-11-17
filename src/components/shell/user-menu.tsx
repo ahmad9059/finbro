@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -18,15 +18,6 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { authClient } from "~/server/better-auth/client";
 
-function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
-
 export function UserMenu({
   name,
   email,
@@ -34,7 +25,7 @@ export function UserMenu({
 }: {
   name: string;
   email: string;
-  /** A URL from the user record. Without one, the initials are shown. */
+  /** A URL from the user record. Without one, a generic person icon is shown. */
   image?: string | null;
 }) {
   const router = useRouter();
@@ -65,8 +56,8 @@ export function UserMenu({
           {image ? (
             <AvatarImage src={image} alt="" className="object-cover" />
           ) : null}
-          <AvatarFallback className="bg-secondary text-sm font-medium text-secondary-foreground">
-            {initials(name) || "?"}
+          <AvatarFallback className="bg-secondary text-muted-foreground">
+            <User className="size-5" aria-hidden="true" />
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

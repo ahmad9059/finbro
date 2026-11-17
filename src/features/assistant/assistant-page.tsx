@@ -33,7 +33,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
-import { Skeleton } from "~/components/ui/skeleton";
 import { formatDate } from "~/lib/format";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
@@ -42,6 +41,7 @@ import {
   AssistantKeyButton,
   ModelSelect,
 } from "./assistant-settings";
+import { ChatSkeleton, HistorySkeleton } from "./assistant-skeleton";
 import { ChatWindow } from "./chat-window";
 
 export function AssistantPage() {
@@ -119,11 +119,8 @@ export function AssistantPage() {
         New chat
       </Button>
       <div className="mt-2 min-h-0 flex-1 overflow-y-auto">
-        {threads.isLoading ? (
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-9 w-full" />
-            <Skeleton className="h-9 w-full" />
-          </div>
+        {threads.isPending ? (
+          <HistorySkeleton />
         ) : list.length === 0 ? (
           <p className="px-1 type-ui-sm text-muted-foreground">No chats yet.</p>
         ) : (
@@ -218,11 +215,8 @@ export function AssistantPage() {
           </Button>
         </header>
 
-        {threadId === null || messages.isLoading ? (
-          <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            <span className="type-ui-sm">Opening your chat…</span>
-          </div>
+        {threadId === null || messages.isPending ? (
+          <ChatSkeleton />
         ) : (
           <ChatWindow
             key={threadId}
