@@ -34,7 +34,7 @@ export function UserMenu({
 }: {
   name: string;
   email: string;
-  /** A URL from the user record; falls back to public/avatar.jpg. */
+  /** A URL from the user record. Without one, the initials are shown. */
   image?: string | null;
 }) {
   const router = useRouter();
@@ -62,7 +62,9 @@ export function UserMenu({
         className="rounded-full outline-none transition-shadow duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:ring-2 hover:ring-ring/40 hover:ring-offset-2 hover:ring-offset-background"
       >
         <Avatar className="size-9 ring-1 ring-sidebar-border">
-          <AvatarImage src={image ?? "/avatar.jpg"} alt="" className="object-cover" />
+          {image ? (
+            <AvatarImage src={image} alt="" className="object-cover" />
+          ) : null}
           <AvatarFallback className="bg-secondary text-sm font-medium text-secondary-foreground">
             {initials(name) || "?"}
           </AvatarFallback>
