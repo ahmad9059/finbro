@@ -1,3 +1,4 @@
+import { createAnthropic } from "@ai-sdk/anthropic";
 import {
   convertToModelMessages,
   createUIMessageStream,
@@ -11,12 +12,9 @@ import { z } from "zod";
 import { env } from "~/env";
 import { todayPK } from "~/lib/dates";
 import { loadAssistantContext, renderContext } from "~/server/assistant/context";
-import { buildSystemPrompt } from "~/server/assistant/prompt";
 import { mockChatResponse } from "~/server/assistant/mock";
-import {
-  modelFor,
-  providersToTry,
-} from "~/server/assistant/providers";
+import { buildSystemPrompt } from "~/server/assistant/prompt";
+import { resolveApiKey, resolveModel } from "~/server/assistant/settings";
 import { createAssistantTools } from "~/server/assistant/tools";
 import { getSession } from "~/server/better-auth/server";
 
@@ -36,15 +34,7 @@ const bodySchema = z.object({
 });
 
 /**
- * The assistant's streaming endpoint.
- *
- * Every call rebuilds the account snapshot server-side, so the model never
- * relies on data the browser could have edited. Tools are bound to the signed-in
- * user; write tools only execute after the owner approves them in the UI.
- */
-/**
- * A streamed error, so the chat shows our sentence rather than a raw HTTP
- * status with an empty body.
+ * Streamed errors, so the chat shows a sentence rather than a bare HTTP status.
  */
 function errorStream(message: string) {
   return createUIMessageStreamResponse({
@@ -71,7 +61,9 @@ function describeError(error: unknown): string {
       if (data) parts.push(JSON.stringify(data).slice(0, 400));
       current = (current as { cause?: unknown }).cause;
     } else {
-      parts.push(typeof current === "string" ? current : JSON.stringify(current).slice(0, 200));
+      parts.push(
+        typeof current === "string" ? current : JSON.stringify(current).slice(0, 200),
+      );
       break;
     }
   }
@@ -81,34 +73,36 @@ function describeError(error: unknown): string {
 /** Turns provider noise into something a person can act on. */
 function friendlyError(error: unknown): string {
   const message = describeError(error);
+  if (/credit balance|billing|insufficient quota/i.test(message)) {
+    return "Your Anthropic account has no credit. Add funds in the console, or use a different key in Settings.";
+  }
   if (/quota|rate limit|429|RESOURCE_EXHAUSTED/i.test(message)) {
-    return "Gemini's limit for this key is reached. Wait a minute and try again, or enable billing on the key.";
-  }
-  if (/high demand|503|UNAVAILABLE/i.test(message)) {
-    return "Gemini is busy right now. Try again in a moment.";
-  }
-  if (/credit balance|billing|insufficient_quota/i.test(message)) {
-    return "The provider account has no credit. Add funds, or change the provider order.";
+    return "The model's rate limit is reached. Wait a moment and try again, or pick a smaller model.";
   }
   if (/invalid x-api-key|authentication_error|API key|401|403/i.test(message)) {
-    return "A provider key was rejected. Check GEMINI_API_KEY and ANTHROPIC_API_KEY.";
+    return "Anthropic rejected the API key. Check it in Settings.";
   }
   if (/overloaded_error|529/i.test(message)) {
-    return "The model is overloaded right now. Try again in a moment.";
+    return "Anthropic is overloaded right now. Try again in a moment.";
   }
   if (/safety|blocked/i.test(message)) {
-    return "Gemini declined to answer that. Try rephrasing it.";
+    return "The model declined to answer that. Try rephrasing it.";
   }
   return "The assistant could not answer. Try again.";
 }
 
+/**
+ * The assistant's streaming endpoint.
+ *
+ * Every call rebuilds the account snapshot server-side, so the model never
+ * relies on data the browser could have edited. Tools are bound to the
+ * signed-in user; write tools only execute after the owner approves them.
+ * The model and key come from the user's settings: their own key (BYOK) when
+ * present, the server key otherwise.
+ */
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) return new Response("Unauthorized", { status: 401 });
-
-  if (!env.GEMINI_API_KEY) {
-    return new Response("The assistant is not configured.", { status: 503 });
-  }
 
   let json: unknown;
   try {
@@ -121,75 +115,52 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return new Response("Invalid chat payload.", { status: 400 });
   }
-  const preferred = (json as { provider?: unknown } | null)?.provider;
 
   try {
     const context = await loadAssistantContext(session.user.id);
 
     if (env.ASSISTANT_MOCK === "true" && env.NODE_ENV !== "production") {
-      return mockChatResponse(
-        parsed.data.messages as UIMessage[],
-        context,
+      return mockChatResponse(parsed.data.messages as UIMessage[], context);
+    }
+
+    const key = await resolveApiKey(session.user.id);
+    if (!key) {
+      return errorStream(
+        "No Anthropic key is available. Add yours in Settings → Assistant, or set ANTHROPIC_API_KEY on the server.",
       );
     }
+
+    const model = await resolveModel(session.user.id);
+    const anthropic = createAnthropic({ apiKey: key.apiKey });
 
     const system = buildSystemPrompt(renderContext(context), todayPK());
-    const accountTools = createAssistantTools({ userId: session.user.id });
-    const providers = providersToTry(preferred);
-
-    if (providers.length === 0) {
-      return errorStream(
-        "No assistant provider is configured. Add GEMINI_API_KEY or ANTHROPIC_API_KEY.",
-      );
-    }
+    const tools = {
+      ...createAssistantTools({ userId: session.user.id }),
+      web_search: anthropic.tools.webSearch_20250305({ maxUses: 5 }),
+    };
 
     const messages = await convertToModelMessages(
       parsed.data.messages as UIMessage[],
-      {},
+      { tools },
     );
 
-    let lastError: unknown;
-    for (const provider of providers) {
-      const tools = { ...accountTools, ...provider.searchTool };
-      try {
-        const result = streamText({
-          model: provider.model as never,
-          providerOptions: provider.providerOptions as never,
-          system,
-          messages,
-          tools,
-          stopWhen: stepCountIs(8),
-          temperature: 0.3,
-          maxOutputTokens: 2500,
-          maxRetries: 1,
-          abortSignal: request.signal,
-        });
+    const result = streamText({
+      model: anthropic(model),
+      system,
+      messages,
+      tools,
+      stopWhen: stepCountIs(8),
+      temperature: 0.3,
+      maxOutputTokens: 2500,
+      maxRetries: 1,
+      abortSignal: request.signal,
+    });
 
-        // Wait for the provider's first HTTP response: a quota or auth failure
-        // arrives here, before any token, so the next provider can take over.
-        await result.response;
-
-        const response = result.toUIMessageStreamResponse({
-          onError: friendlyError,
-        });
-        response.headers.set("x-assistant-provider", provider.id);
-        response.headers.set("x-assistant-model", modelFor(provider.id));
-        return response;
-      } catch (error) {
-        lastError = error;
-        console.warn(
-          `[assistant] ${provider.id} failed, trying the next provider:`,
-          error instanceof Error ? error.message.slice(0, 160) : error,
-        );
-      }
-    }
-
-    console.error("[assistant] every provider failed", lastError);
-    return errorStream(friendlyError(lastError));
+    const response = result.toUIMessageStreamResponse({ onError: friendlyError });
+    response.headers.set("x-assistant-model", model);
+    return response;
   } catch (error) {
     console.error("[assistant] request failed", error);
-    return new Response("The assistant is unavailable right now.", {
-      status: 500,
-    });
+    return errorStream(friendlyError(error));
   }
 }

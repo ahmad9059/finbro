@@ -314,7 +314,8 @@ A dedicated **full-bleed** screen: it owns the whole area under the top bar, wit
 
 - **Messages** — your own words sit right-aligned in a `secondary` bubble with a 16px radius; answers sit on the page with the logo mark and no bubble, so long text stays readable. Answers are markdown: lists, tables (only when comparing three or more things), inline code, links.
 - **Tool calls** — reads are one quiet line (icon, label, chevron) that expands to the raw input and output. Writes are a bordered card: the tool, "needs your approval", each field as a plain line, then Approve (primary) and Deny (secondary). After it runs, the same row shows the result summary in one truncated line.
-- **Provider badge** — a small pill in the header naming the model that answered (Claude or Gemini), with the model id in its tooltip. It follows a fallback automatically.
+- **Model picker** — a small select in the header (Haiku 4.5 / Sonnet 4.5 / Sonnet 5 / Opus 4.5), applied to the next message and remembered per account.
+- **Key button** — a key icon beside the model; a red dot appears when no key is available. It opens a dialog showing whether the server key or a personal key is in use, a password field to add one, and Remove when a personal key exists. The same controls sit in Settings → Assistant.
 - **Sources** — small muted chips under the answer, one per citation.
 - **Composer** — a 16px-radius field with the send button inside on the right, a stop button while streaming, Enter to send and Shift+Enter for a new line. The hint line also states that changes need approval, and warns when privacy mode is on that answers still show amounts.
 - **States** — an empty thread offers five suggested questions; while waiting, three bouncing dots under the logo; errors appear as a `loss`-tinted banner with Retry.

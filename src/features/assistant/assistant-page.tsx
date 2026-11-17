@@ -38,16 +38,13 @@ import { formatDate } from "~/lib/format";
 import { cn } from "~/lib/utils";
 import { api } from "~/trpc/react";
 
+import {
+  AssistantKeyButton,
+  ModelSelect,
+} from "./assistant-settings";
 import { ChatWindow } from "./chat-window";
 
-type ProviderOption = {
-  id: string;
-  label: string;
-  model: string;
-  configured: boolean;
-};
-
-export function AssistantPage({ providers = [] }: { providers?: ProviderOption[] }) {
+export function AssistantPage() {
   const router = useRouter();
   const params = useSearchParams();
   const requested = Number(params.get("t"));
@@ -57,10 +54,6 @@ export function AssistantPage({ providers = [] }: { providers?: ProviderOption[]
   const remove = api.chat.deleteThread.useMutation();
 
   const [historyOpen, setHistoryOpen] = useState(false);
-  const firstConfigured = providers.find((provider) => provider.configured);
-  const [activeProvider, setActiveProvider] = useState<ProviderOption | null>(
-    firstConfigured ?? null,
-  );
   const [renaming, setRenaming] = useState<{ id: number; title: string } | null>(null);
   const [deleting, setDeleting] = useState<{ id: number; title: string } | null>(null);
   const startedRef = useRef(false);
@@ -212,14 +205,8 @@ export function AssistantPage({ providers = [] }: { providers?: ProviderOption[]
           <h1 className="min-w-0 flex-1 truncate type-ui-sm font-medium">
             {current?.title ?? "New chat"}
           </h1>
-          {activeProvider ? (
-            <span
-              title={activeProvider.model}
-              className="hidden rounded-full bg-secondary px-2.5 py-1 type-legal text-secondary-foreground sm:inline"
-            >
-              {activeProvider.label}
-            </span>
-          ) : null}
+          <ModelSelect className="hidden sm:flex" />
+          <AssistantKeyButton />
           <Button
             variant="secondary"
             size="sm"
@@ -242,8 +229,6 @@ export function AssistantPage({ providers = [] }: { providers?: ProviderOption[]
             threadId={threadId}
             initialMessages={messages.data ?? []}
             onSaved={() => void threads.refetch()}
-            onProvider={setActiveProvider}
-            providers={providers}
           />
         )}
       </div>

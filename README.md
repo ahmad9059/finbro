@@ -71,7 +71,11 @@ worlds, one indigo action per view, light type, and numbers that line up.
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/assistant-dark.webp" alt="The assistant, with an approval card before a write" width="100%">
+  <img src="docs/screenshots/assistant-dark.webp" alt="The assistant, with the model picker and an approval card before a write" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/assistant-key.webp" alt="Adding your own Anthropic API key" width="72%">
 </p>
 
 </details>
@@ -85,9 +89,11 @@ A chat that has read access to the whole account and can change it with your app
 - **Web search** — Gemini's Google Search grounding, used for news, rates and anything after the model's cutoff. Sources render under the answer.
 - **History** — threads and messages are stored in Postgres per user, titled from the first message, renameable and deletable.
 
-**Providers.** Claude (Anthropic) is the default, with Gemini as the fallback — or change the order with `ASSISTANT_PROVIDERS` (`anthropic,gemini` by default). If the first provider fails at request time (quota, overloaded, rejected key), the chat retries the same turn with the next one and the badge in the header follows whoever answered. When every provider fails, the reason is shown in plain language with a Retry button, not a stack trace.
+**Claude only, by design.** The chat runs on Anthropic. A dropdown in the header picks the model — Haiku 4.5 (fastest), Sonnet 4.5 (default), Sonnet 5, Opus 4.5 (most capable) — and the choice is saved per account.
 
-`ASSISTANT_MOCK=true` (development only) streams scripted replies — including a full approval round-trip — without calling any provider. It is ignored in production.
+**Bring your own key.** The key icon in the header opens a small dialog: paste an Anthropic key and it is encrypted (AES-256-GCM, keyed from the app secret) before it touches the database, and only ever shown back as `••••••1234`. Remove it at any time and the server's `ANTHROPIC_API_KEY` takes over. Settings → Assistant has the same controls. Every failure (credit, rate limit, rejected key, overload) is a sentence with a Retry button, not a stack trace.
+
+`ASSISTANT_MOCK=true` (development only) streams scripted replies — including a full approval round-trip — without calling Anthropic. It is ignored in production.
 
 ## Stack
 
@@ -123,11 +129,8 @@ Node 22+ and pnpm 10+ are expected; the repo was built on Node 26 and pnpm 12.
 | `BETTER_AUTH_URL` | `http://localhost:3000` locally, `https://fin.devshub.xyz` in production |
 | `CRON_SECRET` | Guards `/api/cron/daily`; Vercel sends it automatically |
 | `AUTH_ALLOW_SIGNUP` | Set to `true` only while `pnpm user:create` runs |
-| `ANTHROPIC_API_KEY` | Anthropic key (primary provider by default) |
-| `ANTHROPIC_MODEL` | Model name, default `claude-sonnet-4-5` |
-| `GEMINI_API_KEY` | Google AI Studio key (fallback provider) |
-| `GEMINI_MODEL` | Model name, default `gemini-3.5-flash` |
-| `ASSISTANT_PROVIDERS` | Order to try, default `anthropic,gemini` |
+| `ANTHROPIC_API_KEY` | Server key, used when the account has no key of its own |
+| `ANTHROPIC_MODEL` | Default model when the account has not chosen one, `claude-sonnet-4-5` |
 | `ASSISTANT_MOCK` | `true` in development to stream scripted replies instead of calling Gemini |
 
 ### Commands

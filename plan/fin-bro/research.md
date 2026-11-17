@@ -148,28 +148,27 @@ Notes:
 - Vercel sends `Authorization: Bearer $CRON_SECRET` to cron routes when that env var is set. (Read; confirm when wiring in Phase 10)
 - Neon free tier is assumed to be enough for a few megabytes of personal data. Current limits are **Unverified**; check the pricing page when creating the project.
 
-## Assistant model notes
+## Assistant provider
 
-Checked 2026-11-16 with the project's Google AI Studio key:
-
-| Model | Result |
-| --- | --- |
-| `gemini-2.5-flash`, `gemini-2.5-pro` | **404 — "no longer available to new users"**; Google points at `gemini-3.8-flash` and the Interactions API |
-| `gemini-3.8-flash` | Recognised, but **503 "high demand"** throughout testing |
-| `gemini-flash-latest`, `gemini-4-*`, `gemini-3.1-pro-preview` | Quota exceeded on the free tier |
-| **`gemini-3.5-flash`** | Worked: plain text, function calling with `stopWhen`, and streaming. **Chosen as the default** |
-| `gemini-3.1-flash-lite` | Worked, but weaker for tool use |
-
-So Gemini's default is `gemini-3.5-flash`, overridable with `GEMINI_MODEL`.
-
-**Anthropic**, checked with a live key on 2026-11-17:
+**Anthropic only.** Checked live on 2026-11-17 with the project's key.
 
 | Model | Result |
 | --- | --- |
-| **`claude-sonnet-4-5`** | Worked end to end: streaming, function calling against the account tools, the approval round-trip (approve → tool executes → confirmation), and provider-native web search available as `webSearch_20250305` |
-| `anthropic-*` via `@ai-sdk/anthropic` 4.0.105 | The SDK lists models up to `claude-opus-4-8` / `claude-sonnet-5-5`; `claude-sonnet-4-5` is the cost/quality default here |
+| `claude-sonnet-4-5` | Worked end to end: streaming, function calling against the account tools, the approval round-trip (approve → tool executes → confirmation), provider-native web search (`webSearch_20250305`) |
+| `claude-haiku-4-5` | Answered a live request; used as the "fastest" option |
+| `claude-sonnet-5`, `claude-opus-4-5` | Offered in the picker; the SDK lists models up to `claude-opus-4-8` |
 
-Claude is therefore the **primary** provider (`ASSISTANT_PROVIDERS="anthropic,gemini"`), with Gemini kept as the fallback and still the cheaper option when its quota is available. A failed provider is retried on the next one in the same turn; the header badge shows which model answered. Free-tier keys have a small per-minute quota — a handful of requests in a minute exhausts it — which is why the UI maps 429/503 to a sentence rather than a stack trace, and why `ASSISTANT_MOCK=true` exists to exercise the whole chat and approval flow without spending quota. Google Search grounding is wired through the provider's `google.tools.googleSearch({})`; it is subject to the same quota.
+**Google Gemini was evaluated and removed.** Its 2.5 models answer 404 for new
+keys, `gemini-3.8-flash` returned 503 "high demand" throughout testing, and the
+free tier's quota is exhausted after a handful of requests — it could not be
+relied on next to a paid key. The provider abstraction and fallback code were
+deleted rather than left dormant, so the assistant is one provider, one model
+picker and one place for a key.
+
+**BYOK.** A key pasted in the app is encrypted with AES-256-GCM before storage
+(the cipher key is derived from `BETTER_AUTH_SECRET`), decrypted only inside the
+chat route, and shown back as a masked hint. Removing it falls back to the
+server key.
 
 ## Open risks
 

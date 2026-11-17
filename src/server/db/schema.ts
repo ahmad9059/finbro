@@ -359,3 +359,14 @@ export const chatMessage = pgTable(
 
 export type ChatThread = typeof chatThread.$inferSelect;
 export type ChatMessageRow = typeof chatMessage.$inferSelect;
+
+/** Per-user assistant preferences: chosen model and an optional BYOK key. */
+export const assistantSettings = pgTable("assistant_settings", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  model: text("model").notNull().default("claude-sonnet-4-5"),
+  /** AES-GCM ciphertext; null means "use the server's key". */
+  apiKeyEncrypted: text("api_key_encrypted"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

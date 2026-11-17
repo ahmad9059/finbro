@@ -1,4 +1,5 @@
 import { assetRouter } from "~/server/api/routers/asset";
+import { assistantRouter } from "~/server/api/routers/assistant";
 import { assetTxnRouter } from "~/server/api/routers/asset-txn";
 import { categoryRouter } from "~/server/api/routers/category";
 import { chatRouter } from "~/server/api/routers/chat";
@@ -16,6 +17,7 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   health: healthRouter,
+  assistant: assistantRouter,
   asset: assetRouter,
   assetTxn: assetTxnRouter,
   price: priceRouter,

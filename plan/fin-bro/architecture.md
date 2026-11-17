@@ -227,9 +227,9 @@ Browser (chat UI)
 - **Prompt** (`server/assistant/prompt.ts`): tool-first answers, PKR formatting, no invented numbers, no repeat after a denial, no price predictions.
 - **Persistence**: `chat_thread` and `chat_message` (jsonb parts). The client replaces a thread's messages after each completed run, which keeps approvals and regenerations consistent.
 - **Limits**: 120 messages and 80 parts per message, 8 tool steps, 2,500 output tokens, one server-side retry.
-- **Providers** (`server/assistant/providers.ts`): Claude (Anthropic) and Gemini (Google) behind one interface — model, provider options and native web-search tool. `ASSISTANT_PROVIDERS` sets the order; providers without a key are skipped.
-- **Fallback**: the route tries the requested provider, then the rest of the order; if the first HTTP response fails, it moves on. On a failure that only surfaces mid-stream, the client retries the same turn with the next provider (once per provider), shows "…retrying with Claude" and updates the badge from the `x-assistant-provider` response header.
-- **Failure modes**: quota, credit balance, overloaded, rejected key, safety and unknown errors each map to a readable sentence; the keys can be absent and the rest of the app still runs.
+- **Settings** (`server/assistant/settings.ts`): each account has a `assistant_settings` row with the chosen model and an optional BYOK key. The key is AES-256-GCM ciphertext (`crypto.ts`, cipher key derived from `BETTER_AUTH_SECRET`); the server decrypts it per request, and the client only ever receives `hasUserKey` and a `••••••1234` hint. A user key wins over `ANTHROPIC_API_KEY`.
+- **Model**: the account's choice, else `ANTHROPIC_MODEL`, else `claude-sonnet-4-5`. The route returns it in `x-assistant-model`.
+- **Failure modes**: credit balance, rate limit, overloaded, rejected key, safety and unknown errors each map to a readable sentence with a Retry button. With no key at all, the chat says where to add one.
 
 ## Daily job
 
